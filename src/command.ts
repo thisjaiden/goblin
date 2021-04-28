@@ -1,39 +1,74 @@
 import { Client, Message } from "discord.js";
 import { Guildman } from "./guildman";
 
+/**
+ * CommandManager is a tool for regulating and activating all of the various commands and functions
+ * of the bot
+ */
 export class CommandManager {
     constructor() {
 
     }
+    /**
+     * registerCommand adds a new command to the CommandManager. This is the main way to add
+     * commands or features to the bot
+     * @param name - The command name to be used to trigger the command
+     * @param requires_admin - Should this command only work for goblin admins?
+     * @param onTrigger - Code to run when the command is used
+     */
     public registerCommand(name: string, requires_admin: boolean, onTrigger: (message: Message, parsed_message: string, man: Guildman) => boolean) {
         this.commands.push(new Command(name, requires_admin, onTrigger));
     }
+    /**
+     * registerClientCommand adds a new command to the CommandManager. This is the same as
+     * registerCommand, but allows the command access to the bot's Client instance
+     * @param name - The command name to be used to trigger the command
+     * @param requires_admin - Should this command only work for goblin admins?
+     * @param onTrigger - Code to run when the command is used
+     */
     public registerClientCommand(name: string, requires_admin: boolean, onTrigger: (message: Message, parsed_message: string, man: Guildman, client: Client) => boolean) {
         this.commands.push(new Command(name, requires_admin, (_a, _b, _c) => {return false;}));
         this.commands[this.commands.length - 1].setClient(onTrigger);
     }
+    /**
+     * runCommands takes a message as an input and runs all appropriate commands registered to
+     * `this`. `man` and `client` are passed through to commands that need these features
+     * @param message - The message to parse for potential commands
+     * @param man - A `Guildman` instance to use for registered commands
+     * @param client - A `Client` instance to use for registered commands
+     */
     public runCommands(message: Message, man: Guildman, client: Client) {
+        // For every registered command...
         this.commands.forEach(command => {
+            // If this command needs admin privlege...
             if (command.requiresAdmin()) {
+                // If the user has admin privlege...
                 if (man.guildCheckAdminStatus(message.guild.id, message.author.id)) {
-                    // continue
+                    // Continue and run the command if appropriate
                 }
                 else {
-                    // not an admin, can't run this command!
+                    // Not an admin, can't run this command! Exit the loop.
                     // TODO: does return here cancel all possible future commands or just this
                     // instance of the closure? `break` is invalid typescript here, as well as
                     // using `continue`.
                     return;
                 }
             }
+            // Check if this guild supports unprefixed commands
             let no_prefix = man.guildSupportsUnprefixed(message.guild.id);
+            // Get the prefix this guild uses
             let prefix = man.guildPrefix(message.guild.id);
+            // Get the first part of the message
             let first_segment = message.content.split(' ')[0];
+            // If this message appears to start wtih a command...
             if ((prefix + command.getName() == first_segment) || (command.getName() == first_segment && no_prefix)) {
+                // If this command requires access to the client...
                 if (command.requiresClient()) {
+                    // Run said command, with access to the client
                     command.trigger(message, message.content.slice(first_segment.length + 1), man, client);
                 }
                 else {
+                    // Run said command
                     command.trigger(message, message.content.slice(first_segment.length + 1), man);
                 }
                 return;

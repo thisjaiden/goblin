@@ -58,7 +58,7 @@ const responses = [
     ],
     [
         "Holy Shit It's TommyInnit Oh God Oh Fuck",
-        " fell over after TommyInnit walked into the room, collaping on top of ",
+        " fell over after TommyInnit walked into the room, collapsing on top of ",
         ".",
         "https://static.wikia.nocookie.net/youtube/images/1/15/TommyOutit.jpg/revision/latest/zoom-crop/width/360/height/360?cb=20200916160817",
         "yellow"
