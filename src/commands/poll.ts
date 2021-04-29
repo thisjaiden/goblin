@@ -9,19 +9,19 @@ export function registerPoll(commandman: CommandManager) {
 
 function poll(message: Message, parsed: string, man: Guildman): boolean {
     let admins = [];
-    if (parsed.split("|").length < 2 || parsed.split("|")[1].split(" ").length < 2) {
+    if (parsed.split("|").length < 2) {
         new EmbedBuilder()
             .title("Not enough arguments.")
-            .text("Use the format `poll question here | answer_1 answer_2 ...`")
+            .text(`Use the format \`${man.guildPrefix(message.guild.id)}poll question here | answer 1 | answer 2 | ...\``)
             .color("red")
             .send(message.channel, man);
         return false;
     }
     let question = parsed.split("|")[0].trim();
     let responses = [];
-    let dataset = parsed.split("|")[1].trim().split(" ");
-    for (let i = 0; i < dataset.length; i++) {
-        responses.push(dataset[i].replace("_", " "));
+    let dataset = parsed.split("|");
+    for (let i = 1; i < dataset.length; i++) {
+        responses.push(dataset[i].trim());
     }
     let managed_responses = "";
     for (let i = 0; i < responses.length; i++) {
@@ -40,6 +40,9 @@ function poll(message: Message, parsed: string, man: Guildman): boolean {
             .response(number_to_letter(i), (_a, _b) => {})
     }
     partial_message.send(message.channel, man);
+    if (message.deletable) {
+        message.delete();
+    }
     return true;
 }
 

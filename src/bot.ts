@@ -1,4 +1,4 @@
-export const BOT_VERSION = "2.2.0";
+export const BOT_VERSION = "2.2.1";
 
 
 // discord.js for accessing the discord api
@@ -50,6 +50,10 @@ export class Bot {
         setInterval(() => {
             this.client.user.setActivity(`${this.client.users.cache.size} humans | !help`, {type: 'WATCHING'});
         }, 120_000);
+        // Autosave every 5 mins
+        setInterval(() => {
+            this.man.export("savedata");
+        }, 300_000);
         // Post patch notes for the bot, if applicable
         this.postUpdates();
     }
