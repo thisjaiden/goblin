@@ -8,6 +8,10 @@ export function registerDababy(commandman: CommandManager) {
 }
 
 function dababy(message: Message, parsed_message: string, man: Guildman): boolean {
+    if (!(man.getGuildField(message.guild.id, "dababy_enabled"))) {
+        // This command is disabled by guild prefrences.
+        return;
+    }
     let rand_select = responses[randInt(responses.length)];
     new EmbedBuilder()
         .title(rand_select[0])

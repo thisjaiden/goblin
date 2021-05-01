@@ -8,8 +8,13 @@ export function registerFlavor(commandman: CommandManager) {
 }
 
 function flv(message: Message, parsed_message: string, man: Guildman): boolean {
-    // TODO: Decline if disabled by guild
     // TODO: read rest of message (seeding)
+
+    if (!(man.getGuildField(message.guild.id, "flavor_enabled"))) {
+        // This command is disabled by guild prefrences.
+        return;
+    }
+
     let rand_select = responses[randInt(responses.length)];
     new EmbedBuilder()
         .title("**ANNOUNCEMENT**")

@@ -43,7 +43,7 @@ export class CommandManager {
             // If this command needs admin privlege...
             if (command.requiresAdmin()) {
                 // If the user has admin privlege...
-                if (man.guildCheckAdminStatus(message.guild.id, message.author.id)) {
+                if (man.guildCheckAdminStatus(message.guild, message.author.id)) {
                     // Continue and run the command if appropriate
                 }
                 else {
@@ -55,9 +55,9 @@ export class CommandManager {
                 }
             }
             // Check if this guild supports unprefixed commands
-            let no_prefix = man.guildSupportsUnprefixed(message.guild.id);
+            let no_prefix = man.getGuildField(message.guild.id, "no_prefix");
             // Get the prefix this guild uses
-            let prefix = man.guildPrefix(message.guild.id);
+            let prefix = man.getGuildField(message.guild.id, "prefix");
             // Get the first part of the message
             let first_segment = message.content.split(' ')[0];
             // If this message appears to start wtih a command...

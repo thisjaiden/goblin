@@ -10,8 +10,13 @@ export function registerBanme(commandman: CommandManager) {
 }
 
 function banme(message: Message, parsed_message: string, man: Guildman): boolean {
-    // TODO: Decline if disabled by guild
     // TODO: read rest of message (`!ban me` doesn't work)
+
+    if (!(man.getGuildField(message.guild.id, "banme_enabled"))) {
+        // This command is disabled by guild prefrences.
+        return;
+    }
+
     if (parsed_message == "") {
         message.guild.member(message.author).ban({ reason: `This user ran ${message.content}. Automatic ban by Goblin.`}).then(() => {
             new EmbedBuilder()

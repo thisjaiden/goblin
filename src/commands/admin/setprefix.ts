@@ -8,9 +8,8 @@ export function registerSetprefix(commandman: CommandManager) {
 }
 
 function setprefix(message: Message, parsed: string, man: Guildman): boolean {
-    let contents = message.mentions.channels.first();
     if (parsed) {
-        man.guildSetPrefix(message.guild.id, parsed);
+        man.setGuildField(message.guild.id, "prefix", parsed);
         new EmbedBuilder()
             .title(`Set bot prefix to \`${parsed}\`.`)
             .color("blue")

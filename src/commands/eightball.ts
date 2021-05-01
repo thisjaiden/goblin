@@ -10,8 +10,13 @@ export function registerEightball(commandman: CommandManager) {
 }
 
 function ball(message: Message, parsed_message: string, man: Guildman): boolean {
-    // TODO: Decline if disabled by guild
     // TODO: read rest of message (seeding)
+
+    if (!(man.getGuildField(message.guild.id, "eightball_enabled"))) {
+        // This command is disabled by guild prefrences.
+        return;
+    }
+
     let rand_select = responses[randInt(responses.length)];
     new EmbedBuilder()
         .title("Magic eight ball says...")

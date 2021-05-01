@@ -10,9 +10,6 @@ const stripIndents = commontags.stripIndents;
 import { Guildman } from './guildman';
 import { CommandManager } from './command';
 import { registerBanme } from './commands/banme';
-import { registerAddadmin } from './commands/admin/addadmin';
-import { registerRemoveadmin } from './commands/admin/removeadmin';
-import { registerListadmins } from './commands/admin/listadmins';
 import { registerPoll } from './commands/poll';
 import { registerSave } from './commands/bot_owner/save';
 import { registerStats } from './commands/bot_owner/stats';
@@ -26,6 +23,7 @@ import { registerHelp } from './commands/help';
 import { registerSetprefix } from './commands/admin/setprefix';
 import { registerAdminhelp } from './commands/admin/adminhelp';
 import { registerFight } from './commands/fight';
+import { registerPrefrences } from './commands/admin/prefrences';
 
 export class Bot {
     // discord.js Client object used for interfacing with Discord
@@ -59,9 +57,6 @@ export class Bot {
     }
     private registerCommands() {
         registerBanme(this.command_manager);
-        registerAddadmin(this.command_manager);
-        registerRemoveadmin(this.command_manager);
-        registerListadmins(this.command_manager);
         registerPoll(this.command_manager);
         registerSave(this.command_manager);
         registerStats(this.command_manager);
@@ -75,6 +70,7 @@ export class Bot {
         registerSetprefix(this.command_manager);
         registerAdminhelp(this.command_manager);
         registerFight(this.command_manager);
+        registerPrefrences(this.command_manager);
     }
     private postUpdates() {
         // Check if we've updated, then post patch notes to update channels.

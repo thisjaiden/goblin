@@ -8,6 +8,10 @@ export function registerFight(commandman: CommandManager) {
 }
 
 function fight(message: Message, parsed_message: string, man: Guildman): boolean {
+    if (!(man.getGuildField(message.guild.id, "fight_enabled"))) {
+        // This command is disabled by guild prefrences.
+        return;
+    }
     let users_mentioned = message.mentions.users.array();
     if (!(users_mentioned.length == 2)) {
         new EmbedBuilder()

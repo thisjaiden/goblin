@@ -9,14 +9,15 @@ export function registerSetlogging(commandman: CommandManager) {
 
 function setlogging(message: Message, parsed: string, man: Guildman): boolean {
     let contents = message.mentions.channels.first();
+    let current_chan = man.getGuildField(message.guild.id, "logging_channel");
     if (contents) {
-        if (man.guildHasLogging(contents.guild.id)) {
+        if (!(current_chan == "none")) {
             new EmbedBuilder()
                 .title(`Updated logging channel.`)
-                .text(`<#${man.guildLogging(contents.guild.id)}> -> ${contents.name}`)
+                .text(`<#${current_chan}> -> ${contents.name}`)
                 .color("blue")
                 .send(message.channel, man);
-            man.guildSetLogging(contents.guild.id, contents.id);
+            man.setGuildField(message.guild.id, "logging_channel", contents.id);
             return true;
         }
         else {
@@ -24,7 +25,7 @@ function setlogging(message: Message, parsed: string, man: Guildman): boolean {
                 .title(`Set logging channel to ${contents.name}.`)
                 .color("green")
                 .send(message.channel, man);
-            man.guildSetLogging(contents.guild.id, contents.id);
+            man.setGuildField(message.guild.id, "logging_channel", contents.id);
             return true;
         }
     }

@@ -9,14 +9,15 @@ export function registerSetgeneral(commandman: CommandManager) {
 
 function setgeneral(message: Message, parsed: string, man: Guildman): boolean {
     let contents = message.mentions.channels.first();
+    let current_chan = man.getGuildField(message.guild.id, "general_channel");
     if (contents) {
-        if (man.guildHasGeneral(contents.guild.id)) {
+        if (!(current_chan == "none")) {
             new EmbedBuilder()
                 .title(`Updated general channel.`)
-                .text(`<#${man.guildGeneral(contents.guild.id)}> -> ${contents.name}`)
+                .text(`<#${current_chan}> -> ${contents.name}`)
                 .color("blue")
                 .send(message.channel, man);
-            man.guildSetGeneral(contents.guild.id, contents.id);
+                man.setGuildField(message.guild.id, "general_channel", contents.id);
             return true;
         }
         else {
@@ -24,7 +25,7 @@ function setgeneral(message: Message, parsed: string, man: Guildman): boolean {
                 .title(`Set general channel to ${contents.name}.`)
                 .color("green")
                 .send(message.channel, man);
-            man.guildSetGeneral(contents.guild.id, contents.id);
+            man.setGuildField(message.guild.id, "general_channel", contents.id);
             return true;
         }
     }

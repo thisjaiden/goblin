@@ -1,12 +1,111 @@
 import { Guild, Message, ReactionEmoji, TextChannel } from "discord.js";
-import { collapseTextChangeRangesAcrossMultipleVersions } from "typescript";
 
 const fs = require('fs');
+
+const field_info = [
+    {
+        key: "essentials-v2-3-0",
+        types: [
+            {
+                key: "id",
+                type: "string",
+                inital_value: "null"
+            },
+            {
+                key: "prefix",
+                type: "string",
+                inital_value: "!"
+            },
+            {
+                key: "no_prefix",
+                type: "bool",
+                inital_value: false
+            }
+        ]
+    },
+    {
+        key: "channels-v1",
+        types: [
+            {
+                key: "general_channel",
+                type: "string",
+                inital_value: "none"
+            },
+            {
+                key: "logging_channel",
+                type: "string",
+                inital_value: "none"
+            },
+            {
+                key: "update_channel",
+                type: "string",
+                inital_value: "none"
+            }
+        ]
+    },
+    {
+        key: "reaction-callbacks-v1",
+        types: [
+            {
+                key: "reaction_callbacks",
+                type: "list",
+                inital_value: []
+            }
+        ]
+    },
+    {
+        key: "prefrences-v1",
+        types: [
+            {
+                key: "banme_enabled",
+                type: "bool",
+                inital_value: false
+            },
+            {
+                key: "poll_enbaled",
+                type: "bool",
+                inital_value: true
+            },
+            {
+                key: "flavor_enabled",
+                type: "bool",
+                inital_value: true
+            },
+            {
+                key: "fight_enabled",
+                type: "bool",
+                inital_value: false
+            },
+            {
+                key: "dababy_enabled",
+                type: "bool",
+                inital_value: false
+            },
+            {
+                key: "eightball_enabled",
+                type: "bool",
+                inital_value: true
+            },
+            {
+                key: "twitch_prime_refrences_enabled",
+                type: "bool",
+                inital_value: false
+            }
+        ]
+    }
+];
 
 export class Guildman {
     constructor() {
         this.guild_data = [];
-        this.general_data = {};
+        this.modern_fields = {
+            field_list: [
+                "essentials-v2-3-0",
+                "channels-v1",
+                "reaction-callbacks-v1",
+                "prefrences-v1"
+            ]
+        };
     }
     /**
      * Saves the data in `Guildman` to the disk
@@ -14,7 +113,6 @@ export class Guildman {
      */
     public export(filename: string) {
         let tmp_dta: DiskData = {
-            general: this.general_data,
             guild: this.guild_data
         };
         fs.writeFileSync(
@@ -32,145 +130,58 @@ export class Guildman {
      */
     public import(filename: string) {
         let tmp_dta = JSON.parse(fs.readFileSync(`${filename}.json`, 'utf8'));
-        this.general_data = tmp_dta.general;
         this.guild_data = tmp_dta.guild;
-        this.migrate();
     }
-    public guildPrefix(guild_id: string): string {
+    public getGuildField(guild_id: string, field: string): any {
         let ptr = this.getGuildPointer(guild_id);
-        return this.guild_data[ptr].prefix;
-    }
-    public guildSupportsUnprefixed(guild_id: string): boolean {
-        let ptr = this.getGuildPointer(guild_id);
-        return this.guild_data[ptr].no_prefix;
-    }
-    public guildAddAdmin(guild_id: string, user_id: string) {
-        let ptr = this.getGuildPointer(guild_id);
-        this.guild_data[ptr].admins.push(user_id);
-    }
-    public guildHasGeneral(guild_id: string): boolean {
-        let ptr = this.getGuildPointer(guild_id);
-        if (this.guild_data[ptr].channels.general_channel == "none") {
-            return false;
+        if (!this.guild_data[ptr][field]) {
+            this.setFieldDefault(ptr, field);
         }
-        else {
-            return true;
-        }
+        return this.guild_data[ptr][field];
     }
-    public guildSetGeneral(guild_id: string, channel_id: string) {
-        let ptr = this.getGuildPointer(guild_id);
-        this.guild_data[ptr].channels.general_channel = channel_id;
+    private setFieldDefault(guild_ptr: number, field_to_set: string) {
+        this.modern_fields.field_list.forEach((field) => {
+            field_info.forEach((field_inf) => {
+                if (field == field_inf.key) {
+                    field_inf.types.forEach((type_spec) => {
+                        if (field_to_set == type_spec.key) {
+                            this.guild_data[guild_ptr][field_to_set] = type_spec.inital_value;
+                            return;
+                        }
+                    });
+                }
+            });
+        });
+        console.warn(`Default for field ${field_to_set} was requested, but not avalable.`);
     }
-    public guildGeneral(guild_id: string): string {
+    public setGuildField(guild_id: string, field: string, value: any) {
         let ptr = this.getGuildPointer(guild_id);
-        return this.guild_data[ptr].channels.general_channel;
-    }
-    public guildHasLogging(guild_id: string): boolean {
-        let ptr = this.getGuildPointer(guild_id);
-        if (this.guild_data[ptr].channels.logging_channel == "none") {
-            return false;
-        }
-        else {
-            return true;
-        }
-    }
-    public guildSetPrefix(guild_id: string, prefix: string) {
-        let ptr = this.getGuildPointer(guild_id);
-        this.guild_data[ptr].prefix = prefix;
-    }
-    public guildSetLogging(guild_id: string, channel_id: string) {
-        let ptr = this.getGuildPointer(guild_id);
-        this.guild_data[ptr].channels.logging_channel = channel_id;
-    }
-    public guildLogging(guild_id: string): string {
-        let ptr = this.getGuildPointer(guild_id);
-        return this.guild_data[ptr].channels.logging_channel;
+        typeof value
+        this.guild_data[ptr][field] = value;
     }
     public guildLog(guild: Guild, message: string) {
-        if (!this.guildHasLogging(guild.id)) {
+        let channel_id = this.getGuildField(guild.id, "logging_channel");
+        if (channel_id == "none") {
             return;
         }
-        let channel_id = this.guildLogging(guild.id);
         let channel = guild.channels.resolve(channel_id);
         if (!channel) return;
         if (!((channel): channel is TextChannel => channel.type === 'text')(channel)) return;
 
         channel.send(message);
     }
-    public guildRemoveAdmin(guild_id: string, user_id: string): boolean {
-        let ptr = this.getGuildPointer(guild_id);
-        let mod = [];
-        let did_mod: boolean = false;
-        this.guild_data[ptr].admins.forEach((admin) => {
-            if (admin == user_id) {
-                did_mod = true;
-            }
-            else {
-                mod.push(admin);
-            }
-        });
-        if (did_mod) {
-            this.guild_data[ptr].admins = mod;
+    public guildCheckAdminStatus(guild: Guild, user_id: string): boolean {
+        if (guild.member(user_id).permissions.has("ADMINISTRATOR") || guild.member(user_id).id == guild.ownerID) {
             return true;
-        }
-        else {
-            return false;
-        }
-    }
-    public guildCheckAdminStatus(guild_id: string, user_id: string): boolean {
-        let ptr = this.getGuildPointer(guild_id);
-        for (let i = 0; i < this.guild_data[ptr].admins.length; i++) {
-            if (this.guild_data[ptr].admins[i] == user_id) {
-                return true;
-            }
         }
         return false;
     }
-    public addReactionCallback(message: Message, reaction: string, callback: (reaction: ReactionEmoji, man: Guildman) => null) {
+    public addReactionCallback(message: Message, reaction: string, callback?: (reaction: ReactionEmoji, man: Guildman) => null) {
+        if (!callback) {
+            return;
+        }
         let ptr = this.getGuildPointer(message.guild.id);
-        this.guild_data[ptr].reaction_callbacks.push({emoji: reaction, callback: callback});
-    }
-    private migrate() {
-        let fresh_guild: GuildData = {
-            id: 'null',
-            channels: {
-                general_channel: 'none',
-                logging_channel: 'none',
-                update_channel: 'none'
-            },
-            prefix: "!",
-            no_prefix: false,
-            reaction_callbacks: [],
-            features: {
-                banme: false
-            },
-            admins: []
-        };
-        let fresh_general: GeneralData = {
-
-        };
-        for (let key in fresh_guild) {
-            for (let i = 0; i < this.guild_data.length; i++) {
-                if (!this.guild_data[i][key]) {
-                    this.guild_data[i][key] = fresh_guild[key]
-                }
-            }
-        }
-        for (let key in fresh_general) {
-            if (!this.general_data[key]) {
-                this.general_data[key] = fresh_general[key];
-            }
-        }
-    }
-
-    /**
-     * Sets the general channel for a given guild. This is where messages will usually be sent.
-     * @param guild_id - A Discord guild id.
-     * @param channel_id - A Discord channel id
-     */
-    public setGeneralChannel(guild_id: string, channel_id: string) {
-        let ptr = this.getGuildPointer(guild_id);
-        this.guild_data[ptr].channels.general_channel = channel_id;
+        this.guild_data[ptr]["reaction_callbacks"].push({emoji: reaction, callback: callback});
     }
     
     /**
@@ -183,7 +194,7 @@ export class Guildman {
         for (let i = 0; i < this.guild_data.length; i++) {
             let thisguild = this.guild_data[i];
             // If the id of this guild matches our requested id...
-            if (thisguild.id == guild_id) {
+            if (thisguild["id"] == guild_id) {
                 // Found a guild matching requested id, return pointer
                 return i;
             }
@@ -196,62 +207,21 @@ export class Guildman {
     public registerNewGuild(guild: Guild): number {
         this.guild_data.push({
             id: guild.id,
-            channels: {
-                general_channel: "none",
-                logging_channel: "none",
-                update_channel: "none"
-            },
-            prefix: "!",
-            no_prefix: false,
-            reaction_callbacks: [],
-            features: {
-                banme: false
-            },
-            admins: []
-        });
-        guild.members.cache.forEach((member) => {
-            // console.log(`INFORMATION ON POTENTIAL ADMIN USER: ${JSON.stringify(member)}`);
-            if (member.permissions.has("ADMINISTRATOR") || member.id == guild.owner.id) {
-                // console.log("Found a match.");
-                this.guild_data[this.guild_data.length - 1].admins.push(member.id);
-            }
         });
         return this.guild_data.length - 1;
     }
 
-    private guild_data: Array<GuildData> = [];
-    private general_data: GeneralData = {};
+    private guild_data: Array<Object> = [];
+    private modern_fields: GeneralData = { field_list: [] };
 }
 
-interface GuildData {
-    id: string,
-    channels: {
-        general_channel: string,
-        logging_channel: string,
-        update_channel: string
-    },
-    /**
-     * The prefix used before commands
-     */
-    prefix: string,
-    /**
-     * If commands run with no prefix should work
-     */
-    no_prefix: boolean,
-    reaction_callbacks: Array<ReactionCallback>,
-    admins: Array<string>,
-    features: {
-        banme: boolean
-    }
-};
 
 interface DiskData {
-    guild: Array<GuildData>,
-    general: GeneralData
+    guild: Array<Object>
 };
 
 interface GeneralData {
-
+    field_list: Array<string>
 };
 
 interface ReactionCallback {

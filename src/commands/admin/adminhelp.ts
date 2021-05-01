@@ -17,15 +17,11 @@ function adminhelp(message: Message, parsed: string, man: Guildman): boolean {
     new EmbedBuilder()
         .title(`Goblin Child ${BOT_VERSION}`)
         .text(stripIndents`
-            Goblin keeps an internal list of admins who can use elevated goblin commands.
-            You can see this list with
-            !listadmins - show all goblin admins
+            Goblin allows users with Administrator or who own a server to use elevated goblin commands.
             !adminhelp - shows this message
-            !addadmin - adds an admin to goblin
-            !removeadmin - removes an admin from goblin
-            !setprefix - sets the prefix of the bot.
+            !setprefix - sets the prefix of the bot. Default: \`!\`
             !setlogging - designates a channel for log messages like removed or edited messages
-            !prefrences - **WIP, Disabled**
+            !prefrences - allows the enabling and disabling of particular commands and functions
             !setgeneral - **WIP, Disabled**
             !unprefixed - **WIP, Disabled**
             !setupdate - **WIP, Disabled**

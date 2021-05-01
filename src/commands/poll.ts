@@ -8,11 +8,14 @@ export function registerPoll(commandman: CommandManager) {
 }
 
 function poll(message: Message, parsed: string, man: Guildman): boolean {
-    let admins = [];
+    if (!(man.getGuildField(message.guild.id, "poll_enabled"))) {
+        // This command is disabled by guild prefrences.
+        return;
+    }
     if (parsed.split("|").length < 2) {
         new EmbedBuilder()
             .title("Not enough arguments.")
-            .text(`Use the format \`${man.guildPrefix(message.guild.id)}poll question here | answer 1 | answer 2 | ...\``)
+            .text(`Use the format \`${man.getGuildField(message.guild.id, "prefix")}poll question here | answer 1 | answer 2 | ...\``)
             .color("red")
             .send(message.channel, man);
         return false;
@@ -34,10 +37,10 @@ function poll(message: Message, parsed: string, man: Guildman): boolean {
         .title(question)
         .text(managed_responses)
         .color("blue")
-        .footer(`Use ${man.guildPrefix(message.guild.id)}poll to make your own`);
+        .footer(`Use ${man.getGuildField(message.guild.id, "prefix")}poll to make your own`);
     for (let i = 0; i < responses.length; i++) {
         partial_message
-            .response(number_to_letter(i), (_a, _b) => {})
+            .response(number_to_letter(i))
     }
     partial_message.send(message.channel, man);
     if (message.deletable) {
