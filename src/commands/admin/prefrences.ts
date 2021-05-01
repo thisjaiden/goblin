@@ -14,7 +14,8 @@ export function registerPrefrences(commandman: CommandManager) {
 function pref(message: Message, parsed: string, man: Guildman): boolean {
     let prefix = man.getGuildField(message.guild.id, "prefix");
     if (parsed.startsWith("set")) {
-        if (parsed.split.length < 3) {
+        if (parsed.split(" ").length < 3) {
+            console.log(JSON.stringify(parsed.split(" ")));
             new EmbedBuilder()
                 .title(`Invalid Arguments.`)
                 .text(stripIndents`

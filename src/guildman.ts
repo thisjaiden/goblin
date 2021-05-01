@@ -62,7 +62,7 @@ const field_info = [
                 inital_value: false
             },
             {
-                key: "poll_enbaled",
+                key: "poll_enabled",
                 type: "bool",
                 inital_value: true
             },
@@ -134,24 +134,21 @@ export class Guildman {
     }
     public getGuildField(guild_id: string, field: string): any {
         let ptr = this.getGuildPointer(guild_id);
-        if (!this.guild_data[ptr][field]) {
+        if (this.guild_data[ptr][field] === undefined) {
             this.setFieldDefault(ptr, field);
         }
         return this.guild_data[ptr][field];
     }
     private setFieldDefault(guild_ptr: number, field_to_set: string) {
-        this.modern_fields.field_list.forEach((field) => {
-            field_info.forEach((field_inf) => {
-                if (field == field_inf.key) {
-                    field_inf.types.forEach((type_spec) => {
-                        if (field_to_set == type_spec.key) {
-                            this.guild_data[guild_ptr][field_to_set] = type_spec.inital_value;
-                            return;
-                        }
-                    });
+        for (let i = 0; i < field_info.length; i++) {
+            for (let j = 0; j < field_info[i].types.length; j++) {
+                if (field_info[i].types[j].key == field_to_set) {
+                    console.log("set default value.");
+                    this.guild_data[guild_ptr][field_to_set] = field_info[i].types[j].inital_value;
+                    return;
                 }
-            });
-        });
+            }
+        }
         console.warn(`Default for field ${field_to_set} was requested, but not avalable.`);
     }
     public setGuildField(guild_id: string, field: string, value: any) {
@@ -223,8 +220,3 @@ interface DiskData {
 interface GeneralData {
     field_list: Array<string>
 };
-
-interface ReactionCallback {
-    emoji: string,
-    callback: (reaction: ReactionEmoji, man: Guildman) => null
-}

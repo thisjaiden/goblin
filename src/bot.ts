@@ -1,4 +1,4 @@
-export const BOT_VERSION = "2.2.1";
+export const BOT_VERSION = "2.3.0";
 
 
 // discord.js for accessing the discord api
