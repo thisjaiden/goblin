@@ -44,7 +44,7 @@ function pref(message: Message, parsed: string, man: Guildman): boolean {
                         .color("green")
                         .send(message.channel);
                     man.setGuildField(message.guild.id, field + "_enabled", true);
-                    return false;
+                    return true;
                 }
                 else {
                     new EmbedBuilder()
@@ -53,6 +53,25 @@ function pref(message: Message, parsed: string, man: Guildman): boolean {
                         .color("red")
                         .send(message.channel);
                     man.setGuildField(message.guild.id, field + "_enabled", false);
+                    return true;
+                }
+            case "needs_prefix":
+                if (value == "true") {
+                    new EmbedBuilder()
+                        .title(`Preference Updated!`)
+                        .text(`Set ${field} to ${value}.`)
+                        .color("green")
+                        .send(message.channel);
+                    man.setGuildField(message.guild.id, "no_prefix", false);
+                    return true;
+                }
+                else {
+                    new EmbedBuilder()
+                        .title(`Preference Updated!`)
+                        .text(`Set ${field} to ${value}.`)
+                        .color("red")
+                        .send(message.channel);
+                    man.setGuildField(message.guild.id, "no_prefix", true);
                     return true;
                 }
             default:
@@ -76,6 +95,7 @@ function pref(message: Message, parsed: string, man: Guildman): boolean {
             let eightball_ico = "❌";
             let twitch_prime_refrences_ico = "❌";
             let logging_ico = "❌"
+            let prefix_ico = "❌"
             if (man.getGuildField(message.guild.id, "banme_enabled")) {
                 banme_ico = "✅";
             }
@@ -100,6 +120,9 @@ function pref(message: Message, parsed: string, man: Guildman): boolean {
             if (man.getGuildField(message.guild.id, "logging_channel") != "none") {
                 logging_ico = "✅";
             }
+            if (man.getGuildField(message.guild.id, "no_prefix") == true) {
+                prefix_ico = "✅";
+            }
             new EmbedBuilder()
                 .title(`Goblin Child Preferences`)
                 .text(stripIndents`
@@ -116,6 +139,9 @@ function pref(message: Message, parsed: string, man: Guildman): boolean {
                     (twitch_prime_refrences)
                     **Events**
                     logging           - ${logging_ico} (<#${man.getGuildField(message.guild.id, "logging_channel")}>)
+                    **Special**
+                    no prefix needed  - ${prefix_ico}
+                    (needs_prefix)
                 `)
                 .color("blue")
                 .send(message.channel);

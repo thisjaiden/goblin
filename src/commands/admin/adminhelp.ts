@@ -23,7 +23,6 @@ function adminhelp(message: Message, parsed: string, man: Guildman): boolean {
             !setlogging - designates a channel for log messages like removed or edited messages
             !prefrences - allows the enabling and disabling of particular commands and functions
             !setgeneral - **WIP, Disabled**
-            !unprefixed - **WIP, Disabled**
             !setupdate - **WIP, Disabled**
         `)
         .footer("I'm goblin child | !help | !invite")
