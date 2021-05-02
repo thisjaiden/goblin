@@ -98,26 +98,15 @@ const field_info = [
 export class Guildman {
     constructor() {
         this.guild_data = [];
-        this.modern_fields = {
-            field_list: [
-                "essentials-v2-3-0",
-                "channels-v1",
-                "reaction-callbacks-v1",
-                "prefrences-v1"
-            ]
-        };
     }
     /**
      * Saves the data in `Guildman` to the disk
      * @param filename - The name of the file to save to. Do not add a file extension.
      */
     public export(filename: string) {
-        let tmp_dta: DiskData = {
-            guild: this.guild_data
-        };
         fs.writeFileSync(
             `${filename}.json`,
-            JSON.stringify(tmp_dta),
+            JSON.stringify(this.guild_data),
             function(err) {
                 if (err) throw err;
                 console.log('saved to savedata.json');
@@ -130,7 +119,7 @@ export class Guildman {
      */
     public import(filename: string) {
         let tmp_dta = JSON.parse(fs.readFileSync(`${filename}.json`, 'utf8'));
-        this.guild_data = tmp_dta.guild;
+        this.guild_data = tmp_dta;
     }
     public getGuildField(guild_id: string, field: string): any {
         let ptr = this.getGuildPointer(guild_id);
@@ -143,7 +132,6 @@ export class Guildman {
         for (let i = 0; i < field_info.length; i++) {
             for (let j = 0; j < field_info[i].types.length; j++) {
                 if (field_info[i].types[j].key == field_to_set) {
-                    console.log("set default value.");
                     this.guild_data[guild_ptr][field_to_set] = field_info[i].types[j].inital_value;
                     return;
                 }
@@ -208,15 +196,23 @@ export class Guildman {
         return this.guild_data.length - 1;
     }
 
+    public unregisterGuild(guild: Guild) {
+        let index = 0;
+        let found = false;
+        this.guild_data.forEach((guild_spec) => {
+            if (guild_spec["id"] == guild.id) {
+                found = true;
+                return;
+            }
+            index++;
+        });
+        if (found) {
+            this.guild_data.splice(index, 1);
+        }
+        else {
+            console.warn(`Guild ${guild.toString()} was not found during \`unregisterGuild\`!`);
+        }
+    }
+
     private guild_data: Array<Object> = [];
-    private modern_fields: GeneralData = { field_list: [] };
 }
-
-
-interface DiskData {
-    guild: Array<Object>
-};
-
-interface GeneralData {
-    field_list: Array<string>
-};

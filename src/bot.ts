@@ -1,4 +1,4 @@
-export const BOT_VERSION = "2.3.0";
+export const BOT_VERSION = "2.3.1";
 
 
 // discord.js for accessing the discord api
@@ -96,6 +96,10 @@ export class Bot {
             this.man.registerNewGuild(guild);
             console.log(`Goblin was invited to a new guild! (${guild.name} with ${guild.memberCount} members)`);
         });
+        this.client.on('guildDelete', (guild: Guild) => {
+            this.man.unregisterGuild(guild);
+            console.log(`Goblin was removed from a guild... (${guild.name})`)
+        })
         this.client.on('emojiCreate', emoji => {
             this.man.guildLog(emoji.guild, stripIndents`
                 Action: Emoji Created
