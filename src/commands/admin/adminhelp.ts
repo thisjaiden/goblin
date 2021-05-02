@@ -22,8 +22,8 @@ function adminhelp(message: Message, parsed: string, man: Guildman): boolean {
             !setprefix - sets the prefix of the bot. Default: \`!\`
             !setlogging - designates a channel for log messages like removed or edited messages
             !prefrences - allows the enabling and disabling of particular commands and functions
-            !setgeneral - **WIP, Disabled**
-            !setupdate - **WIP, Disabled**
+            !setgeneral - designates a channel for random shitposts and other event based responses
+            !setupdate - designates a channel for patch notes and update logs from goblin
         `)
         .footer("I'm goblin child | !help | !invite")
         .color("blue")

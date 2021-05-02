@@ -94,8 +94,9 @@ function pref(message: Message, parsed: string, man: Guildman): boolean {
             let dababy_ico = "❌";
             let eightball_ico = "❌";
             let twitch_prime_refrences_ico = "❌";
-            let logging_ico = "❌"
-            let prefix_ico = "❌"
+            let logging_ico = "❌";
+            let prefix_ico = "❌";
+            let updates_ico = "❌";
             if (man.getGuildField(message.guild.id, "banme_enabled")) {
                 banme_ico = "✅";
             }
@@ -120,6 +121,9 @@ function pref(message: Message, parsed: string, man: Guildman): boolean {
             if (man.getGuildField(message.guild.id, "logging_channel") != "none") {
                 logging_ico = "✅";
             }
+            if (man.getGuildField(message.guild.id, "update_channel") != "none") {
+                updates_ico = "✅";
+            }
             if (man.getGuildField(message.guild.id, "no_prefix") == true) {
                 prefix_ico = "✅";
             }
@@ -138,6 +142,7 @@ function pref(message: Message, parsed: string, man: Guildman): boolean {
                     Twitch Prime SMP  - ${twitch_prime_refrences_ico}
                     (twitch_prime_refrences)
                     **Events**
+                    updates           - ${updates_ico} (<#${man.getGuildField(message.guild.id, "update_channel")}>)
                     logging           - ${logging_ico} (<#${man.getGuildField(message.guild.id, "logging_channel")}>)
                     **Special**
                     no prefix needed  - ${prefix_ico}

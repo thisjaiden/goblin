@@ -1,11 +1,19 @@
-export const BOT_VERSION = "2.3.1";
-
-
-// discord.js for accessing the discord api
-import { Client, Guild, GuildAuditLogs, Message, TextChannel, VoiceChannel } from 'discord.js';
 // commontags allows more diverse usage of `` tags
 const commontags = require('common-tags');
 const stripIndents = commontags.stripIndents;
+
+// bot version and latest patch notes
+export const BOT_VERSION = "2.3.2";
+
+export const PATCH_NOTES = stripIndents`
+**Goblin Child v${BOT_VERSION}**
+- Readded functionality for \`setupdates\`
+- Readded functionality for \`setgeneral\`, although it is not yet used. (soon!)
+`;
+
+
+// discord.js for accessing the discord api
+import { Client, Guild, GuildAuditLogs, Message, NewsChannel, TextChannel, VoiceChannel } from 'discord.js';
 
 import { Guildman } from './guildman';
 import { CommandManager } from './command';
@@ -24,6 +32,7 @@ import { registerSetprefix } from './commands/admin/setprefix';
 import { registerAdminhelp } from './commands/admin/adminhelp';
 import { registerFight } from './commands/fight';
 import { registerPrefrences } from './commands/admin/prefrences';
+import { registerSetupdate } from './commands/admin/setupdate';
 
 export class Bot {
     // discord.js Client object used for interfacing with Discord
@@ -71,9 +80,21 @@ export class Bot {
         registerAdminhelp(this.command_manager);
         registerFight(this.command_manager);
         registerPrefrences(this.command_manager);
+        registerSetupdate(this.command_manager);
     }
     private postUpdates() {
         // Check if we've updated, then post patch notes to update channels.
+        let guilds = this.man.allGuildIds();
+        guilds.forEach((guild) => {
+            if (this.man.getGuildField(guild, "latest_version") != BOT_VERSION) {
+                this.man.setGuildField(guild, "latest_version", BOT_VERSION);
+                let update_channel = this.man.getGuildField(guild, "update_channel");
+                if (update_channel != "none") {
+                    let mod_chan = this.client.guilds.resolve(guild).channels.resolve(update_channel) as TextChannel | NewsChannel;
+                    mod_chan.send(PATCH_NOTES);
+                }
+            }
+        });
     }
     public listen(): Promise<string> {
         this.client.on('ready', () => {

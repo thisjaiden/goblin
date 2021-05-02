@@ -1,5 +1,7 @@
 import { Guild, Message, ReactionEmoji, TextChannel } from "discord.js";
 
+import { BOT_VERSION, PATCH_NOTES } from "./bot";
+
 const fs = require('fs');
 
 const field_info = [
@@ -92,6 +94,16 @@ const field_info = [
                 inital_value: false
             }
         ]
+    },
+    {
+        key: "updates-v1",
+        types: [
+            {
+                key: "latest_version",
+                type: "string",
+                inital_value: BOT_VERSION
+            }
+        ]
     }
 ];
 
@@ -112,6 +124,13 @@ export class Guildman {
                 console.log('saved to savedata.json');
             }
         );
+    }
+    public allGuildIds(): Array<string> {
+        let wip = [];
+        this.guild_data.forEach((guild) => {
+            wip.push(guild["id"]);
+        });
+        return wip;
     }
     /**
      * Loads data from the disk into `Guildman`
