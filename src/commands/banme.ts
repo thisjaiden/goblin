@@ -22,7 +22,6 @@ function banme(message: Message, parsed_message: string, man: Guildman): boolean
             new EmbedBuilder()
                 .title("Whoops!")
                 .text(`Looks like ${message.author} was stupid enough to run ${message.content}.\nI've banned them from ${message.guild}.`)
-                .footer("I'm Goblin Child. | !help/invite")
                 .thumbnail("https://i.pinimg.com/originals/82/69/9d/82699d6571d0fa1bfc3bbefebfe302b6.png")
                 .color("#730b1b")
                 .send(message.channel);
@@ -31,7 +30,6 @@ function banme(message: Message, parsed_message: string, man: Guildman): boolean
             new EmbedBuilder()
                 .title("I would've banned you but...")
                 .text("It looks like you have more permissions than me. Hate to dissapoint you.")
-                .footer("I'm Goblin Child. | !help/invite")
                 .color("#872b7c")
                 .send(message.channel);
             return false;

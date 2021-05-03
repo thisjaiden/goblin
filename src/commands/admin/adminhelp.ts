@@ -14,18 +14,19 @@ export function registerAdminhelp(commandman: CommandManager) {
 }
 
 function adminhelp(message: Message, parsed: string, man: Guildman): boolean {
+    let prefix = man.getGuildField(message.guild.id, "prefix");
     new EmbedBuilder()
         .title(`Goblin Child ${BOT_VERSION}`)
         .text(stripIndents`
             Goblin allows users with Administrator or who own a server to use elevated goblin commands.
-            !adminhelp - shows this message
-            !setprefix - sets the prefix of the bot. Default: \`!\`
-            !setlogging - designates a channel for log messages like removed or edited messages
-            !prefrences - allows the enabling and disabling of particular commands and functions
-            !setgeneral - designates a channel for random shitposts and other event based responses
-            !setupdate - designates a channel for patch notes and update logs from goblin
+            ${prefix}adminhelp - shows this message
+            ${prefix}setprefix - sets the prefix of the bot. Default: \`!\`
+            ${prefix}setlogging - designates a channel for log messages like removed or edited messages
+            ${prefix}setgeneral - designates a channel for random shitposts and other event based responses
+            ${prefix}setupdate - designates a channel for patch notes and update logs from goblin
+            ${prefix}preferences - allows the enabling and disabling of particular commands and functions
         `)
-        .footer("I'm goblin child | !help | !invite")
+        .footer(`I'm goblin child | ${prefix}help | ${prefix}invite`)
         .color("blue")
         .send(message.channel)
     return true;

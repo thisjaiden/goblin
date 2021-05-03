@@ -13,7 +13,10 @@ function fight(message: Message, parsed_message: string, man: Guildman): boolean
         return;
     }
     let users_mentioned = message.mentions.users.array();
-    if (!(users_mentioned.length == 2)) {
+    if (users_mentioned.length == 1) {
+        users_mentioned.push(message.author);
+    }
+    else if (!(users_mentioned.length == 2)) {
         new EmbedBuilder()
             .title("Not enough arguments.")
             .text("Usage: `!fight @user1 @user2`")
@@ -102,7 +105,7 @@ const responses = [
         "https://freshpoint.com/wp-content/uploads/commodity-celery.jpg",
         "green"
     ],
-    [
+    [ // 10
         "Now watch me whip!",
         " nae naed on ",
         ".",

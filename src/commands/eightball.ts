@@ -10,8 +10,6 @@ export function registerEightball(commandman: CommandManager) {
 }
 
 function ball(message: Message, parsed_message: string, man: Guildman): boolean {
-    // TODO: read rest of message (seeding)
-
     if (!(man.getGuildField(message.guild.id, "eightball_enabled"))) {
         // This command is disabled by guild prefrences.
         return;
@@ -27,24 +25,30 @@ function ball(message: Message, parsed_message: string, man: Guildman): boolean 
 }
 
 const responses = [
-    ["yes", "green"],
-    ["nah", "red"],
-    ["idk", "yellow"],
-    ["stupid question", "red"],
+    // yes (6)
     ["sure", "green"],
     ["absoulutely", "green"],
-    ["no", "red"],
-    ["maybe", "yellow"],
-    ["i'm not telling you", "yellow"],
-    ["try asking later i'm busy", "yellow"],
-    ["**FUCK NO!**", "red"],
-    ["wanna fuck around and find out?", "yellow"],
-    ["why ask *me*? I don't know", "yellow"],
-    ["okeydokey", "blue"],
-    ["nope", "red"],
-    ["mmhm.", "blue"],
+    ["yes", "green"],
     ["yeah...", "green"],
-    ["i am __eight (8) ball__", "blue"]
+    ["of course!", "green"],
+    ["indeed.", "green"],
+    // unclear (3)
+    ["okeydokey", "blue"],
+    ["the answer is ambigous.", "blue"],
+    ["i am __eight (8) ball__", "blue"],
+    // maybe (4)
+    ["idk", "yellow"],
+    ["maybe", "yellow"],
+    ["possibly.", "yellow"],
+    ["why ask *me*? I don't know.", "yellow"],
+    // no (7)
+    ["nah", "red"],
+    ["**FUCK NO!**", "red"],
+    ["stupid question, obviously not", "red"],
+    ["no", "red"],
+    ["nope", "red"],
+    ["no way", "red"],
+    ["negative.", "red"]
 ];
 
 // [0-max)

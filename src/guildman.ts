@@ -56,7 +56,7 @@ const field_info = [
         ]
     },
     {
-        key: "prefrences-v1",
+        key: "preferences-v1",
         types: [
             {
                 key: "banme_enabled",
@@ -92,6 +92,21 @@ const field_info = [
                 key: "twitch_prime_refrences_enabled",
                 type: "bool",
                 inital_value: false
+            }
+        ]
+    },
+    {
+        key: "preferences-v2",
+        types: [
+            {
+                key: "balls_enabled",
+                type: "bool",
+                inital_value: true
+            },
+            {
+                key: "game_enabled",
+                type: "bool",
+                inital_value: true
             }
         ]
     },

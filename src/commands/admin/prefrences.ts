@@ -36,6 +36,8 @@ function pref(message: Message, parsed: string, man: Guildman): boolean {
             case "fight":
             case "dababy":
             case "eightball":
+            case "balls":
+            case "game":
             case "twitch_prime_refrences":
                 if (value == "true") {
                     new EmbedBuilder()
@@ -97,6 +99,8 @@ function pref(message: Message, parsed: string, man: Guildman): boolean {
             let logging_ico = "❌";
             let prefix_ico = "❌";
             let updates_ico = "❌";
+            let balls_ico = "❌";
+            let game_ico = "❌";
             if (man.getGuildField(message.guild.id, "banme_enabled")) {
                 banme_ico = "✅";
             }
@@ -127,12 +131,20 @@ function pref(message: Message, parsed: string, man: Guildman): boolean {
             if (man.getGuildField(message.guild.id, "no_prefix") == true) {
                 prefix_ico = "✅";
             }
+            if (man.getGuildField(message.guild.id, "balls_enabled")) {
+                balls_ico = "✅";
+            }
+            if (man.getGuildField(message.guild.id, "game_enabled")) {
+                game_ico = "✅";
+            }
             new EmbedBuilder()
                 .title(`Goblin Child Preferences`)
+                // game              - ${game_ico}
                 .text(stripIndents`
                     **Commands**
                     prefix            - \`${prefix}\`
                     banme             - ${banme_ico}
+                    balls             - ${balls_ico}
                     poll              - ${poll_ico}
                     flavor            - ${flavor_ico}
                     fight             - ${fight_ico}

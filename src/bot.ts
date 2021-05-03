@@ -3,14 +3,30 @@ const commontags = require('common-tags');
 const stripIndents = commontags.stripIndents;
 
 // bot version and latest patch notes
-export const BOT_VERSION = "2.3.2";
+export const BOT_VERSION = "2.4.0";
 
 export const PATCH_NOTES = stripIndents`
 **Goblin Child v${BOT_VERSION}**
-- Readded functionality for \`setupdates\`
-- Readded functionality for \`setgeneral\`, although it is not yet used. (soon!)
+*Features and New Content*
+- Added the new command \`balls\`
+- Added 6 new flavors to \`flavor\`
+*Polishing Changes*
+- Changed many of \`eightball\`'s responses
+- Adjusted \`invite\`'s message
+|  • Now an embed
+|  • No more default embed popup
+- Adjusted \`help\`'s message
+|  • Now uses the server's prefix, if changed from the default
+|  • "I wonder what this does?" -> "Ban yourself?"
+|  • Removed the "..." at the end of the eightball command description
+|  • "Beat the shit out of your friends" -> "Who would win in a fight?"
+- Adjusted \`adminhelp\`'s message
+|  • Now uses the server's prefix, if changed from the default
+|  • Moved \`preferences\` to the end of the list for consistency
+|  • Fixed a typo in the spelling of "preferences"
+- Removed the footer from \`banme\`'s message
+- \`fight\` now assumes the person running the command is involved if only one person is mentioned
 `;
-
 
 // discord.js for accessing the discord api
 import { Client, Guild, GuildAuditLogs, Message, NewsChannel, TextChannel, VoiceChannel } from 'discord.js';
