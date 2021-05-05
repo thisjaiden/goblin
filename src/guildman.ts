@@ -1,6 +1,6 @@
-import { Guild, Message, ReactionEmoji, TextChannel } from "discord.js";
+import { Guild, Message, MessageReaction, ReactionEmoji, TextChannel } from "discord.js";
 
-import { BOT_VERSION, PATCH_NOTES } from "./bot";
+import { BOT_VERSION } from "./bot";
 
 const fs = require('fs');
 
@@ -119,6 +119,18 @@ const field_info = [
                 inital_value: BOT_VERSION
             }
         ]
+    },
+    {
+        key: "game-v1",
+        types: [
+            {
+                key: "game",
+                type: "object",
+                inital_value: {
+                    setup: false
+                }
+            }
+        ]
     }
 ];
 
@@ -128,7 +140,7 @@ export class Guildman {
     }
     /**
      * Saves the data in `Guildman` to the disk
-     * @param filename - The name of the file to save to. Do not add a file extension.
+     * @param filename - The name of the file to save to. Do not add a file extension
      */
     public export(filename: string) {
         fs.writeFileSync(
@@ -140,11 +152,19 @@ export class Guildman {
             }
         );
     }
+    /**
+     * Gets a list of all the Guild ids managed by this `Guildman`
+     * @returns A list of Guild ids that are managed by this `Guildman`
+     */
     public allGuildIds(): Array<string> {
+        // create an empty list to store the guild ids
         let wip = [];
+        // for every guild we track
         this.guild_data.forEach((guild) => {
+            // add the id of this guild to our list
             wip.push(guild["id"]);
         });
+        // return the list
         return wip;
     }
     /**
@@ -195,12 +215,46 @@ export class Guildman {
         }
         return false;
     }
-    public addReactionCallback(message: Message, reaction: string, callback?: (reaction: ReactionEmoji, man: Guildman) => null) {
+    public addReactionCallback(message: Message, reaction: string, callback?: (reaction: ReactionEmoji, man: Guildman) => null, allow_multiple_uses?: boolean) {
         if (!callback) {
             return;
         }
+        if (allow_multiple_uses) {
+            let ptr = this.getGuildPointer(message.guild.id);
+            this.guild_data[ptr]["reaction_callbacks"].push({emoji: reaction, message_id: message.id, callback: callback, uid: -1});
+            return;
+        }
         let ptr = this.getGuildPointer(message.guild.id);
-        this.guild_data[ptr]["reaction_callbacks"].push({emoji: reaction, callback: callback});
+        this.guild_data[ptr]["reaction_callbacks"].push({emoji: reaction, message_id: message.id, callback: callback, uid: randInt(100_000)});
+    }
+
+    public handleReactionCallbacks(reaction: MessageReaction) {
+        let message_id = reaction.message.id;
+        // for every guild
+        this.guild_data.forEach((guild) => {
+            // for every waiting reaction callback
+            guild["reaction_callbacks"].foreach((reaction_callback) => {
+                if (reaction_callback.message_id == message_id) {
+                    // run the callback
+                    reaction_callback.callback(reaction, this);
+                    // if it's appropriate to remove this callback, remove it
+                    if (reaction_callback.uid != -1) {
+                        this.removeReactionCallback(reaction.message.guild.id, reaction_callback.uid);
+                    }
+                }
+            });
+        });
+    }
+    private removeReactionCallback(guild_id: string, uid: number) {
+        let ptr = this.getGuildPointer(guild_id);
+        let indx = 0;
+        this.guild_data[ptr]["reaction_callbacks"].foreach((reaction_callback) => {
+            if (reaction_callback.uid == uid) {
+                this.guild_data[ptr]["reaction_callbacks"].splice(indx, 1);
+                return;
+            }
+            indx++;
+        });
     }
     
     /**
@@ -249,4 +303,9 @@ export class Guildman {
     }
 
     private guild_data: Array<Object> = [];
+}
+
+// [0-max)
+function randInt(max) {
+    return Math.floor(Math.random() * Math.floor(max));
 }

@@ -1,4 +1,4 @@
-import { DMChannel, NewsChannel, ReactionEmoji, TextChannel } from "discord.js";
+import { DMChannel, MessageReaction, NewsChannel, ReactionEmoji, TextChannel } from "discord.js";
 import { Guildman } from "./guildman";
 
 const Discord = require('discord.js');
@@ -68,7 +68,7 @@ export class EmbedBuilder {
         }
         return this;
     }
-    public response = function(emoji: string, onreact?: (reaction: ReactionEmoji, man: Guildman) => void): EmbedBuilder {
+    public response = function(emoji: string, onreact?: (reaction: MessageReaction, man: Guildman) => void): EmbedBuilder {
         this.contents.push({type: "response", emoji, callback: onreact});
         return this;
     }

@@ -29,7 +29,7 @@ export const PATCH_NOTES = stripIndents`
 `;
 
 // discord.js for accessing the discord api
-import { Client, Guild, GuildAuditLogs, Message, NewsChannel, TextChannel, VoiceChannel } from 'discord.js';
+import { Client, Guild, GuildAuditLogs, Message, MessageReaction, NewsChannel, TextChannel, VoiceChannel } from 'discord.js';
 
 import { Guildman } from './guildman';
 import { CommandManager } from './command';
@@ -49,6 +49,7 @@ import { registerAdminhelp } from './commands/admin/adminhelp';
 import { registerFight } from './commands/fight';
 import { registerPrefrences } from './commands/admin/prefrences';
 import { registerSetupdate } from './commands/admin/setupdate';
+import { registerBalls } from './commands/balls';
 
 export class Bot {
     // discord.js Client object used for interfacing with Discord
@@ -97,6 +98,7 @@ export class Bot {
         registerFight(this.command_manager);
         registerPrefrences(this.command_manager);
         registerSetupdate(this.command_manager);
+        registerBalls(this.command_manager);
     }
     private postUpdates() {
         // Check if we've updated, then post patch notes to update channels.
@@ -129,6 +131,9 @@ export class Bot {
             // Run all commands
             this.command_manager.runCommands(msg, this.man, this.client);
         });
+        this.client.on('messageReactionAdd', (reaction: MessageReaction) => {
+            this.man.handleReactionCallbacks(reaction);
+        })
         this.client.on('guildCreate', (guild: Guild) => {
             this.man.registerNewGuild(guild);
             console.log(`Goblin was invited to a new guild! (${guild.name} with ${guild.memberCount} members)`);
