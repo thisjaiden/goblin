@@ -15,7 +15,7 @@ function setupdate(message: Message, parsed: string, man: Guildman): boolean {
         if (!(current_chan == "none")) {
             new EmbedBuilder()
                 .title(`Updated updates channel.`)
-                .text(`<#${current_chan}> -> ${contents.name}`)
+                .text(`<#${current_chan}> -> ${contents.toString()}`)
                 .color("blue")
                 .send(message.channel, man);
                 man.setGuildField(message.guild.id, "update_channel", contents.id);
@@ -23,7 +23,7 @@ function setupdate(message: Message, parsed: string, man: Guildman): boolean {
         }
         else {
             new EmbedBuilder()
-                .title(`Set updates channel to ${contents.name}.`)
+                .title(`Set updates channel to ${contents.toString()}.`)
                 .color("green")
                 .send(message.channel, man);
             man.setGuildField(message.guild.id, "update_channel", contents.id);

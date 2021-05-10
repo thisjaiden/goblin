@@ -14,7 +14,7 @@ function setgeneral(message: Message, parsed: string, man: Guildman): boolean {
         if (!(current_chan == "none")) {
             new EmbedBuilder()
                 .title(`Updated general channel.`)
-                .text(`<#${current_chan}> -> ${contents.name}`)
+                .text(`<#${current_chan}> -> ${contents.toString()}`)
                 .color("blue")
                 .send(message.channel, man);
                 man.setGuildField(message.guild.id, "general_channel", contents.id);
@@ -22,7 +22,7 @@ function setgeneral(message: Message, parsed: string, man: Guildman): boolean {
         }
         else {
             new EmbedBuilder()
-                .title(`Set general channel to ${contents.name}.`)
+                .title(`Set general channel to ${contents.toString()}.`)
                 .color("green")
                 .send(message.channel, man);
             man.setGuildField(message.guild.id, "general_channel", contents.id);

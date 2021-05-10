@@ -3,33 +3,25 @@ const commontags = require('common-tags');
 const stripIndents = commontags.stripIndents;
 
 // bot version and latest patch notes
-export const BOT_VERSION = "2.4.0";
+export const BOT_VERSION = "3.0.0";
 
 export const PATCH_NOTES = stripIndents`
 **Goblin Child v${BOT_VERSION}**
+**IMPORTANT ANNOUNCEMENT**
+Goblin's new features require you to kick the bot and add it back. Slash command support can *only*
+be added this way due to an oversight on Discord's part. Sorry in advance.
 *Features and New Content*
-- Added the new command \`balls\`
-- Added 6 new flavors to \`flavor\`
+- Slash commands! Try them today with \`/\`, supporting autofill and such!
 *Polishing Changes*
-- Changed many of \`eightball\`'s responses
-- Adjusted \`invite\`'s message
-|  • Now an embed
-|  • No more default embed popup
-- Adjusted \`help\`'s message
-|  • Now uses the server's prefix, if changed from the default
-|  • "I wonder what this does?" -> "Ban yourself?"
-|  • Removed the "..." at the end of the eightball command description
-|  • "Beat the shit out of your friends" -> "Who would win in a fight?"
-- Adjusted \`adminhelp\`'s message
-|  • Now uses the server's prefix, if changed from the default
-|  • Moved \`preferences\` to the end of the list for consistency
-|  • Fixed a typo in the spelling of "preferences"
-- Removed the footer from \`banme\`'s message
-- \`fight\` now assumes the person running the command is involved if only one person is mentioned
+- For technical and security reasons, Goblin's status has changed to \`Watching x servers\`.
+*Technical Changes*
+- Updated to \`discord.js\` v13, improving security and adding new Discord features
+- Updated to Discord API v8
+- Updated to \`node.js\` 14.x
 `;
 
 // discord.js for accessing the discord api
-import { Client, Guild, GuildAuditLogs, Message, MessageReaction, NewsChannel, TextChannel, VoiceChannel } from 'discord.js';
+import { Client, Guild, GuildAuditLogs, Message, MessageReaction, NewsChannel, Permissions, TextChannel, VoiceChannel } from 'discord.js';
 
 import { Guildman } from './guildman';
 import { CommandManager } from './command';
@@ -72,7 +64,7 @@ export class Bot {
     private startTasks() {
         // Set the status of the bot to update every 2 mins
         setInterval(() => {
-            this.client.user.setActivity(`${this.client.users.cache.size} humans | !help`, {type: 'WATCHING'});
+            this.client.user.setActivity(`${this.man.allGuildIds().length} servers | !help`, {type: 'WATCHING'});
         }, 120_000);
         // Autosave every 5 mins
         setInterval(() => {
@@ -80,6 +72,11 @@ export class Bot {
         }, 300_000);
         // Post patch notes for the bot, if applicable
         this.postUpdates();
+        this.slashCommands();
+        console.log("Invite URL:\n" + this.client.generateInvite({permissions:[Permissions.FLAGS.ADMINISTRATOR,Permissions.FLAGS.USE_APPLICATION_COMMANDS,Permissions.FLAGS.VIEW_GUILD_INSIGHTS]}))
+    }
+    private slashCommands() {
+        this.command_manager.pushInteractions(this.client);
     }
     private registerCommands() {
         registerBanme(this.command_manager);
@@ -131,6 +128,12 @@ export class Bot {
             // Run all commands
             this.command_manager.runCommands(msg, this.man, this.client);
         });
+        this.client.on('interaction', interaction => {
+            // we only handle command interactions
+            if (!interaction.isCommand()) return;
+            this.command_manager.runInteractions(interaction, this.man, this.client);
+            return true;
+        })
         this.client.on('messageReactionAdd', (reaction: MessageReaction) => {
             this.man.handleReactionCallbacks(reaction);
         })
@@ -163,7 +166,6 @@ export class Bot {
             `);
         });
         this.client.on('channelCreate', channel => {
-            if (channel.type == "dm") return; // we don't deal with dms
             let spec_channel = channel as TextChannel | VoiceChannel;
             this.man.guildLog(spec_channel.guild, stripIndents`
                 Action: Channel Created
@@ -193,24 +195,13 @@ export class Bot {
             }
         });
         this.client.on('messageUpdate', message => {
+            // TODO: We need to track message history to log edits.
+            // For now this is disabled.
+            return;
             // The bot doesn't log bots
             if (message.author.bot) return;
             // The bot doesn't log webhooks
             if (message.webhookID) return;
-            let history = message.edits;
-            let concat = "CURRENT MESSAGE <= ";
-            for (let i = 1; i < history.length; i++) {
-                let instance = history[i];
-                concat = concat + instance.content;
-                concat = concat + " <= ";
-            };
-            concat = concat + "MESSAGE CREATED";
-            this.man.guildLog(message.guild, stripIndents`
-                Action: Message Edited
-                Message History:
-                ${concat}
-                Message Author: ${message.author}
-            `);
         });
         this.client.on('messageDelete', message => {
             // The bot doesn't log bots

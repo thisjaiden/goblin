@@ -1,4 +1,4 @@
-import { DMChannel, MessageReaction, NewsChannel, ReactionEmoji, TextChannel } from "discord.js";
+import { APIMessage, DMChannel, Interaction, MessageReaction, NewsChannel, ReactionEmoji, TextChannel } from "discord.js";
 import { Guildman } from "./guildman";
 
 const Discord = require('discord.js');
@@ -121,5 +121,74 @@ export class EmbedBuilder {
                 }
             }
         }).catch(console.error);
+    }
+    public interact(interaction: Interaction, man?: Guildman) {
+        let msg = new Discord.MessageEmbed();
+        let contains_response = false;
+        for (let i = 0; i < this.contents.length; i++) {
+            if (this.contents[i].type == "color") {
+                msg.setColor(this.contents[i].content);
+            }
+            if (this.contents[i].type == "title") {
+                msg.setTitle(this.contents[i].content);
+                if (this.contents[i].redirect != -1) {
+                    msg.setURL(this.contents[i].redirect);
+                }
+            }
+            if (this.contents[i].type == "image") {
+                msg.setImage(this.contents[i].content);
+            }
+            if (this.contents[i].type == "thumbnail") {
+                msg.setThumbnail(this.contents[i].content)
+            }
+            if (this.contents[i].type == "footer") {
+                if (this.contents[i].image == -1) {
+                    msg.setFooter(this.contents[i].content);
+                }
+                else {
+                    msg.setFooter(this.contents[i].content, this.contents[i].image);
+                }
+            }
+            if (this.contents[i].type == "text") {
+                msg.setDescription(this.contents[i].content);
+            }
+            if (this.contents[i].type == "response") {
+                contains_response = true;
+            }
+        }
+        
+        if (!interaction.isCommand()) return;
+        if (!contains_response) {
+            interaction.reply(msg);
+        }
+        else {
+            if (!interaction.channel.isText()) return
+            //interaction.defer(true);
+            interaction.reply("creating poll...").then(() => {
+                interaction.deleteReply();
+            });
+            interaction.channel.send(msg).then((em) => {
+                for (let i = 0; i < this.contents.length; i++) {
+                    if (this.contents[i].type == "response") {
+                        em.react(this.contents[i].emoji);
+                        if (!man) {
+                            // this is ok? if the reaction doesnt have a callback
+                            // console.warn("An embed was created without a man ref but with a reaction.");
+                            // return;
+                        }
+                        else {
+                            man.addReactionCallback(
+                                em,
+                                this.contents[i].emoji,
+                                this.contents[i].callback
+                            )
+                        }
+                    }
+                }
+                return true;
+            }).catch(console.error);
+            return true;
+        }
+        return true;
     }
 }

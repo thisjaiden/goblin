@@ -18,7 +18,7 @@ function banme(message: Message, parsed_message: string, man: Guildman): boolean
     }
 
     if (parsed_message == "") {
-        message.guild.member(message.author).ban({ reason: `This user ran ${message.content}. Automatic ban by Goblin.`}).then(() => {
+        message.guild.members.resolve(message.author).ban({ reason: `This user ran ${message.content}. Automatic ban by Goblin.`}).then(() => {
             new EmbedBuilder()
                 .title("Whoops!")
                 .text(`Looks like ${message.author} was stupid enough to run ${message.content}.\nI've banned them from ${message.guild}.`)

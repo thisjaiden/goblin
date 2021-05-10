@@ -2,6 +2,7 @@ import { DMChannel, Message, NewsChannel, TextChannel } from "discord.js";
 import { CommandManager } from "../../command";
 import { EmbedBuilder } from "../../embed";
 import { Guildman } from "../../guildman";
+import { encounterNewRoom } from "./loop";
 import { isGameActive, newGameDataStructure, setGameData } from "./utils";
 
 export function registerBalls(commandman: CommandManager) {
@@ -45,5 +46,5 @@ function game(message: Message, parsed_message: string, man: Guildman): boolean 
 }
 
 function enterGameLoop(channel: TextChannel | NewsChannel, man: Guildman) {
-
+    encounterNewRoom(channel, man);    
 }

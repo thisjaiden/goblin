@@ -14,7 +14,7 @@ function setlogging(message: Message, parsed: string, man: Guildman): boolean {
         if (!(current_chan == "none")) {
             new EmbedBuilder()
                 .title(`Updated logging channel.`)
-                .text(`<#${current_chan}> -> ${contents.name}`)
+                .text(`<#${current_chan}> -> ${contents.toString()}`)
                 .color("blue")
                 .send(message.channel, man);
             man.setGuildField(message.guild.id, "logging_channel", contents.id);
@@ -22,7 +22,7 @@ function setlogging(message: Message, parsed: string, man: Guildman): boolean {
         }
         else {
             new EmbedBuilder()
-                .title(`Set logging channel to ${contents.name}.`)
+                .title(`Set logging channel to ${contents.toString()}.`)
                 .color("green")
                 .send(message.channel, man);
             man.setGuildField(message.guild.id, "logging_channel", contents.id);

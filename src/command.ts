@@ -1,4 +1,4 @@
-import { Client, Message } from "discord.js";
+import { ApplicationCommandData, Client, Guild, Interaction, Message } from "discord.js";
 import { Guildman } from "./guildman";
 
 /**
@@ -29,6 +29,26 @@ export class CommandManager {
     public registerClientCommand(name: string, requires_admin: boolean, onTrigger: (message: Message, parsed_message: string, man: Guildman, client: Client) => boolean) {
         this.commands.push(new Command(name, requires_admin, (_a, _b, _c) => {return false;}));
         this.commands[this.commands.length - 1].setClient(onTrigger);
+    }
+    public registerInteraction(interaction_details: Object, requires_admin: boolean, onTrigger: (interaction: Interaction, man: Guildman) => boolean) {
+        this.interactions.push(new InteractionCommand(interaction_details, requires_admin, onTrigger))
+    }
+    public pushInteractions(client: Client) {
+        // reset all guild commands
+        client.guilds.cache.forEach((guild) => {
+            guild.commands.set([]).catch(e => {
+                console.warn("WARNING: UNABLE TO CLEAR ANCIENT SLASH COMMANDS:\n" + e);
+            });
+        });
+        this.interactions.forEach(interaction_details => {
+            console.log(`For an interaction named ${interaction_details.getRegisterInfo()["name"]}...`);
+            client.guilds.cache.forEach((guild) => {
+                console.log(`Adding to guild called ${guild.name}.`);
+                guild.commands.create(interaction_details.getRegisterInfo() as unknown as ApplicationCommandData).catch(e => {
+                    console.warn("WARNING: AN ERROR OCCURED ADDING A SLASH COMMAND:\n" + e);
+                });
+            });
+        })
     }
     /**
      * runCommands takes a message as an input and runs all appropriate commands registered to
@@ -75,7 +95,19 @@ export class CommandManager {
             }
         });
     }
+    public runInteractions(message: Interaction, man: Guildman, client: Client) {
+        if (message.isCommand()) {
+            //console.log(`Recieved an interaction: ${message.commandName}`);
+            this.interactions.forEach(interaction => {
+                if (interaction.getRegisterInfo()["name"] == message.commandName) {
+                    //console.log("An interaction has been found matching the request.");
+                    interaction.trigger(message, man, client);
+                }
+            });
+        }
+    }
     private commands: Array<Command> = [];
+    private interactions: Array<InteractionCommand> = [];
 }
 
 class Command {
@@ -83,21 +115,14 @@ class Command {
         this.name = name;
         this.admin = requires_admin;
         this.onTrigger = onTrigger;
-        this.times_used = 0;
-        this.errors = 0;
         this.needs_client = false;
     }
     public trigger(message: Message, parsed_message: string, man: Guildman, client?: Client) {
-        this.times_used++;
         if (client) {
-            if (!this.onTriggerClient(message, parsed_message, man, client)) {
-                this.errors++;
-            }
+            this.onTriggerClient(message, parsed_message, man, client);
         }
         else {
-            if (!this.onTrigger(message, parsed_message, man)) {
-                this.errors++;
-            }
+            this.onTrigger(message, parsed_message, man);
         }
     }
     public getName(): string {
@@ -117,7 +142,40 @@ class Command {
     private admin: boolean;
     private onTrigger: (message: Message, parsed_message: string, man: Guildman) => boolean;
     private onTriggerClient: (message: Message, parsed_message: string, man: Guildman, client: Client) => boolean;
-    private times_used: number;
-    private errors: number;
+    private needs_client: boolean
+}
+
+class InteractionCommand {
+    constructor(interaction_details: Object, requires_admin: boolean, onTrigger: (message: Interaction, man: Guildman) => boolean) {
+        this.interaction_details = interaction_details;
+        this.admin = requires_admin;
+        this.onTrigger = onTrigger;
+        this.needs_client = false;
+    }
+    public trigger(interaction: Interaction, man: Guildman, client?: Client) {
+        if (this.needs_client) {
+            this.onTriggerClient(interaction, man, client);
+        }
+        else {
+            this.onTrigger(interaction, man);
+        }
+    }
+    public requiresAdmin(): boolean {
+        return this.admin;
+    }
+    public requiresClient(): boolean {
+        return this.needs_client;
+    }
+    public setClient(ontrigger: (interaction: Interaction, man: Guildman, client: Client) => boolean) {
+        this.onTriggerClient = ontrigger;
+        this.needs_client = true;
+    }
+    public getRegisterInfo(): Object {
+        return this.interaction_details;
+    }
+    private interaction_details: Object;
+    private admin: boolean;
+    private onTrigger: (interaction: Interaction, man: Guildman) => boolean;
+    private onTriggerClient: (interaction: Interaction, man: Guildman, client: Client) => boolean;
     private needs_client: boolean
 }

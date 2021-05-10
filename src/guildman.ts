@@ -210,7 +210,7 @@ export class Guildman {
         channel.send(message);
     }
     public guildCheckAdminStatus(guild: Guild, user_id: string): boolean {
-        if (guild.member(user_id).permissions.has("ADMINISTRATOR") || guild.member(user_id).id == guild.ownerID) {
+        if (guild.members.resolve(user_id).permissions.has("ADMINISTRATOR") || guild.members.resolve(user_id).id == guild.ownerID) {
             return true;
         }
         return false;
@@ -219,12 +219,14 @@ export class Guildman {
         if (!callback) {
             return;
         }
+        let ptr = this.getGuildPointer(message.guild.id);
+        if (typeof this.guild_data[ptr]["reaction_callbacks"] === 'undefined') {
+            this.guild_data[ptr]["reaction_callbacks"] = [];
+        }
         if (allow_multiple_uses) {
-            let ptr = this.getGuildPointer(message.guild.id);
             this.guild_data[ptr]["reaction_callbacks"].push({emoji: reaction, message_id: message.id, callback: callback, uid: -1});
             return;
         }
-        let ptr = this.getGuildPointer(message.guild.id);
         this.guild_data[ptr]["reaction_callbacks"].push({emoji: reaction, message_id: message.id, callback: callback, uid: randInt(100_000)});
     }
 
@@ -232,6 +234,9 @@ export class Guildman {
         let message_id = reaction.message.id;
         // for every guild
         this.guild_data.forEach((guild) => {
+            if (typeof guild["reaction_callbacks"] === 'undefined') {
+                return;
+            }
             // for every waiting reaction callback
             guild["reaction_callbacks"].foreach((reaction_callback) => {
                 if (reaction_callback.message_id == message_id) {
