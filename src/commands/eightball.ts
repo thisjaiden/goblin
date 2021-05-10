@@ -1,26 +1,38 @@
-import { Message } from "discord.js";
+import { CommandInteraction, Interaction, Message } from "discord.js";
 import { CommandManager } from "../command";
 import { EmbedBuilder } from "../embed";
 import { Guildman } from "../guildman";
 
+const eightball_inf = {
+    name: "eightball",
+    description: "Ask the magic 8 ball a question!",
+    options: [
+        {
+            type: 3,
+            name: "question",
+            description: "The question you want to ask",
+            default: false,
+            required: true
+        }
+    ]
+};
+
 export function registerEightball(commandman: CommandManager) {
-    commandman.registerCommand("8b", false, ball);
-    commandman.registerCommand("eightball", false, ball);
-    commandman.registerCommand("8ball", false, ball);
+    commandman.registerInteraction(eightball_inf, false, ball);
 }
 
-function ball(message: Message, parsed_message: string, man: Guildman): boolean {
-    if (!(man.getGuildField(message.guild.id, "eightball_enabled"))) {
+function ball(interaction: CommandInteraction, man: Guildman): boolean {
+    if (!(man.getGuildField(interaction.guild.id, "eightball_enabled"))) {
         // This command is disabled by guild prefrences.
         return;
     }
 
     let rand_select = responses[randInt(responses.length)];
     new EmbedBuilder()
-        .title("Magic eight ball says...")
-        .text(`"${rand_select[0]}"`)
+        .title(`${interaction.user.username} asked "${interaction.options[0].value}"`)
+        .text(`**Magic eight ball says...**\n"${rand_select[0]}"`)
         .color(rand_select[1])
-        .send(message.channel);
+        .interact(interaction);
     return true;
 }
 

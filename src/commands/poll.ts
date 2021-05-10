@@ -53,7 +53,6 @@ const poll_inf = {
 };
 
 export function registerPoll(commandman: CommandManager) {
-    commandman.registerCommand("poll", false, poll);
     commandman.registerInteraction(poll_inf, false, poll_interaction);
 }
 
@@ -87,48 +86,6 @@ function poll_interaction(interaction: Interaction, man: Guildman): boolean {
         partial_message.interact(interaction, man);
         return true;
     }
-}
-
-function poll(message: Message, parsed: string, man: Guildman): boolean {
-    if (!(man.getGuildField(message.guild.id, "poll_enabled"))) {
-        // This command is disabled by guild prefrences.
-        return;
-    }
-    if (parsed.split("|").length < 2) {
-        new EmbedBuilder()
-            .title("Not enough arguments.")
-            .text(`Use the format \`${man.getGuildField(message.guild.id, "prefix")}poll question here | answer 1 | answer 2 | ...\``)
-            .color("red")
-            .send(message.channel, man);
-        return false;
-    }
-    let question = parsed.split("|")[0].trim();
-    let responses = [];
-    let dataset = parsed.split("|");
-    for (let i = 1; i < dataset.length; i++) {
-        responses.push(dataset[i].trim());
-    }
-    let managed_responses = "";
-    for (let i = 0; i < responses.length; i++) {
-        managed_responses = managed_responses + number_to_letter(i);
-        managed_responses = managed_responses + " - ";
-        managed_responses = managed_responses + responses[i];
-        managed_responses = managed_responses + "\n";
-    }
-    let partial_message = new EmbedBuilder()
-        .title(question)
-        .text(managed_responses)
-        .color("blue")
-        .footer(`Use ${man.getGuildField(message.guild.id, "prefix")}poll to make your own`);
-    for (let i = 0; i < responses.length; i++) {
-        partial_message
-            .response(number_to_letter(i))
-    }
-    partial_message.send(message.channel, man);
-    if (message.deletable) {
-        message.delete();
-    }
-    return true;
 }
 
 function number_to_letter(number) {

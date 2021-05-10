@@ -4,8 +4,8 @@ import { EmbedBuilder } from "../../embed";
 import { Guildman } from "../../guildman";
 
 export function registerSetupdate(commandman: CommandManager) {
-    commandman.registerCommand("setupdate", true, setupdate);
-    commandman.registerCommand("setupdates", true, setupdate);
+    //commandman.registerCommand("setupdate", true, setupdate);
+    //commandman.registerCommand("setupdates", true, setupdate);
 }
 
 function setupdate(message: Message, parsed: string, man: Guildman): boolean {

@@ -131,6 +131,16 @@ const field_info = [
                 }
             }
         ]
+    },
+    {
+        key: "essentials-v3-0-0",
+        types: [
+            {
+                key: "slash_command_support",
+                type: "bool",
+                inital_value: false
+            }
+        ]
     }
 ];
 
@@ -285,6 +295,7 @@ export class Guildman {
     public registerNewGuild(guild: Guild): number {
         this.guild_data.push({
             id: guild.id,
+            slash_command_support: true
         });
         return this.guild_data.length - 1;
     }

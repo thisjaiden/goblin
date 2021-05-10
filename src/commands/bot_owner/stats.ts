@@ -8,7 +8,7 @@ const commontags = require('common-tags');
 const stripIndents = commontags.stripIndents;
 
 export function registerStats(commandman: CommandManager) {
-    commandman.registerClientCommand("stats", false, stats);
+    //commandman.registerClientCommand("stats", false, stats);
 }
 
 function stats(message: Message, parsed_message: string, man: Guildman, client: Client): boolean {

@@ -4,7 +4,7 @@ import { EmbedBuilder } from "../../embed";
 import { Guildman } from "../../guildman";
 
 export function registerSetprefix(commandman: CommandManager) {
-    commandman.registerCommand("setprefix", true, setprefix);
+    //commandman.registerCommand("setprefix", true, setprefix);
 }
 
 function setprefix(message: Message, parsed: string, man: Guildman): boolean {

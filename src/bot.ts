@@ -14,11 +14,20 @@ be added this way due to an oversight on Discord's part. Sorry in advance.
 - Slash commands! Try them today with \`/\`, supporting autofill and such!
 *Polishing Changes*
 - For technical and security reasons, Goblin's status has changed to \`Watching x servers\`.
+- Old prefix based commands have been **removed**. Slash commands are the only way to use Goblin.
+- \`help\` has been removed as it is not needed with slash commands.
+- \`preferences\` has been reworked to be easier with slash commands.
+- \`invite\` has been tweaked to better fit slash commands.
+- \`eightball\` has been tweaked to better fit slash commands.
 *Technical Changes*
 - Updated to \`discord.js\` v13, improving security and adding new Discord features
 - Updated to Discord API v8
 - Updated to \`node.js\` 14.x
 `;
+
+
+const INVITE_URL = "https://discord.com/oauth2/authorize?client_id=763525517931839520&permissions=8&scope=bot%20applications.commands";
+const LEGACY_REINVITE_MESSAGE = `Goblin needs to be reconnected to update. I promise this is the only time you'll need to do this. Please kick Goblin and reinvite her using this link:\n${INVITE_URL}`;
 
 // discord.js for accessing the discord api
 import { Client, Guild, GuildAuditLogs, Message, MessageReaction, NewsChannel, Permissions, TextChannel, VoiceChannel } from 'discord.js';
@@ -35,9 +44,7 @@ import { registerSetlogging } from './commands/admin/setlogging';
 import { registerDababy } from './commands/dababy';
 import { registerFlavor } from './commands/flavor';
 import { registerInvite } from './commands/invite';
-import { registerHelp } from './commands/help';
 import { registerSetprefix } from './commands/admin/setprefix';
-import { registerAdminhelp } from './commands/admin/adminhelp';
 import { registerFight } from './commands/fight';
 import { registerPrefrences } from './commands/admin/prefrences';
 import { registerSetupdate } from './commands/admin/setupdate';
@@ -76,7 +83,7 @@ export class Bot {
         console.log("Invite URL:\n" + this.client.generateInvite({permissions:[Permissions.FLAGS.ADMINISTRATOR,Permissions.FLAGS.USE_APPLICATION_COMMANDS,Permissions.FLAGS.VIEW_GUILD_INSIGHTS]}))
     }
     private slashCommands() {
-        this.command_manager.pushInteractions(this.client);
+        this.command_manager.pushInteractions(this.client, this.man);
     }
     private registerCommands() {
         registerBanme(this.command_manager);
@@ -89,9 +96,7 @@ export class Bot {
         registerDababy(this.command_manager);
         registerFlavor(this.command_manager);
         registerInvite(this.command_manager);
-        registerHelp(this.command_manager);
         registerSetprefix(this.command_manager);
-        registerAdminhelp(this.command_manager);
         registerFight(this.command_manager);
         registerPrefrences(this.command_manager);
         registerSetupdate(this.command_manager);
@@ -101,6 +106,32 @@ export class Bot {
         // Check if we've updated, then post patch notes to update channels.
         let guilds = this.man.allGuildIds();
         guilds.forEach((guild) => {
+            if (!this.man.getGuildField(guild, "slash_command_support")) {
+                // legacy reinvite notice
+                let real_guild = this.client.guilds.resolve(guild);
+                let found_channel = false;
+                if (real_guild == null) {
+                    return;
+                }
+                if (real_guild.publicUpdatesChannel) {
+                    real_guild.publicUpdatesChannel.send(LEGACY_REINVITE_MESSAGE);
+                    found_channel = true;
+                }
+                if (real_guild.rulesChannel) {
+                    real_guild.rulesChannel.send(LEGACY_REINVITE_MESSAGE);
+                    found_channel = true;
+                }
+                if (real_guild.systemChannel) {
+                    real_guild.systemChannel.send(LEGACY_REINVITE_MESSAGE);
+                    found_channel = true;
+                }
+                if (!found_channel) {
+                    let first_chan = real_guild.channels.cache.first();
+                    if (first_chan.isText()) {
+                        first_chan.send(LEGACY_REINVITE_MESSAGE);
+                    }
+                }
+            }
             if (this.man.getGuildField(guild, "latest_version") != BOT_VERSION) {
                 this.man.setGuildField(guild, "latest_version", BOT_VERSION);
                 let update_channel = this.man.getGuildField(guild, "update_channel");
@@ -115,18 +146,6 @@ export class Bot {
         this.client.on('ready', () => {
             this.registerCommands();
             this.startTasks();
-        });
-        this.client.on('message', (msg: Message) => {
-            // The bot doesn't respond to other bots
-            if (msg.author.bot) return;
-            // The bot doesn't respond to discord system messages
-            if (msg.author.system) return;
-            // The bot doesn't respond to webhooks
-            if (msg.webhookID) return;
-            // DMs are not finished yet
-            if (msg.channel.type == "dm") return;
-            // Run all commands
-            this.command_manager.runCommands(msg, this.man, this.client);
         });
         this.client.on('interaction', interaction => {
             // we only handle command interactions

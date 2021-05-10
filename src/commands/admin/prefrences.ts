@@ -8,7 +8,7 @@ import { EmbedBuilder } from "../../embed";
 import { Guildman } from "../../guildman";
 
 export function registerPrefrences(commandman: CommandManager) {
-    commandman.registerCommand("preferences", true, pref);
+    //commandman.registerCommand("preferences", true, pref);
 }
 
 function pref(message: Message, parsed: string, man: Guildman): boolean {

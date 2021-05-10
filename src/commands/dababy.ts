@@ -4,7 +4,7 @@ import { EmbedBuilder } from "../embed";
 import { Guildman } from "../guildman";
 
 export function registerDababy(commandman: CommandManager) {
-    commandman.registerCommand("dababy", false, dababy);
+    //commandman.registerCommand("dababy", false, dababy);
 }
 
 function dababy(message: Message, parsed_message: string, man: Guildman): boolean {

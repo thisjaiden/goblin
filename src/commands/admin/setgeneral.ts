@@ -4,7 +4,7 @@ import { EmbedBuilder } from "../../embed";
 import { Guildman } from "../../guildman";
 
 export function registerSetgeneral(commandman: CommandManager) {
-    commandman.registerCommand("setgeneral", true, setgeneral);
+    //commandman.registerCommand("setgeneral", true, setgeneral);
 }
 
 function setgeneral(message: Message, parsed: string, man: Guildman): boolean {

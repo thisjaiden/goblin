@@ -4,7 +4,7 @@ import { EmbedBuilder } from "../embed";
 import { Guildman } from "../guildman";
 
 export function registerBalls(commandman: CommandManager) {
-    commandman.registerCommand("balls", false, balls);
+    //commandman.registerCommand("balls", false, balls);
 }
 
 function balls(message: Message, parsed_message: string, man: Guildman): boolean {

@@ -4,26 +4,7 @@ import { EmbedBuilder } from "../embed";
 import { Guildman } from "../guildman";
 
 export function registerFlavor(commandman: CommandManager) {
-    commandman.registerCommand("flavor", false, flv);
     commandman.registerInteraction({ name: "flavor", description: "Get your flavor!" }, false, flv_interact);
-}
-
-function flv(message: Message, parsed_message: string, man: Guildman): boolean {
-    // TODO: read rest of message (seeding)
-
-    if (!(man.getGuildField(message.guild.id, "flavor_enabled"))) {
-        // This command is disabled by guild prefrences.
-        return;
-    }
-
-    let rand_select = responses[randInt(responses.length)];
-    new EmbedBuilder()
-        .title("**ANNOUNCEMENT**")
-        .text(`"${message.author} is __${rand_select[0]}__"`)
-        .footer("Get your own: !flavor")
-        .color(rand_select[1])
-        .send(message.channel);
-    return true;
 }
 
 function flv_interact(interaction: Interaction, man: Guildman): boolean {

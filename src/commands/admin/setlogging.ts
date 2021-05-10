@@ -4,7 +4,7 @@ import { EmbedBuilder } from "../../embed";
 import { Guildman } from "../../guildman";
 
 export function registerSetlogging(commandman: CommandManager) {
-    commandman.registerCommand("setlogging", true, setlogging);
+    //commandman.registerCommand("setlogging", true, setlogging);
 }
 
 function setlogging(message: Message, parsed: string, man: Guildman): boolean {

@@ -1,29 +1,47 @@
-import { Message } from "discord.js";
+import { CommandInteraction, Message, User } from "discord.js";
 import { CommandManager } from "../command";
 import { EmbedBuilder } from "../embed";
 import { Guildman } from "../guildman";
 
+const fight_inf = {
+    "name": "fight",
+    "description": "Fight a friend or foe",
+    "options": [
+      {
+        "type": 6,
+        "name": "opponent",
+        "description": "The person to fight",
+        "default": false,
+        "required": true
+      },
+      {
+        "type": 6,
+        "name": "opponent2",
+        "description": "An additional person to replace yourself in the fight",
+        "default": false,
+        "required": false
+      }
+    ]
+};
+
 export function registerFight(commandman: CommandManager) {
-    commandman.registerCommand("fight", false, fight);
+    //commandman.registerCommand("fight", false, fight);
+    commandman.registerInteraction(fight_inf, false, fight);
 }
 
-function fight(message: Message, parsed_message: string, man: Guildman): boolean {
-    if (!(man.getGuildField(message.guild.id, "fight_enabled"))) {
+function fight(interaction: CommandInteraction, man: Guildman): boolean {
+    if (!(man.getGuildField(interaction.guild.id, "fight_enabled"))) {
         // This command is disabled by guild prefrences.
         return;
     }
-    let users_mentioned = message.mentions.users.array();
-    if (users_mentioned.length == 1) {
-        users_mentioned.push(message.author);
+    let users_mentioned: Array<User> = [];
+    if (interaction.options.length == 1) {
+        users_mentioned.push(interaction.options[0].user);
+        users_mentioned.push(interaction.user);
     }
-    else if (!(users_mentioned.length == 2)) {
-        new EmbedBuilder()
-            .title("Not enough arguments.")
-            .text("Usage: `!fight @user1 @user2`")
-            .footer("!fight to start your own")
-            .color("red")
-            .send(message.channel);
-        return false;
+    else {
+        users_mentioned.push(interaction.options[0].user);
+        users_mentioned.push(interaction.options[1].user);
     }
     if (randInt(2) == 1) {
         let tmp = users_mentioned[0];
@@ -36,8 +54,8 @@ function fight(message: Message, parsed_message: string, man: Guildman): boolean
         .text(users_mentioned[0].toString() + rand_select[1] + users_mentioned[1].toString() + rand_select[2])
         .thumbnail(rand_select[3])
         .color(rand_select[4])
-        .footer("!fight to start your own")
-        .send(message.channel);
+        .footer("/fight to start your own")
+        .interact(interaction);
     return true;
 }
 

@@ -4,9 +4,9 @@ import { EmbedBuilder } from "../embed";
 import { Guildman } from "../guildman";
 
 export function registerBanme(commandman: CommandManager) {
-    commandman.registerCommand("ban", false, banme);
-    commandman.registerCommand("banme", false, banme);
-    commandman.registerCommand("selfban", false, banme);
+    //commandman.registerCommand("ban", false, banme);
+    //commandman.registerCommand("banme", false, banme);
+    //commandman.registerCommand("selfban", false, banme);
 }
 
 function banme(message: Message, parsed_message: string, man: Guildman): boolean {

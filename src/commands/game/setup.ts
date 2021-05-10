@@ -6,7 +6,7 @@ import { encounterNewRoom } from "./loop";
 import { isGameActive, newGameDataStructure, setGameData } from "./utils";
 
 export function registerBalls(commandman: CommandManager) {
-    commandman.registerCommand("game", false, game);
+    //commandman.registerCommand("game", false, game);
 }
 
 function game(message: Message, parsed_message: string, man: Guildman): boolean {

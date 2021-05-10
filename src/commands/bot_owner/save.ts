@@ -4,7 +4,7 @@ import { EmbedBuilder } from "../../embed";
 import { Guildman } from "../../guildman";
 
 export function registerSave(commandman: CommandManager) {
-    commandman.registerCommand("save", false, save);
+    //commandman.registerCommand("save", false, save);
 }
 
 function save(message: Message, parsed_message: string, man: Guildman): boolean {
