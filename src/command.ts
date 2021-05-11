@@ -23,7 +23,12 @@ export class CommandManager {
             // console.log(`For an interaction named ${interaction_details.getRegisterInfo()["name"]}...`);
             client.guilds.cache.forEach((guild) => {
                 // console.log(`Adding to guild called ${guild.name}.`);
-                if (man.getGuildField(guild.id, (interaction_details.getRegisterInfo()["name"] + "_enabled"))) {
+                if (interaction_details.getRegisterInfo()["name"] == "preferences") {
+                    guild.commands.create(interaction_details.getRegisterInfo() as unknown as ApplicationCommandData).catch(e => {
+                        console.warn("WARNING: AN ERROR OCCURED ADDING A SLASH COMMAND:\n" + e);
+                    });
+                }
+                else if (man.getGuildField(guild.id, (interaction_details.getRegisterInfo()["name"] + "_enabled"))) {
                     guild.commands.create(interaction_details.getRegisterInfo() as unknown as ApplicationCommandData).catch(e => {
                         console.warn("WARNING: AN ERROR OCCURED ADDING A SLASH COMMAND:\n" + e);
                     });

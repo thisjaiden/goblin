@@ -20,8 +20,8 @@ import { Guildman } from './guildman';
 let bot = new Bot(
     new Client(
         {
+            // we request access to all non-priviledged interfaces
             intents: [
-                // all non privileged interfaces
                 Intents.NON_PRIVILEGED
             ]
         }

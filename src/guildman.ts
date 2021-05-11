@@ -185,38 +185,76 @@ export class Guildman {
         let tmp_dta = JSON.parse(fs.readFileSync(`${filename}.json`, 'utf8'));
         this.guild_data = tmp_dta;
     }
+    /**
+     * Reads data for a specific guild
+     * @param guild_id - The id of the guild we are reading from
+     * @param field - The field to get
+     * @returns Whatever data was stored
+     */
     public getGuildField(guild_id: string, field: string): any {
+        // get the guild pointer
         let ptr = this.getGuildPointer(guild_id);
+        // if there is no data for this field...
         if (this.guild_data[ptr][field] === undefined) {
+            // set it to the default value
             this.setFieldDefault(ptr, field);
         }
+        // return the data
         return this.guild_data[ptr][field];
     }
+    /**
+     * Sets data for a specific guild
+     * @param guild_id - The id of the guild we are modifying
+     * @param field - The field to set
+     * @param value - What we are setting the field's value to
+     */
+    public setGuildField(guild_id: string, field: string, value: any) {
+        // get the guild pointer
+        let ptr = this.getGuildPointer(guild_id);
+        // set the data
+        this.guild_data[ptr][field] = value;
+    }
+    /**
+     * Retrieves the default value for a field, and then sets a given guild's field to that value
+     * @param guild_ptr - The id of the guild we are modifying
+     * @param field_to_set - The field we need to set
+     */
     private setFieldDefault(guild_ptr: number, field_to_set: string) {
+        // for each group of defaults...
         for (let i = 0; i < field_info.length; i++) {
+            // for each default value...
             for (let j = 0; j < field_info[i].types.length; j++) {
+                // if this is the correct field...
                 if (field_info[i].types[j].key == field_to_set) {
+                    // set the value and return
                     this.guild_data[guild_ptr][field_to_set] = field_info[i].types[j].inital_value;
                     return;
                 }
             }
         }
+        // We were unable to find a default value to set this field to.
         console.warn(`Default for field ${field_to_set} was requested, but not avalable.`);
     }
-    public setGuildField(guild_id: string, field: string, value: any) {
-        let ptr = this.getGuildPointer(guild_id);
-        typeof value
-        this.guild_data[ptr][field] = value;
-    }
+
+    /**
+     * Sends a message to a given guild's logging channel, if applicable
+     * @param guild - The guild to send a message to
+     * @param message - The message to be sent
+     */
     public guildLog(guild: Guild, message: string) {
+        // get logging channel id
         let channel_id = this.getGuildField(guild.id, "logging_channel");
-        if (channel_id == "none") {
-            return;
-        }
+
+        // if there is no channel, return
+        if (channel_id == "none") return;
+
         let channel = guild.channels.resolve(channel_id);
+        // if there is no channel, return
         if (!channel) return;
+        // if the channel is not a text channel, return
         if (!((channel): channel is TextChannel => channel.type === 'text')(channel)) return;
 
+        // send the message
         channel.send(message);
     }
     public guildCheckAdminStatus(guild: Guild, user_id: string): boolean {
@@ -321,7 +359,11 @@ export class Guildman {
     private guild_data: Array<Object> = [];
 }
 
-// [0-max)
-function randInt(max) {
+/**
+ * Generates a random whole number from 0 to `max`, including 0 and excluding `max`
+ * @param max - The largest number to generate (exclusive)
+ * @returns The generated number
+ */
+function randInt(max: number): number {
     return Math.floor(Math.random() * Math.floor(max));
 }
