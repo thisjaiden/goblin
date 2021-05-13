@@ -22,11 +22,6 @@ export function registerEightball(commandman: CommandManager) {
 }
 
 function ball(interaction: CommandInteraction, man: Guildman): boolean {
-    if (!(man.getGuildField(interaction.guild.id, "eightball_enabled"))) {
-        // This command is disabled by guild prefrences.
-        return;
-    }
-
     let rand_select = responses[randInt(responses.length)];
     new EmbedBuilder()
         .title(`${interaction.user.username} asked "${interaction.options[0].value}"`)

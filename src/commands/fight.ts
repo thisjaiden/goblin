@@ -28,9 +28,12 @@ export function registerFight(commandman: CommandManager) {
     commandman.registerInteraction(fight_inf, false, fight);
 }
 
-function fight(interaction: CommandInteraction, man: Guildman): boolean {
-    if (!(man.getGuildField(interaction.guild.id, "fight_enabled"))) {
-        // This command is disabled by guild prefrences.
+function fight(interaction: CommandInteraction, man: Guildman) {
+    if (interaction.channel.type == "dm") {
+        new EmbedBuilder()
+            .title("This command does not work in DMs.")
+            .color("red")
+            .interact(interaction);
         return;
     }
     let users_mentioned: Array<User> = [];

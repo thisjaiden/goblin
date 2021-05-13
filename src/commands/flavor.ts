@@ -1,4 +1,4 @@
-import { Interaction } from "discord.js";
+import { CommandInteraction } from "discord.js";
 import { CommandManager } from "../command";
 import { EmbedBuilder } from "../embed";
 import { Guildman } from "../guildman";
@@ -7,14 +7,7 @@ export function registerFlavor(commandman: CommandManager) {
     commandman.registerInteraction({ name: "flavor", description: "Get your flavor!" }, false, flv_interact);
 }
 
-function flv_interact(interaction: Interaction, man: Guildman): boolean {
-    if (!interaction.isCommand()) return;
-    if (!interaction.channel.isText()) return;
-    if (!(man.getGuildField(interaction.guild.id, "flavor_enabled"))) {
-        // This command is disabled by guild prefrences.
-        return;
-    }
-
+function flv_interact(interaction: CommandInteraction, man: Guildman): boolean {
     let rand_select = responses[randInt(responses.length)];
     new EmbedBuilder()
         .title("**ANNOUNCEMENT**")

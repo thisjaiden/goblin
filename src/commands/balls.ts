@@ -3,7 +3,6 @@ import { CommandManager } from "../command";
 import { EmbedBuilder } from "../embed";
 import { Guildman } from "../guildman";
  
-
 export function registerBalls(commandman: CommandManager) {
     commandman.registerInteraction(
         {
@@ -16,10 +15,6 @@ export function registerBalls(commandman: CommandManager) {
 }
 
 function balls(interaction: Interaction, man: Guildman): boolean {
-    if (!(man.getGuildField(interaction.guild.id, "balls_enabled"))) {
-        // This command is disabled by guild prefrences.
-        return;
-    }
     new EmbedBuilder()
         .title("Balls")
         .text("balls")
@@ -70,7 +65,15 @@ const responses = [
     // dodgeballs (19)
     "https://m.media-amazon.com/images/I/81CCz-2TTSL._AC_SL1500_.jpg",
     // beach balls (20)
-    "https://res.cloudinary.com/gray-malin/image/upload/c_scale,w_1000,q_80,f_auto/gray-malin/products/Beach-Balls_(2).jpg?updated=1507731558"
+    "https://res.cloudinary.com/gray-malin/image/upload/c_scale,w_1000,q_80,f_auto/gray-malin/products/Beach-Balls_(2).jpg?updated=1507731558",
+    // gumballs (21)
+    "https://m.media-amazon.com/images/I/51z7Zc2RwFL._SX425_.jpg",
+    // cricket balls (22)
+    "https://m.media-amazon.com/images/I/718v4VFCBHL._AC_.jpg",
+    // disco balls (23)
+    "https://previews.123rf.com/images/pilgrimiracle/pilgrimiracle1701/pilgrimiracle170100002/69770390-disco-balls-on-the-ceiling.jpg",
+    // yarn balls (24)
+    "https://previews.123rf.com/images/pjjaruwan/pjjaruwan1501/pjjaruwan150100003/35077423-colorful-wool-yarn-balls.jpg",
 ];
 
 // [0-max)

@@ -6,7 +6,7 @@ const fs = require('fs');
 
 const field_info = [
     {
-        key: "essentials-v2-3-0",
+        key: "essentials-v3-0-2",
         types: [
             {
                 key: "id",
@@ -14,105 +14,15 @@ const field_info = [
                 inital_value: "null"
             },
             {
-                key: "prefix",
-                type: "string",
-                inital_value: "!"
-            },
-            {
-                key: "no_prefix",
-                type: "bool",
-                inital_value: false
-            }
-        ]
-    },
-    {
-        key: "channels-v1",
-        types: [
-            {
-                key: "general_channel",
-                type: "string",
-                inital_value: "none"
-            },
-            {
-                key: "logging_channel",
-                type: "string",
-                inital_value: "none"
-            },
-            {
                 key: "update_channel",
                 type: "string",
                 inital_value: "none"
-            }
-        ]
-    },
-    {
-        key: "reaction-callbacks-v1",
-        types: [
+            },
             {
                 key: "reaction_callbacks",
                 type: "list",
                 inital_value: []
-            }
-        ]
-    },
-    {
-        key: "preferences-v1",
-        types: [
-            {
-                key: "banme_enabled",
-                type: "bool",
-                inital_value: false
             },
-            {
-                key: "poll_enabled",
-                type: "bool",
-                inital_value: true
-            },
-            {
-                key: "flavor_enabled",
-                type: "bool",
-                inital_value: true
-            },
-            {
-                key: "fight_enabled",
-                type: "bool",
-                inital_value: false
-            },
-            {
-                key: "dababy_enabled",
-                type: "bool",
-                inital_value: false
-            },
-            {
-                key: "eightball_enabled",
-                type: "bool",
-                inital_value: true
-            },
-            {
-                key: "twitch_prime_refrences_enabled",
-                type: "bool",
-                inital_value: false
-            }
-        ]
-    },
-    {
-        key: "preferences-v2",
-        types: [
-            {
-                key: "balls_enabled",
-                type: "bool",
-                inital_value: true
-            },
-            {
-                key: "game_enabled",
-                type: "bool",
-                inital_value: true
-            }
-        ]
-    },
-    {
-        key: "updates-v1",
-        types: [
             {
                 key: "latest_version",
                 type: "string",
@@ -129,16 +39,6 @@ const field_info = [
                 inital_value: {
                     setup: false
                 }
-            }
-        ]
-    },
-    {
-        key: "essentials-v3-0-0",
-        types: [
-            {
-                key: "slash_command_support",
-                type: "bool",
-                inital_value: false
             }
         ]
     }
@@ -234,28 +134,6 @@ export class Guildman {
         }
         // We were unable to find a default value to set this field to.
         console.warn(`Default for field ${field_to_set} was requested, but not avalable.`);
-    }
-
-    /**
-     * Sends a message to a given guild's logging channel, if applicable
-     * @param guild - The guild to send a message to
-     * @param message - The message to be sent
-     */
-    public guildLog(guild: Guild, message: string) {
-        // get logging channel id
-        let channel_id = this.getGuildField(guild.id, "logging_channel");
-
-        // if there is no channel, return
-        if (channel_id == "none") return;
-
-        let channel = guild.channels.resolve(channel_id);
-        // if there is no channel, return
-        if (!channel) return;
-        // if the channel is not a text channel, return
-        if (!((channel): channel is TextChannel => channel.type === 'text')(channel)) return;
-
-        // send the message
-        channel.send(message);
     }
     public guildCheckAdminStatus(guild: Guild, user_id: string): boolean {
         if (guild.members.resolve(user_id).permissions.has("ADMINISTRATOR") || guild.members.resolve(user_id).id == guild.ownerID) {

@@ -57,11 +57,14 @@ export function registerPoll(commandman: CommandManager) {
 }
 
 function poll_interaction(interaction: Interaction, man: Guildman): boolean {
-    if (!(man.getGuildField(interaction.guildID, "poll_enabled"))) {
-        // This command is disabled by guild prefrences.
-        return;
-    }
     if (interaction.isCommand()) {
+        if (interaction.channel.type == "dm") {
+            new EmbedBuilder()
+                .title("This command is disabled in DMs.")
+                .color("red")
+                .interact(interaction);
+            return;
+        }
         let question = interaction.options[0].value as string;
         let options: Array<string> = [];
         for (let i = 1; i < interaction.options.length; i++) {
