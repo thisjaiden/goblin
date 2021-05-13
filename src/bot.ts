@@ -3,39 +3,17 @@ const commontags = require('common-tags');
 const stripIndents = commontags.stripIndents;
 
 // bot version and latest patch notes
-export const BOT_VERSION = "3.0.0";
+export const BOT_VERSION = "3.0.1";
 
 export const PATCH_NOTES = stripIndents`
 **Goblin Child v${BOT_VERSION}**
-**IMPORTANT ANNOUNCEMENT**
-Goblin's new features require you to kick the bot and add it back. Slash command support can *only*
-be added this way due to an oversight on Discord's part. Sorry in advance.
-*Features and New Content*
-- Slash commands! Try them today with \`/\`, supporting autofill and such!
 *Polishing Changes*
-- For technical and security reasons, Goblin's status has changed to \`Watching x servers\`.
-- Old prefix based commands have been **removed**. Slash commands are the only way to use Goblin.
-- \`help\` has been removed as it is not needed with slash commands.
-- \`setprefix\` has been removed as it is not needed with slash commands.
-- \`preferences\` has been reworked to be easier with slash commands.
-- \`invite\` has been tweaked to better fit slash commands.
-- \`eightball\` has been tweaked to better fit slash commands.
-- \`banme\` has been tweaked to better fit slash commands.
-- \`fight\` has been tweaked to better fit slash commands.
-- \`dababy\` has been temporarily removed while it goes through an upgrade.
-- logging functions may be impared while they go through an upgrade.
-*Technical Changes*
-- Server owners! If you do not have a role with \`Administrator\` power, you will be unable to use Goblin's admin features. There is currently NO workaround for this, sorry.
-- Updated to \`discord.js\` v13, improving security and adding new Discord features
-- Updated to Discord API v8
-- Updated to \`node.js\` 14.x
-- Goblin no longer collects **ANY** user or server data. Feel safe again!
-**This is a big update. Report issues and things you don't like or want please, feedback does help.**
+- \`/preferences\` has been temporarily removed while hotfixes are developed
 `;
 
 
-// const INVITE_URL = "https://discord.com/oauth2/authorize?client_id=763525517931839520&permissions=8&scope=bot%20applications.commands";
-// const LEGACY_REINVITE_MESSAGE = `Goblin needs to be reconnected to update. I promise this is the only time you'll need to do this. Please kick Goblin and reinvite her using this link:\n${INVITE_URL}`;
+const INVITE_URL = "https://discord.com/oauth2/authorize?client_id=763525517931839520&permissions=8&scope=bot%20applications.commands";
+const LEGACY_REINVITE_MESSAGE = `Goblin needs to be reconnected to update. I promise this is the only time you'll need to do this. Please kick Goblin and reinvite her using this link:\n${INVITE_URL}`;
 
 // discord.js for accessing the discord api
 import { Client, Guild, GuildAuditLogs, MessageReaction, NewsChannel, Permissions, TextChannel, VoiceChannel } from 'discord.js';
@@ -104,7 +82,7 @@ export class Bot {
         registerFlavor(this.command_manager);
         registerInvite(this.command_manager);
         registerFight(this.command_manager);
-        registerPrefrences(this.command_manager);
+        //registerPrefrences(this.command_manager);
         registerSetupdate(this.command_manager);
         registerBalls(this.command_manager);
     }

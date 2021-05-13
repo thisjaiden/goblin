@@ -1,5 +1,5 @@
 import { GuildDefaultMessageNotifications, MembershipScreeningFieldType } from "discord-api-types";
-import { ApplicationCommand, ApplicationCommandData, Client, Guild, Interaction, Message, Permissions } from "discord.js";
+import { ApplicationCommand, ApplicationCommandData, ApplicationCommandPermissionData, Client, Guild, Interaction, Message, Permissions } from "discord.js";
 import { Guildman } from "./guildman";
 
 /**
@@ -58,13 +58,42 @@ export class CommandManager {
         })
     }
     public pushInteractions(client: Client, man: Guildman) {
+        
         // reset all guild commands
         client.guilds.cache.forEach((guild) => {
             guild.commands.set([]).catch(e => {
                 console.warn("WARNING: UNABLE TO CLEAR ANCIENT SLASH COMMANDS:\n" + e);
             });
         });
+        client.application.commands.set([]).catch(e => {
+            console.warn("WARNING: UNABLE TO CLEAR ANCIENT GLOBAL SLASH COMMANDS:\n" + e);
+        });
         this.interactions.forEach(interaction_details => {
+            client.application.commands.create(interaction_details.getRegisterInfo() as unknown as ApplicationCommandData).catch(e => {
+                console.warn("WARNING: AN ERROR OCCURED ADDING A GLOBAL SLASH COMMAND:\n" + e);
+            }).then(cmd => {
+                if (typeof cmd === "undefined") {
+                    console.log("udef, returning");
+                    return;
+                }
+                let command = cmd as ApplicationCommand;
+                if (interaction_details.requiresAdmin()) {
+                    // well, fuck. IDK what the hell to do here.
+                    // how do i disable/enable commands for certain roles/permissions globally
+                    // without hitting rate limits?
+                    // I'm going to yolo into this attempt.
+                    let perms_struct: Array<ApplicationCommandPermissionData> = [];
+                    client.guilds.cache.forEach(guild => {
+                        guild.roles.cache.forEach(role => {
+                            if (role.permissions.has(Permissions.FLAGS.ADMINISTRATOR)) {
+                                perms_struct.push({id: role.id, type: "ROLE", permission: true});
+                            }
+                        })
+                    })
+                    command.setPermissions(perms_struct);
+                }
+            })
+            /*
             // console.log(`For an interaction named ${interaction_details.getRegisterInfo()["name"]}...`);
             client.guilds.cache.forEach((guild) => {
                 // console.log(`Adding to guild called ${guild.name}.`);
@@ -107,6 +136,7 @@ export class CommandManager {
                     });
                 }
             });
+            */
         });
     }
     public runInteractions(message: Interaction, man: Guildman, client: Client) {
