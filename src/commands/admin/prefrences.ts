@@ -8,6 +8,7 @@ import { EmbedBuilder } from "../../embed";
 import { Guildman } from "../../guildman";
 
 const prefrences_inf = {
+    defaultPermission: false,
     name: "preferences",
     description: "Change settings about Goblin Child",
     options: [
@@ -101,7 +102,7 @@ const prefrences_inf = {
         },
         {
           "type": 1,
-          "name": "twitch_prime_refrences",
+          "name": "twitch_prime",
           "description": "Change if refrences to Twitch Prime should appear",
           "options": [
             {
@@ -325,7 +326,7 @@ function pref(interaction: CommandInteraction, man: Guildman): boolean {
                         .interact(interaction);
                 }
                 break;
-            case "twitch_prime_refrences":
+            case "twitch_prime":
                 man.setGuildField(interaction.guild.id, "twitch_prime_refrences_enabled", interaction.options[0].options[0].options[0].value);
                 if (man.getGuildField(interaction.guild.id, "twitch_prime_refrences_enabled")) {
                     new EmbedBuilder()

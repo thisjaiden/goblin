@@ -13,6 +13,50 @@ export class CommandManager {
     public registerInteraction(interaction_details: Object, requires_admin: boolean, onTrigger: (interaction: Interaction, man: Guildman) => boolean) {
         this.interactions.push(new InteractionCommand(interaction_details, requires_admin, onTrigger))
     }
+    public pushGuildInteractions(guild: Guild, man: Guildman) {
+        guild.commands.set([]).catch(e => {
+            console.warn("WARNING: UNABLE TO CLEAR ANCIENT SLASH COMMANDS:\n" + e);
+        });
+        this.interactions.forEach(interaction_details => {
+            if (
+                interaction_details.getRegisterInfo()["name"] == "preferences" ||
+                interaction_details.getRegisterInfo()["name"] == "invite"
+            ) {
+                guild.commands.create(interaction_details.getRegisterInfo() as unknown as ApplicationCommandData).catch(e => {
+                    console.warn("WARNING: AN ERROR OCCURED ADDING A SLASH COMMAND:\n" + e);
+                }).then(cmd => {
+                    if (typeof cmd === "undefined") {
+                        console.log("udef, returning");
+                        return;
+                    }
+                    let command = cmd as ApplicationCommand;
+                    if (interaction_details.requiresAdmin()) {
+                        let perms_struct = [];
+                        // console.log(`${guild.roles.cache.size} roles in cache`);
+                        guild.roles.cache.forEach(role => {
+                            if (role.permissions.has(Permissions.FLAGS.ADMINISTRATOR)) {
+                                perms_struct.push({id: role.id, type: "ROLE", permission: true});
+                            }
+                            else {
+                                // perms_struct.push({id: role.id, type: "ROLE", permission: false});
+                            }
+                        });
+                        if (perms_struct.length >= 10) {
+                            console.error("Too many priveledged roles. This needs to be handled properly.");
+                        }
+                        else {
+                            command.setPermissions(perms_struct);
+                        }
+                    }
+                });
+            }
+            else if (man.getGuildField(guild.id, (interaction_details.getRegisterInfo()["name"] + "_enabled"))) {
+                guild.commands.create(interaction_details.getRegisterInfo() as unknown as ApplicationCommandData).catch(e => {
+                    console.warn("WARNING: AN ERROR OCCURED ADDING A SLASH COMMAND:\n" + e);
+                });
+            }
+        })
+    }
     public pushInteractions(client: Client, man: Guildman) {
         // reset all guild commands
         client.guilds.cache.forEach((guild) => {
@@ -31,19 +75,29 @@ export class CommandManager {
                     guild.commands.create(interaction_details.getRegisterInfo() as unknown as ApplicationCommandData).catch(e => {
                         console.warn("WARNING: AN ERROR OCCURED ADDING A SLASH COMMAND:\n" + e);
                     }).then(cmd => {
+                        if (typeof cmd === "undefined") {
+                            console.log("udef, returning");
+                            return;
+                        }
                         let command = cmd as ApplicationCommand;
                         if (interaction_details.requiresAdmin()) {
                             let perms_struct = [];
-                            console.log(`${guild.roles.cache.size} roles in cache`);
+                            // console.log(`${guild.roles.cache.size} roles in cache`);
                             guild.roles.cache.forEach(role => {
                                 if (role.permissions.has(Permissions.FLAGS.ADMINISTRATOR)) {
                                     perms_struct.push({id: role.id, type: "ROLE", permission: true});
                                 }
                                 else {
-                                    perms_struct.push({id: role.id, type: "ROLE", permission: false});
+                                    // exculding for test
+                                    // perms_struct.push({id: role.id, type: "ROLE", permission: false});
                                 }
-                            })
-                            command.setPermissions(perms_struct);
+                            });
+                            if (perms_struct.length >= 10) {
+                                console.error("Too many priveledged roles. This needs to be handled properly.");
+                            }
+                            else {
+                                command.setPermissions(perms_struct);
+                            }
                         }
                     });
                 }
@@ -62,6 +116,9 @@ export class CommandManager {
                 if (interaction.getRegisterInfo()["name"] == message.commandName) {
                     //console.log("An interaction has been found matching the request.");
                     interaction.trigger(message, man, client);
+                }
+                if (message.commandName == "preferences") {
+                    this.pushGuildInteractions(message.guild, man);
                 }
             });
         }

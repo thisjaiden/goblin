@@ -23,17 +23,19 @@ be added this way due to an oversight on Discord's part. Sorry in advance.
 - \`banme\` has been tweaked to better fit slash commands.
 - \`fight\` has been tweaked to better fit slash commands.
 - \`dababy\` has been temporarily removed while it goes through an upgrade.
+- logging functions may be impared while they go through an upgrade.
 *Technical Changes*
 - Server owners! If you do not have a role with \`Administrator\` power, you will be unable to use Goblin's admin features. There is currently NO workaround for this, sorry.
 - Updated to \`discord.js\` v13, improving security and adding new Discord features
 - Updated to Discord API v8
 - Updated to \`node.js\` 14.x
+- Goblin no longer collects **ANY** user or server data. Feel safe again!
 **This is a big update. Report issues and things you don't like or want please, feedback does help.**
 `;
 
 
-const INVITE_URL = "https://discord.com/oauth2/authorize?client_id=763525517931839520&permissions=8&scope=bot%20applications.commands";
-const LEGACY_REINVITE_MESSAGE = `Goblin needs to be reconnected to update. I promise this is the only time you'll need to do this. Please kick Goblin and reinvite her using this link:\n${INVITE_URL}`;
+// const INVITE_URL = "https://discord.com/oauth2/authorize?client_id=763525517931839520&permissions=8&scope=bot%20applications.commands";
+// const LEGACY_REINVITE_MESSAGE = `Goblin needs to be reconnected to update. I promise this is the only time you'll need to do this. Please kick Goblin and reinvite her using this link:\n${INVITE_URL}`;
 
 // discord.js for accessing the discord api
 import { Client, Guild, GuildAuditLogs, MessageReaction, NewsChannel, Permissions, TextChannel, VoiceChannel } from 'discord.js';
@@ -118,21 +120,21 @@ export class Bot {
                     return;
                 }
                 if (real_guild.publicUpdatesChannel) {
-                    real_guild.publicUpdatesChannel.send(LEGACY_REINVITE_MESSAGE);
+                    //real_guild.publicUpdatesChannel.send(LEGACY_REINVITE_MESSAGE);
                     found_channel = true;
                 }
                 if (real_guild.rulesChannel) {
-                    real_guild.rulesChannel.send(LEGACY_REINVITE_MESSAGE);
+                    //real_guild.rulesChannel.send(LEGACY_REINVITE_MESSAGE);
                     found_channel = true;
                 }
                 if (real_guild.systemChannel) {
-                    real_guild.systemChannel.send(LEGACY_REINVITE_MESSAGE);
+                    //real_guild.systemChannel.send(LEGACY_REINVITE_MESSAGE);
                     found_channel = true;
                 }
                 if (!found_channel) {
                     let first_chan = real_guild.channels.cache.first();
                     if (first_chan.isText()) {
-                        first_chan.send(LEGACY_REINVITE_MESSAGE);
+                        //first_chan.send(LEGACY_REINVITE_MESSAGE);
                     }
                 }
             }
@@ -150,6 +152,15 @@ export class Bot {
         this.client.on('ready', () => {
             this.registerCommands();
             this.startTasks();
+        });
+        this.client.on('roleCreate', role => {
+            this.command_manager.pushGuildInteractions(role.guild, this.man);
+        });
+        this.client.on('roleDelete', role => {
+            this.command_manager.pushGuildInteractions(role.guild, this.man);
+        });
+        this.client.on('roleUpdate', role => {
+            this.command_manager.pushGuildInteractions(role.guild, this.man);
         });
         this.client.on('interaction', interaction => {
             // we only handle command interactions
