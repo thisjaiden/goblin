@@ -1,4 +1,4 @@
-import { CommandInteraction, Message, User } from "discord.js";
+import { CommandInteraction, User } from "discord.js";
 import { CommandManager } from "../command";
 import { EmbedBuilder } from "../embed";
 import { Guildman } from "../guildman";
@@ -25,7 +25,6 @@ const fight_inf = {
 };
 
 export function registerFight(commandman: CommandManager) {
-    //commandman.registerCommand("fight", false, fight);
     commandman.registerInteraction(fight_inf, false, fight);
 }
 

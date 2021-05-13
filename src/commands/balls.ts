@@ -1,14 +1,22 @@
-import { Message } from "discord.js";
+import { Interaction } from "discord.js";
 import { CommandManager } from "../command";
 import { EmbedBuilder } from "../embed";
 import { Guildman } from "../guildman";
+ 
 
 export function registerBalls(commandman: CommandManager) {
-    //commandman.registerCommand("balls", false, balls);
+    commandman.registerInteraction(
+        {
+            name: "balls",
+            description: "Get a picture of balls"
+        },
+        false,
+        balls
+    );
 }
 
-function balls(message: Message, parsed_message: string, man: Guildman): boolean {
-    if (!(man.getGuildField(message.guild.id, "balls_enabled"))) {
+function balls(interaction: Interaction, man: Guildman): boolean {
+    if (!(man.getGuildField(interaction.guild.id, "balls_enabled"))) {
         // This command is disabled by guild prefrences.
         return;
     }
@@ -18,7 +26,7 @@ function balls(message: Message, parsed_message: string, man: Guildman): boolean
         .image(responses[randInt(responses.length)])
         .color("blue")
         .footer("balls")
-        .send(message.channel);
+        .interact(interaction);
     return true;
 }
 

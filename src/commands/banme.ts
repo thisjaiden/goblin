@@ -1,39 +1,42 @@
-import { Message } from "discord.js";
+import { Interaction } from "discord.js";
 import { CommandManager } from "../command";
 import { EmbedBuilder } from "../embed";
 import { Guildman } from "../guildman";
 
 export function registerBanme(commandman: CommandManager) {
-    //commandman.registerCommand("ban", false, banme);
-    //commandman.registerCommand("banme", false, banme);
-    //commandman.registerCommand("selfban", false, banme);
+    commandman.registerInteraction(
+        {
+            name: "banme",
+            description: "Ban yourself from this server. No, this is not a joke."
+        },
+        false,
+        banme
+    )
 }
 
-function banme(message: Message, parsed_message: string, man: Guildman): boolean {
+function banme(interaction: Interaction, man: Guildman): boolean {
     // TODO: read rest of message (`!ban me` doesn't work)
 
-    if (!(man.getGuildField(message.guild.id, "banme_enabled"))) {
+    if (!(man.getGuildField(interaction.guild.id, "banme_enabled"))) {
         // This command is disabled by guild prefrences.
         return;
     }
 
-    if (parsed_message == "") {
-        message.guild.members.resolve(message.author).ban({ reason: `This user ran ${message.content}. Automatic ban by Goblin.`}).then(() => {
-            new EmbedBuilder()
-                .title("Whoops!")
-                .text(`Looks like ${message.author} was stupid enough to run ${message.content}.\nI've banned them from ${message.guild}.`)
-                .thumbnail("https://i.pinimg.com/originals/82/69/9d/82699d6571d0fa1bfc3bbefebfe302b6.png")
-                .color("#730b1b")
-                .send(message.channel);
-            return true;
-        }).catch(() => {
-            new EmbedBuilder()
-                .title("I would've banned you but...")
-                .text("It looks like you have more permissions than me. Hate to dissapoint you.")
-                .color("#872b7c")
-                .send(message.channel);
-            return false;
-        });
-    }
+    interaction.guild.members.resolve(interaction.user).ban({ reason: `This user ran \`/banme\`. Automatic ban by Goblin.`}).then(() => {
+        new EmbedBuilder()
+            .title("Whoops!")
+            .text(`Looks like ${interaction.user.toString()} was stupid enough to run /banme.\nI've banned them from ${interaction.guild.toString()}.`)
+            .thumbnail("https://i.pinimg.com/originals/82/69/9d/82699d6571d0fa1bfc3bbefebfe302b6.png")
+            .color("#730b1b")
+            .interact(interaction);
+         return true;
+    }).catch(() => {
+        new EmbedBuilder()
+            .title("I would've banned you but...")
+            .text("It looks like you have more permissions than me. Hate to dissapoint you.")
+            .color("#872b7c")
+            .interact(interaction);
+        return false;
+    });
     return false;
 }

@@ -4,6 +4,7 @@ import { EmbedBuilder } from "../embed";
 import { Guildman } from "../guildman";
 
 export function registerDababy(commandman: CommandManager) {
+    // TODO: This command is being removed until more responses can be made.
     //commandman.registerCommand("dababy", false, dababy);
 }
 

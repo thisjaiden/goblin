@@ -1,4 +1,5 @@
-import { ApplicationCommandData, Client, Guild, Interaction, Message } from "discord.js";
+import { GuildDefaultMessageNotifications, MembershipScreeningFieldType } from "discord-api-types";
+import { ApplicationCommand, ApplicationCommandData, Client, Guild, Interaction, Message, Permissions } from "discord.js";
 import { Guildman } from "./guildman";
 
 /**
@@ -23,9 +24,27 @@ export class CommandManager {
             // console.log(`For an interaction named ${interaction_details.getRegisterInfo()["name"]}...`);
             client.guilds.cache.forEach((guild) => {
                 // console.log(`Adding to guild called ${guild.name}.`);
-                if (interaction_details.getRegisterInfo()["name"] == "preferences") {
+                if (
+                    interaction_details.getRegisterInfo()["name"] == "preferences" ||
+                    interaction_details.getRegisterInfo()["name"] == "invite"
+                ) {
                     guild.commands.create(interaction_details.getRegisterInfo() as unknown as ApplicationCommandData).catch(e => {
                         console.warn("WARNING: AN ERROR OCCURED ADDING A SLASH COMMAND:\n" + e);
+                    }).then(cmd => {
+                        let command = cmd as ApplicationCommand;
+                        if (interaction_details.requiresAdmin()) {
+                            let perms_struct = [];
+                            console.log(`${guild.roles.cache.size} roles in cache`);
+                            guild.roles.cache.forEach(role => {
+                                if (role.permissions.has(Permissions.FLAGS.ADMINISTRATOR)) {
+                                    perms_struct.push({id: role.id, type: "ROLE", permission: true});
+                                }
+                                else {
+                                    perms_struct.push({id: role.id, type: "ROLE", permission: false});
+                                }
+                            })
+                            command.setPermissions(perms_struct);
+                        }
                     });
                 }
                 else if (man.getGuildField(guild.id, (interaction_details.getRegisterInfo()["name"] + "_enabled"))) {
@@ -34,7 +53,7 @@ export class CommandManager {
                     });
                 }
             });
-        })
+        });
     }
     public runInteractions(message: Interaction, man: Guildman, client: Client) {
         if (message.isCommand()) {

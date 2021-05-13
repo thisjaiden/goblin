@@ -1,4 +1,4 @@
-import { Interaction, Message } from "discord.js";
+import { Interaction } from "discord.js";
 import { CommandManager } from "../command";
 import { EmbedBuilder } from "../embed";
 import { Guildman } from "../guildman";
