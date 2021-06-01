@@ -53,7 +53,7 @@ const poll_inf = {
 };
 
 export function registerPoll(commandman: CommandManager) {
-    commandman.registerInteraction(poll_inf, false, poll_interaction);
+    commandman.registerInteraction(poll_inf, poll_interaction);
 }
 
 function poll_interaction(interaction: Interaction, man: Guildman): boolean {
@@ -81,7 +81,7 @@ function poll_interaction(interaction: Interaction, man: Guildman): boolean {
             .title(question)
             .text(managed_responses)
             .color("blue")
-            .footer(`Use ${man.getGuildField(interaction.guildID, "prefix")}poll to make your own`);
+            .footer(`Use /poll to make your own`);
         for (let i = 0; i < options.length; i++) {
             partial_message
                 .response(number_to_letter(i))

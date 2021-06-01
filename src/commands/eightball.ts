@@ -18,7 +18,7 @@ const eightball_inf = {
 };
 
 export function registerEightball(commandman: CommandManager) {
-    commandman.registerInteraction(eightball_inf, false, ball);
+    commandman.registerInteraction(eightball_inf, ball);
 }
 
 function ball(interaction: CommandInteraction, man: Guildman): boolean {

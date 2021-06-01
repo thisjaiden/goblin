@@ -9,7 +9,6 @@ export function registerBanme(commandman: CommandManager) {
             name: "banme",
             description: "Ban yourself from this server. No, this is not a joke."
         },
-        false,
         banme
     )
 }

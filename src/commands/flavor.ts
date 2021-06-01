@@ -4,7 +4,13 @@ import { EmbedBuilder } from "../embed";
 import { Guildman } from "../guildman";
 
 export function registerFlavor(commandman: CommandManager) {
-    commandman.registerInteraction({ name: "flavor", description: "Get your flavor!" }, false, flv_interact);
+    commandman.registerInteraction(
+        {
+            name: "flavor",
+            description: "Get your flavor!"
+        },
+        flv_interact
+    );
 }
 
 function flv_interact(interaction: CommandInteraction, man: Guildman): boolean {
@@ -12,7 +18,7 @@ function flv_interact(interaction: CommandInteraction, man: Guildman): boolean {
     new EmbedBuilder()
         .title("**ANNOUNCEMENT**")
         .text(`"${interaction.member} is __${rand_select[0]}__"`)
-        .footer("Get your own: !flavor")
+        .footer("Get your own: /flavor")
         .color(rand_select[1])
         .interact(interaction);
     return true;

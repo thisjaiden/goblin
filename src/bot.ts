@@ -3,18 +3,17 @@ const commontags = require('common-tags');
 const stripIndents = commontags.stripIndents;
 
 // bot version and latest patch notes
-export const BOT_VERSION = "3.0.2";
+export const BOT_VERSION = "3.0.3";
 
 export const PATCH_NOTES = stripIndents`
 **Goblin Child v${BOT_VERSION}**
 *Features and New Content*
-- Added 4 new types of balls to \`/balls\`
-*Polishing Changes*
-- Changed Goblin's status to remove the suggestion of !help which no longer makes sense
-- Fixed Goblin crashing if ever used via DMs
-- Logging functionality has been removed, as there is no good way to handle admin-specific tasks
-*Notes*
-- \`/preferences\` and accociated functionality will not be returning to Goblin any time soon. This is currently impossible, and as such will be removed entirely
+- \`/help\` added to reduce confusion
+*Fixes and Tweaks*
+- Fixed an issue with \`/poll\` that would display the footer text incorrectly
+- Removed the footer from \`/invite\`, which no longer made sense
+- Updated the footer text on \`/flavor\`
+- Added the help command to Goblin's status
 `;
 
 // discord.js for accessing the discord api
@@ -30,6 +29,8 @@ import { registerFlavor } from './commands/flavor';
 import { registerInvite } from './commands/invite';
 import { registerFight } from './commands/fight';
 import { registerBalls } from './commands/balls';
+import { registerGame } from './commands/game/setup';
+import { registerHelp } from './commands/help';
 
 export class Bot {
     // discord.js Client object used for interfacing with Discord
@@ -52,7 +53,7 @@ export class Bot {
     private startTasks() {
         // Set the status of the bot to update every 2 mins
         setInterval(() => {
-            this.client.user.setActivity(`${this.man.allGuildIds().length} servers`, {type: 'WATCHING'});
+            this.client.user.setActivity(`${this.man.allGuildIds().length} servers | \`/help\``, {type: 'WATCHING'});
         }, 120_000);
         // Autosave every 5 mins
         setInterval(() => {
@@ -75,6 +76,8 @@ export class Bot {
         registerInvite(this.command_manager);
         registerFight(this.command_manager);
         registerBalls(this.command_manager);
+        registerGame(this.command_manager);
+        registerHelp(this.command_manager);
     }
     private postUpdates() {
         // Check if we've updated, then post patch notes to update channels.

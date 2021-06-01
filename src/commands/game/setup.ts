@@ -1,21 +1,32 @@
-import { DMChannel, Message, NewsChannel, TextChannel } from "discord.js";
+import { CommandInteraction, NewsChannel, TextChannel } from "discord.js";
 import { CommandManager } from "../../command";
 import { EmbedBuilder } from "../../embed";
 import { Guildman } from "../../guildman";
 import { encounterNewRoom } from "./loop";
 import { isGameActive, newGameDataStructure, setGameData } from "./utils";
 
-export function registerBalls(commandman: CommandManager) {
-    //commandman.registerCommand("game", false, game);
+export function registerGame(commandman: CommandManager) {
+    /*
+    commandman.registerInteraction(
+        {
+            name: "game",
+            description: "Start a new game"
+        },
+        game
+    );
+    */
 }
 
-function game(message: Message, parsed_message: string, man: Guildman): boolean {
-    if (!(man.getGuildField(message.guild.id, "game_enabled"))) {
-        // This command is disabled by guild prefrences.
+function game(interaction: CommandInteraction, man: Guildman): boolean {
+    if (interaction.channel.type == "dm") {
+        new EmbedBuilder()
+            .title("This command is disabled in DMs.")
+            .color("red")
+            .interact(interaction);
         return;
     }
 
-    let guild_id = message.guild.id;
+    let guild_id = interaction.guild.id;
     
     if (isGameActive(man, guild_id)) {
         new EmbedBuilder()
@@ -32,15 +43,16 @@ function game(message: Message, parsed_message: string, man: Guildman): boolean 
                 reaction.message.delete().catch((_e) => {
                     // we were unable to delete this message, but that's fine. Just ignore
                 });
-            });
+            })
+            .interact(interaction, man);
     }
     else {
         new EmbedBuilder()
             .title("Starting a new game...")
             .text("Please wait while data is set up and generated.")
             .color("blue")
-            .send(message.channel);
-        enterGameLoop(message.channel as TextChannel | NewsChannel, man);
+            .interact(interaction);
+        enterGameLoop(interaction.channel as TextChannel | NewsChannel, man);
     }
     return true;
 }

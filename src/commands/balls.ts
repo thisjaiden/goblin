@@ -9,7 +9,6 @@ export function registerBalls(commandman: CommandManager) {
             name: "balls",
             description: "Get a picture of balls"
         },
-        false,
         balls
     );
 }

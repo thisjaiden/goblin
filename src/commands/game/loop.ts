@@ -1,4 +1,4 @@
-import { TextChannel, DMChannel, NewsChannel } from "discord.js";
+import { TextChannel, NewsChannel } from "discord.js";
 import { Guildman } from "../../guildman";
 import { getGameData, randZeroToMax } from "./utils";
 import { encounterRoom as fightRoom } from "./rooms/fight";

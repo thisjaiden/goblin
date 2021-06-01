@@ -9,8 +9,8 @@ export class CommandManager {
     constructor() {
 
     }
-    public registerInteraction(interaction_details: Object, requires_admin: boolean, onTrigger: (interaction: Interaction, man: Guildman) => any | null) {
-        this.interactions.push(new InteractionCommand(interaction_details, requires_admin, onTrigger))
+    public registerInteraction(interaction_details: Object, onTrigger: (interaction: Interaction, man: Guildman) => any | null) {
+        this.interactions.push(new InteractionCommand(interaction_details, onTrigger))
     }
     public pushInteractions(client: Client, man: Guildman) {
         // reset all slash commands
@@ -38,9 +38,8 @@ export class CommandManager {
 }
 
 class InteractionCommand {
-    constructor(interaction_details: Object, requires_admin: boolean, onTrigger: (message: Interaction, man: Guildman) => any | null) {
+    constructor(interaction_details: Object, onTrigger: (message: Interaction, man: Guildman) => any | null) {
         this.interaction_details = interaction_details;
-        this.admin = requires_admin;
         this.onTrigger = onTrigger;
         this.needs_client = false;
     }
@@ -51,9 +50,6 @@ class InteractionCommand {
         else {
             this.onTrigger(interaction, man);
         }
-    }
-    public requiresAdmin(): boolean {
-        return this.admin;
     }
     public requiresClient(): boolean {
         return this.needs_client;
@@ -66,7 +62,6 @@ class InteractionCommand {
         return this.interaction_details;
     }
     private interaction_details: Object;
-    private admin: boolean;
     private onTrigger: (interaction: Interaction, man: Guildman) => any | null;
     private onTriggerClient: (interaction: Interaction, man: Guildman, client: Client) => any | null;
     private needs_client: boolean

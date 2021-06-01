@@ -25,7 +25,7 @@ const fight_inf = {
 };
 
 export function registerFight(commandman: CommandManager) {
-    commandman.registerInteraction(fight_inf, false, fight);
+    commandman.registerInteraction(fight_inf, fight);
 }
 
 function fight(interaction: CommandInteraction, man: Guildman) {
