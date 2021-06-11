@@ -10,12 +10,6 @@ export function registerRemindme(commandman: CommandManager) {
             "description": "Set a reminder for the future",
             "options": [
                 {
-                    "type": 3,
-                    "name": "reminder",
-                    "description": "What do you want to be reminded?",
-                    "required": false
-                },
-                {
                     "type": 4,
                     "name": "time",
                     "description": "How long until your reminder?",
@@ -40,6 +34,12 @@ export function registerRemindme(commandman: CommandManager) {
                             "value": "days"
                         }
                     ]
+                },
+                {
+                    "type": 3,
+                    "name": "reminder",
+                    "description": "What do you want to be reminded?",
+                    "required": false
                 }
             ]
         },
