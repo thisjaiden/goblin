@@ -3,17 +3,15 @@ const commontags = require('common-tags');
 const stripIndents = commontags.stripIndents;
 
 // bot version and latest patch notes
-export const BOT_VERSION = "3.0.3";
+export const BOT_VERSION = "3.1.0";
 
 export const PATCH_NOTES = stripIndents`
 **Goblin Child v${BOT_VERSION}**
 *Features and New Content*
-- \`/help\` added to reduce confusion
+- \`/remindme\`
 *Fixes and Tweaks*
-- Fixed an issue with \`/poll\` that would display the footer text incorrectly
-- Removed the footer from \`/invite\`, which no longer made sense
-- Updated the footer text on \`/flavor\`
-- Added the help command to Goblin's status
+- Fixed unintentional characters in Goblin's status
+- Added an indication if Goblin is currently updating
 `;
 
 // discord.js for accessing the discord api
@@ -31,6 +29,8 @@ import { registerFight } from './commands/fight';
 import { registerBalls } from './commands/balls';
 import { registerGame } from './commands/game/setup';
 import { registerHelp } from './commands/help';
+import { EmbedBuilder } from './embed';
+import { registerRemindme } from './commands/remindme';
 
 export class Bot {
     // discord.js Client object used for interfacing with Discord
@@ -51,17 +51,46 @@ export class Bot {
     }
 
     private startTasks() {
-        // Set the status of the bot to update every 2 mins
-        setInterval(() => {
-            this.client.user.setActivity(`${this.man.allGuildIds().length} servers | \`/help\``, {type: 'WATCHING'});
-        }, 120_000);
-        // Autosave every 5 mins
-        setInterval(() => {
-            this.man.export("savedata");
-        }, 300_000);
+        // Start everything one hour later after updating
+        setTimeout(() => {
+            // Set the status of the bot to update every 2 mins
+            setInterval(() => {
+                this.client.user.setActivity(`${this.man.allGuildIds().length} servers | /help`, {type: 'WATCHING'});
+            }, 120_000);
+            // Autosave every 5 mins
+            setInterval(() => {
+                this.man.export("savedata");
+            }, 300_000);
+            this.client.user.setStatus("online")
+        }, 3_600_000);
+        this.client.user.setStatus("dnd");
+        this.client.user.setActivity(`Goblin is restarting...`, {type: 'WATCHING'});
         // Post patch notes for the bot, if applicable
         this.postUpdates();
         this.slashCommands();
+        // Check reminders every min
+        setInterval(() => {
+            let all_guilds = this.man.allGuildIds;
+            let current_time = new Date().getTime();
+            for (let i = 0; i < all_guilds.length; i++) {
+                let these_reminders = this.man.getGuildField(all_guilds[i], "reminders");
+                let new_reminders = [];
+                for (let j = 0; j < these_reminders.length; j++) {
+                    if (these_reminders[j].when <= current_time) {
+                        let chan = this.client.guilds.resolve(all_guilds[i]).channels.resolve(these_reminders[j].channel) as TextChannel;
+                        new EmbedBuilder()
+                            .title(`${these_reminders[j].reminder}`)
+                            .text(`${these_reminders[j].user}, I am reminding you!`)
+                            .color("green")
+                            .send(chan);
+                    }
+                    else {
+                        new_reminders.push(these_reminders[j]);
+                    }
+                }
+                this.man.setGuildField(all_guilds[i], "reminders", new_reminders);
+            }
+        }, 60_000)
         console.log("Invite URL:\n" + this.client.generateInvite({permissions:[Permissions.FLAGS.ADMINISTRATOR,Permissions.FLAGS.USE_APPLICATION_COMMANDS,Permissions.FLAGS.VIEW_GUILD_INSIGHTS]}))
     }
     private slashCommands() {
@@ -78,6 +107,7 @@ export class Bot {
         registerBalls(this.command_manager);
         registerGame(this.command_manager);
         registerHelp(this.command_manager);
+        registerRemindme(this.command_manager);
     }
     private postUpdates() {
         // Check if we've updated, then post patch notes to update channels.

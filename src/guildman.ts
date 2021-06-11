@@ -41,6 +41,16 @@ const field_info = [
                 }
             }
         ]
+    },
+    {
+        key: "remindme-v1",
+        types: [
+            {
+                key: "reminders",
+                type: "list",
+                inital_value: []
+            }
+        ]
     }
 ];
 
