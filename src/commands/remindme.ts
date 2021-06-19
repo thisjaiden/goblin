@@ -79,7 +79,9 @@ function remind(interaction: CommandInteraction, man: Guildman): boolean {
     }
     el_to_push.channel = interaction.channelID;
     el_to_push.user = interaction.user.toString();
-    man.setGuildField(interaction.guildID, "reminders", man.getGuildField(interaction.guildID, "reminders") + el_to_push);
+    let old_data = man.getGuildField(interaction.guildID, "reminders");
+    old_data.push(el_to_push);
+    man.setGuildField(interaction.guildID, "reminders", old_data);
     new EmbedBuilder()
         .title("Reminder Set!")
         .text(`You will be reminded in ${value} ${units}.`)
