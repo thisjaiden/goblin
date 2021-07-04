@@ -74,7 +74,7 @@ export class Bot {
         this.slashCommands();
         // Check reminders every min
         setInterval(() => {
-            let all_guilds = this.man.allGuildIds;
+            let all_guilds = this.man.allGuildIds();
             let current_time = new Date().getTime();
             for (let i = 0; i < all_guilds.length; i++) {
                 let these_reminders = this.man.getGuildField(all_guilds[i], "reminders");

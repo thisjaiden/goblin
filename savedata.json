@@ -23,10 +23,17 @@
             "server_name": "Lumen"
         },
         "id": "806374515009257512",
-        "logging_channel": "806699990360522762",
+        "update_channel": "806699990360522762",
         "slash_command_support": true,
         "latest_version": "3.0.0",
-        "update_channel": "none"
+        "reminders": [
+            {
+                "reminder": "test",
+                "when": 1625435842500,
+                "channel": "844263475173523456",
+                "user": "<@453332405537996820>"
+            }
+        ]
     },
     {
         "id": "787957523281870858",
@@ -48,6 +55,7 @@
     },
     {
         "id": "855554727911751680",
-        "slash_command_support": true
+        "slash_command_support": true,
+        "latest_version": "3.1.0"
     }
 ]
