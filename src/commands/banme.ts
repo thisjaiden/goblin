@@ -14,7 +14,7 @@ export function registerBanme(commandman: CommandManager) {
 }
 
 function banme(interaction: CommandInteraction, man: Guildman) {
-    if (interaction.channel.type == "dm") {
+    if (!interaction.channel) {
         new EmbedBuilder()
             .title("What are you trying to do?")
             .text("I can't ban you from your own DMs.")

@@ -48,6 +48,14 @@ export function registerRemindme(commandman: CommandManager) {
 }
 
 function remind(interaction: CommandInteraction, man: Guildman): boolean {
+    if (!interaction.channel) {
+        new EmbedBuilder()
+            .title("Sorry, this won't work.")
+            .text("Unfortunately, due to technical constraints this command can't yet be used in DMs.")
+            .color("red")
+            .interact(interaction);
+        return false;
+    }
     let el_to_push = {
         reminder: "/remindme reminder",
         when: new Date().getTime(),

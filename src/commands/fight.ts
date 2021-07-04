@@ -29,7 +29,7 @@ export function registerFight(commandman: CommandManager) {
 }
 
 function fight(interaction: CommandInteraction, man: Guildman) {
-    if (interaction.channel.type == "dm") {
+    if (!interaction.channel) {
         new EmbedBuilder()
             .title("This command does not work in DMs.")
             .color("red")

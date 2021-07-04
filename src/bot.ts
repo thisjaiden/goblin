@@ -12,6 +12,10 @@ export const PATCH_NOTES = stripIndents`
 *Fixes and Tweaks*
 - Fixed unintentional characters in Goblin's status
 - Added an indication if Goblin is currently updating
+- Fixed \`/banme\` in DMs
+- Fixed a crash when attempting to use \`/poll\`
+- Fixed a crash when attempting to use \`/fight\`
+- Fixed a type with \`/help\`
 `;
 
 // discord.js for accessing the discord api
@@ -90,7 +94,7 @@ export class Bot {
                 }
                 this.man.setGuildField(all_guilds[i], "reminders", new_reminders);
             }
-        }, 60_000)
+        }, 60_000);
         console.log("Invite URL:\n" + this.client.generateInvite({permissions:[Permissions.FLAGS.ADMINISTRATOR,Permissions.FLAGS.USE_APPLICATION_COMMANDS,Permissions.FLAGS.VIEW_GUILD_INSIGHTS]}))
     }
     private slashCommands() {

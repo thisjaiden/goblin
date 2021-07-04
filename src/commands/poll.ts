@@ -58,9 +58,9 @@ export function registerPoll(commandman: CommandManager) {
 
 function poll_interaction(interaction: Interaction, man: Guildman): boolean {
     if (interaction.isCommand()) {
-        if (interaction.channel.type == "dm") {
+        if (!interaction.channel) {
             new EmbedBuilder()
-                .title("This command is disabled in DMs.")
+                .title("This command is disabled in DMs. No point in polling yourself anyways.")
                 .color("red")
                 .interact(interaction);
             return;

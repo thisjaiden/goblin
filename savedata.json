@@ -1,1 +1,53 @@
-[{"id":"766740089237274625","no_prefix":true,"prefix":"!","logging_channel":"821098636657950790","banme_enabled":true,"fight_enabled":true,"dababy_enabled":true,"twitch_prime_refrences_enabled":true,"poll_enabled":true,"flavor_enabled":true,"eightball_enabled":true,"latest_version":"3.1.0","update_channel":"766740306849824828","balls_enabled":true,"game_enabled":true,"slash_command_support":false},{"id":"415215485194338305","no_prefix":false,"prefix":"!","dababy_enabled":true,"flavor_enabled":true,"fight_enabled":true,"banme_enabled":false,"poll_enabled":true,"eightball_enabled":true,"twitch_prime_refrences_enabled":false,"logging_channel":"none","latest_version":"3.1.0","update_channel":"none","balls_enabled":true,"slash_command_support":false},{"id":"806374515009257512","slash_command_support":true,"latest_version":"3.1.0","update_channel":"none"},{"id":"787957523281870858","slash_command_support":true,"latest_version":"3.1.0","update_channel":"none"},{"id":"758135861530722344","slash_command_support":true,"latest_version":"3.1.0","update_channel":"none"},{"id":"826664781208616982","slash_command_support":true,"latest_version":"3.1.0","update_channel":"none"}]
+[
+    {
+        "_comment": {
+            "server_name": "Twitch Prime SMP"
+        },
+        "id": "766740089237274625",
+        "logging_channel": "821098636657950790",
+        "latest_version": "3.1.0",
+        "update_channel": "766740306849824828",
+        "slash_command_support": true
+    },
+    {
+        "_comment": {
+            "server_name": "This is kal's server. idk the name"
+        },
+        "id": "415215485194338305",
+        "latest_version": "3.1.0",
+        "update_channel": "none",
+        "slash_command_support": false
+    },
+    {
+        "_comment": {
+            "server_name": "Lumen"
+        },
+        "id": "806374515009257512",
+        "logging_channel": "806699990360522762",
+        "slash_command_support": true,
+        "latest_version": "3.0.0",
+        "update_channel": "none"
+    },
+    {
+        "id": "787957523281870858",
+        "slash_command_support": true,
+        "latest_version": "3.1.0",
+        "update_channel": "none"
+    },
+    {
+        "id": "758135861530722344",
+        "slash_command_support": true,
+        "latest_version": "3.1.0",
+        "update_channel": "none"
+    },
+    {
+        "id": "826664781208616982",
+        "slash_command_support": true,
+        "latest_version": "3.1.0",
+        "update_channel": "none"
+    },
+    {
+        "id": "855554727911751680",
+        "slash_command_support": true
+    }
+]

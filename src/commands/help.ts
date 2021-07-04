@@ -24,7 +24,7 @@ function help(interaction: Interaction, man: Guildman): boolean {
         .text(stripIndents`
             /balls - Shows a picture of balls. Genuinely SFW.
             /banme - Bans you from the server where you run this. Not recommended.
-            /eightball - Answeres all your deepest questions.
+            /eightball - Answers all your deepest questions.
             /fight - Settles who would win in a fight.
             /flavor - Ever wondered what flavor you are? Find out now.
             /invite - Get the invite link for Goblin. <3
