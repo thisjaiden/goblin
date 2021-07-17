@@ -1,4 +1,4 @@
-import { Guild, Message, MessageReaction, ReactionEmoji, TextChannel } from "discord.js";
+import { Guild, Interaction, Message, MessageReaction, ReactionEmoji, Snowflake, TextChannel } from "discord.js";
 
 import { BOT_VERSION } from "./bot";
 
@@ -51,6 +51,16 @@ const field_info = [
                 inital_value: []
             }
         ]
+    },
+    {
+        key: "poll-v1",
+        types: [
+            {
+                key: "active_polls",
+                type: "list",
+                inital_value: []
+            }
+        ]
     }
 ];
 
@@ -62,6 +72,9 @@ export class Guildman {
      * Saves the data in `Guildman` to the disk
      * @param filename - The name of the file to save to. Do not add a file extension
      */
+    public get_custom_id(): string {
+        return `${randInt(999999999)}`;
+    }
     public export(filename: string) {
         fs.writeFileSync(
             `${filename}.json`,
@@ -146,7 +159,7 @@ export class Guildman {
         console.warn(`Default for field ${field_to_set} was requested, but not avalable.`);
     }
     public guildCheckAdminStatus(guild: Guild, user_id: string): boolean {
-        if (guild.members.resolve(user_id).permissions.has("ADMINISTRATOR") || guild.members.resolve(user_id).id == guild.ownerID) {
+        if (guild.members.resolve(user_id as Snowflake).permissions.has("ADMINISTRATOR") || guild.members.resolve(user_id as Snowflake).id == guild.ownerId) {
             return true;
         }
         return false;
@@ -164,6 +177,15 @@ export class Guildman {
             return;
         }
         this.guild_data[ptr]["reaction_callbacks"].push({emoji: reaction, message_id: message.id, callback: callback, uid: randInt(100_000)});
+    }
+    public addButtonCallback(guild: string, multiple_uses: boolean, callback: (button_details: Interaction, man: Guildman) => null | any): string {
+        let ptr = this.getGuildPointer(guild);
+        if (typeof this.guild_data[ptr]["button_callbacks"] === 'undefined') {
+            this.guild_data[ptr]["button_callbacks"] = [];
+        }
+        let id = this.get_custom_id();
+        this.guild_data[ptr]["button_callbacks"].push({callback: callback, uid: id, multi: multiple_uses});
+        return id;
     }
 
     public handleReactionCallbacks(reaction: MessageReaction) {
@@ -184,6 +206,51 @@ export class Guildman {
                     }
                 }
             });
+        });
+    }
+
+    public handleButtonCallbacks(reaction: Interaction) {
+        if (!reaction.isButton()) { return; }
+        let bid = reaction.customId;
+        console.log(`pressed button bid = ${bid}`);
+        this.guild_data.forEach((guild) => {
+            if (typeof guild["button_callbacks"] === 'undefined') {
+                return;
+            }
+            // for every waiting reaction callback
+            for (let i = 0; i < guild["button_callbacks"].length; i++) {
+                let button_callback = guild["button_callbacks"][i];
+                if (button_callback.uid == bid) {
+                    // run the callback
+                    console.log("running callback");
+                    button_callback.callback(reaction, this);
+                    // if it's appropriate to remove this callback, remove it
+                    if (!button_callback.multi) {
+                        this.removeButtonCallback(bid);
+                    }
+                }
+                else {
+                    console.log(`Not running callback for button ${button_callback.uid} != bid.`);
+                }
+            }
+        });
+    }
+
+    private removeButtonCallback(bid: string) {
+        this.guild_data.forEach((guild) => {
+            let indx = 0;
+            if (typeof guild["active_polls"] === 'undefined') {
+                return;
+            }
+            // for every waiting reaction callback
+            guild["active_polls"].foreach((button_callback) => {
+                if (button_callback.id == bid) {
+                    guild["active_polls"].splice(indx, 1);
+                    return;
+                }
+                indx++;
+            });
+            
         });
     }
     private removeReactionCallback(guild_id: string, uid: number) {

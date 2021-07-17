@@ -1,4 +1,4 @@
-import { CommandInteraction, Interaction } from "discord.js";
+import { Client, CommandInteraction, Interaction } from "discord.js";
 import { CommandManager } from "../command";
 import { EmbedBuilder } from "../embed";
 import { Guildman } from "../guildman";
@@ -13,13 +13,13 @@ export function registerBanme(commandman: CommandManager) {
     )
 }
 
-function banme(interaction: CommandInteraction, man: Guildman) {
+function banme(interaction: CommandInteraction, man: Guildman, client: Client) {
     if (!interaction.channel) {
         new EmbedBuilder()
             .title("What are you trying to do?")
             .text("I can't ban you from your own DMs.")
             .color("#872b7c")
-            .interact(interaction)
+            .interact(interaction, client, man);
         return;
     }
     interaction.guild.members.resolve(interaction.user).ban({ reason: `This user ran \`/banme\`. Automatic ban by Goblin.`}).then(() => {
@@ -28,12 +28,12 @@ function banme(interaction: CommandInteraction, man: Guildman) {
             .text(`Looks like ${interaction.user.toString()} was stupid enough to run /banme.\nI've banned them from ${interaction.guild.toString()}.`)
             .thumbnail("https://i.pinimg.com/originals/82/69/9d/82699d6571d0fa1bfc3bbefebfe302b6.png")
             .color("#730b1b")
-            .interact(interaction);
+            .interact(interaction, client, man);
     }).catch(() => {
         new EmbedBuilder()
             .title("I would've banned you but...")
             .text("It looks like you have more permissions than me. Hate to dissapoint you.")
             .color("#872b7c")
-            .interact(interaction);
+            .interact(interaction, client, man);
     });
 }

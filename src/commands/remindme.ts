@@ -1,4 +1,4 @@
-import { CommandInteraction, Interaction } from "discord.js";
+import { Client, CommandInteraction, Interaction } from "discord.js";
 import { CommandManager } from "../command";
 import { EmbedBuilder } from "../embed";
 import { Guildman } from "../guildman";
@@ -47,13 +47,13 @@ export function registerRemindme(commandman: CommandManager) {
     );
 }
 
-function remind(interaction: CommandInteraction, man: Guildman): boolean {
+function remind(interaction: CommandInteraction, man: Guildman, client: Client): boolean {
     if (!interaction.channel) {
         new EmbedBuilder()
             .title("Sorry, this won't work.")
             .text("Unfortunately, due to technical constraints this command can't yet be used in DMs.")
             .color("red")
-            .interact(interaction);
+            .interact(interaction, client, man);
         return false;
     }
     let el_to_push = {
@@ -64,8 +64,8 @@ function remind(interaction: CommandInteraction, man: Guildman): boolean {
     };
     let units = "";
     let value = 0;
-    for (let i = 0; i < interaction.options.length; i++) {
-        let this_option = interaction.options[i];
+    for (let i = 0; i < interaction.options.array().length; i++) {
+        let this_option = interaction.options.array()[i];
         if (this_option.name == "reminder") {
             el_to_push.reminder = this_option.value as string;
         }
@@ -85,15 +85,15 @@ function remind(interaction: CommandInteraction, man: Guildman): boolean {
     if (units == "days") {
         el_to_push.when = new Date().getTime() + (1000 * 60 * 60 * 24 * value);
     }
-    el_to_push.channel = interaction.channelID;
+    el_to_push.channel = interaction.channelId;
     el_to_push.user = interaction.user.toString();
-    let old_data = man.getGuildField(interaction.guildID, "reminders");
+    let old_data = man.getGuildField(interaction.guildId, "reminders");
     old_data.push(el_to_push);
-    man.setGuildField(interaction.guildID, "reminders", old_data);
+    man.setGuildField(interaction.guildId, "reminders", old_data);
     new EmbedBuilder()
         .title("Reminder Set!")
         .text(`You will be reminded in ${value} ${units}.`)
         .color("blue")
-        .interact(interaction);
+        .interact(interaction, client, man);
     return true;
 }

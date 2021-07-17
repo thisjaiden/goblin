@@ -1,4 +1,4 @@
-import { Interaction } from "discord.js";
+import { ButtonInteraction, Client, Interaction } from "discord.js";
 import { CommandManager } from "../command";
 import { EmbedBuilder } from "../embed";
 import { Guildman } from "../guildman";
@@ -56,70 +56,70 @@ export function registerPoll(commandman: CommandManager) {
     commandman.registerInteraction(poll_inf, poll_interaction);
 }
 
-function poll_interaction(interaction: Interaction, man: Guildman): boolean {
+function poll_interaction(interaction: Interaction, man: Guildman, client: Client): boolean {
     if (interaction.isCommand()) {
         if (!interaction.channel) {
             new EmbedBuilder()
                 .title("This command is disabled in DMs. No point in polling yourself anyways.")
                 .color("red")
-                .interact(interaction);
+                .interact(interaction, client, man);
             return;
         }
-        let question = interaction.options[0].value as string;
+        let question = interaction.options.array()[0].value as string;
         let options: Array<string> = [];
-        for (let i = 1; i < interaction.options.length; i++) {
-            options.push(interaction.options[i].value as string);
+        for (let i = 1; i < interaction.options.array().length; i++) {
+            options.push(interaction.options.array()[i].value as string);
         }
-        let managed_responses = "";
+        let polls = man.getGuildField(interaction.guildId, "active_polls");
+        let responses_wip = [];
         for (let i = 0; i < options.length; i++) {
-            managed_responses = managed_responses + number_to_letter(i);
-            managed_responses = managed_responses + " - ";
-            managed_responses = managed_responses + options[i];
-            managed_responses = managed_responses + "\n";
+            responses_wip.push(0);
+        }
+        let new_poll = {
+            options,
+            responses: responses_wip,
+            author: interaction.member.toString(),
+            command_id: interaction.commandId
+        };
+        polls.push(new_poll);
+        man.setGuildField(interaction.guildId, "active_polls", polls);
+        let partial = "";
+        for (let j = 0; j < new_poll.responses.length; j++) {
+            partial += new_poll.options[j];
+            partial += ": ";
+            partial += new_poll.responses[j];
+            partial += "\n";
         }
         let partial_message = new EmbedBuilder()
             .title(question)
-            .text(managed_responses)
+            .text(partial)
             .color("blue")
             .footer(`Use /poll to make your own`);
         for (let i = 0; i < options.length; i++) {
             partial_message
-                .response(number_to_letter(i))
+                .button("PRIMARY", options[i], (bi: ButtonInteraction, gm: Guildman) => {
+                    console.log("callback arrived!");
+                    let polls = man.getGuildField(bi.guildId, "active_polls");
+                    polls.forEach(poll => {
+                        bi.fetchReply().then((reply) => {
+                            if (reply.interaction.id == poll.command_id) {
+                                console.log(`proper poll found, using val ${i} for i`);
+                                poll.responses[i] += 1;
+                            }
+                        })
+                        let partial = "";
+                        for (let j = 0; j < poll.responses.length; j++) {
+                            partial += poll.options[j];
+                            partial += ": ";
+                            partial += poll.responses[j];
+                            partial += "\n";
+                        }
+                        bi.editReply(partial);
+                    });
+                    man.setGuildField(bi.guildId, "active_polls", polls);
+                });
         }
-        partial_message.interact(interaction, man);
+        partial_message.interact(interaction, client, man);
         return true;
-    }
-}
-
-function number_to_letter(number) {
-    switch (number) {
-        case 0:
-            return "🇦"
-        case 1:
-            return "🇧"
-        case 2:
-            return "🇨"
-        case 3:
-            return "🇩"
-        case 4:
-            return "🇪"
-        case 5:
-            return "🇫"
-        case 6:
-            return "🇬"
-        case 7:
-            return "🇭"
-        case 8:
-            return "🇮"
-        case 9:
-            return "🇯"
-        case 10:
-            return "🇰"
-        case 11:
-            return "🇱"
-        case 12:
-            return "🇲"
-        default:
-            return "🚫"
     }
 }

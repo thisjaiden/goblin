@@ -1,4 +1,4 @@
-import { CommandInteraction, User } from "discord.js";
+import { Client, CommandInteraction, User } from "discord.js";
 import { CommandManager } from "../command";
 import { EmbedBuilder } from "../embed";
 import { Guildman } from "../guildman";
@@ -28,16 +28,16 @@ export function registerFight(commandman: CommandManager) {
     commandman.registerInteraction(fight_inf, fight);
 }
 
-function fight(interaction: CommandInteraction, man: Guildman) {
+function fight(interaction: CommandInteraction, man: Guildman, client: Client) {
     if (!interaction.channel) {
         new EmbedBuilder()
             .title("This command does not work in DMs.")
             .color("red")
-            .interact(interaction);
+            .interact(interaction, client, man);
         return;
     }
     let users_mentioned: Array<User> = [];
-    if (interaction.options.length == 1) {
+    if (interaction.options.array().length == 1) {
         users_mentioned.push(interaction.options[0].user);
         users_mentioned.push(interaction.user);
     }
@@ -57,7 +57,7 @@ function fight(interaction: CommandInteraction, man: Guildman) {
         .thumbnail(rand_select[3])
         .color(rand_select[4])
         .footer("/fight to start your own")
-        .interact(interaction);
+        .interact(interaction, client, man);
     return true;
 }
 
@@ -74,20 +74,6 @@ const responses = [
         " summons a baby which throws up on ",
         ".",
         "https://i0.wp.com/post.healthline.com/wp-content/uploads/2020/05/yawning_overtired_baby-1296x728-header.jpg?w=1155&h=1528",
-        "yellow"
-    ],
-    [
-        "Well this is akward...",
-        " summons DaBaby who rap-battles ",
-        " out of the room.",
-        "https://media.pitchfork.com/photos/5c7d4c1b4101df3df85c41e5/1:1/w_600/Dababy_BabyOnBaby.jpg",
-        "yellow"
-    ],
-    [
-        "Holy Shit It's TommyInnit Oh God Oh Fuck",
-        " fell over after TommyInnit walked into the room, collapsing on top of ",
-        ".",
-        "https://static.wikia.nocookie.net/youtube/images/1/15/TommyOutit.jpg/revision/latest/zoom-crop/width/360/height/360?cb=20200916160817",
         "yellow"
     ],
     [

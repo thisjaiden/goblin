@@ -1,4 +1,4 @@
-import { Interaction } from "discord.js";
+import { Client, Interaction } from "discord.js";
 import { CommandManager } from "../command";
 import { EmbedBuilder } from "../embed";
 import { Guildman } from "../guildman";
@@ -13,14 +13,14 @@ export function registerBalls(commandman: CommandManager) {
     );
 }
 
-function balls(interaction: Interaction, man: Guildman): boolean {
+function balls(interaction: Interaction, man: Guildman, client: Client): boolean {
     new EmbedBuilder()
         .title("Balls")
         .text("balls")
         .image(responses[randInt(responses.length)])
         .color("blue")
         .footer("balls")
-        .interact(interaction);
+        .interact(interaction, client, man);
     return true;
 }
 

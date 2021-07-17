@@ -8,25 +8,20 @@ export const BOT_VERSION = "3.1.0";
 export const PATCH_NOTES = stripIndents`
 **Goblin Child v${BOT_VERSION}**
 *Features and New Content*
-- \`/remindme\`
+- \`/poll\` has been redone with a fresh coat of paint!
 *Fixes and Tweaks*
-- Fixed unintentional characters in Goblin's status
-- Added an indication if Goblin is currently updating
-- Fixed \`/banme\` in DMs
-- Fixed a crash when attempting to use \`/poll\`
-- Fixed a crash when attempting to use \`/fight\`
-- Fixed a type with \`/help\`
+- Removed old unused code
+- Updated to latest commit of Discord.js
 `;
 
 // discord.js for accessing the discord api
-import { Client, Guild, MessageReaction, NewsChannel, Permissions, TextChannel } from 'discord.js';
+import { Client, Guild, MessageReaction, NewsChannel, Snowflake, TextChannel } from 'discord.js';
 
 import { Guildman } from './guildman';
 import { CommandManager } from './command';
 import { registerBanme } from './commands/banme';
 import { registerPoll } from './commands/poll';
 import { registerEightball } from './commands/eightball';
-import { registerDababy } from './commands/dababy';
 import { registerFlavor } from './commands/flavor';
 import { registerInvite } from './commands/invite';
 import { registerFight } from './commands/fight';
@@ -81,7 +76,7 @@ export class Bot {
                 let new_reminders = [];
                 for (let j = 0; j < these_reminders.length; j++) {
                     if (these_reminders[j].when <= current_time) {
-                        let chan = this.client.guilds.resolve(all_guilds[i]).channels.resolve(these_reminders[j].channel) as TextChannel;
+                        let chan = this.client.guilds.resolve(all_guilds[i] as Snowflake).channels.resolve(these_reminders[j].channel) as TextChannel;
                         new EmbedBuilder()
                             .title(`${these_reminders[j].reminder}`)
                             .text(`${these_reminders[j].user}, I am reminding you!`)
@@ -95,16 +90,15 @@ export class Bot {
                 this.man.setGuildField(all_guilds[i], "reminders", new_reminders);
             }
         }, 60_000);
-        console.log("Invite URL:\n" + this.client.generateInvite({permissions:[Permissions.FLAGS.ADMINISTRATOR,Permissions.FLAGS.USE_APPLICATION_COMMANDS,Permissions.FLAGS.VIEW_GUILD_INSIGHTS]}))
+        console.log("Finished start tasks.");
     }
     private slashCommands() {
-        this.command_manager.pushInteractions(this.client, this.man);
+        return this.command_manager.pushInteractions(this.client, this.man);
     }
     private registerCommands() {
         registerBanme(this.command_manager);
         registerPoll(this.command_manager);
         registerEightball(this.command_manager);
-        registerDababy(this.command_manager);
         registerFlavor(this.command_manager);
         registerInvite(this.command_manager);
         registerFight(this.command_manager);
@@ -121,7 +115,7 @@ export class Bot {
                 this.man.setGuildField(guild, "latest_version", BOT_VERSION);
                 let update_channel = this.man.getGuildField(guild, "update_channel");
                 if (update_channel != "none") {
-                    let mod_chan = this.client.guilds.resolve(guild).channels.resolve(update_channel) as TextChannel | NewsChannel;
+                    let mod_chan = this.client.guilds.resolve(guild as Snowflake).channels.resolve(update_channel) as TextChannel | NewsChannel;
                     mod_chan.send(PATCH_NOTES);
                 }
             }
@@ -132,11 +126,14 @@ export class Bot {
             this.registerCommands();
             this.startTasks();
         });
-        this.client.on('interaction', interaction => {
-            // we only handle command interactions
-            if (!interaction.isCommand()) return;
-            this.command_manager.runInteractions(interaction, this.man, this.client);
-            return true;
+        this.client.on('interactionCreate', (interaction) => {
+            if (interaction.isCommand()) {
+                this.command_manager.runInteractions(interaction, this.man, this.client);
+            }
+            if (interaction.isButton()) {
+                console.log("a button was pressed");
+                this.man.handleButtonCallbacks(interaction);
+            }
         })
         this.client.on('messageReactionAdd', (reaction: MessageReaction) => {
             this.man.handleReactionCallbacks(reaction);

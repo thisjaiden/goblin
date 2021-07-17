@@ -2,7 +2,7 @@
 const commontags = require('common-tags');
 const stripIndents = commontags.stripIndents;
 
-import { Interaction } from "discord.js";
+import { Client, Interaction } from "discord.js";
 import { BOT_VERSION } from "../bot";
 import { CommandManager } from "../command";
 import { EmbedBuilder } from "../embed";
@@ -18,7 +18,7 @@ export function registerHelp(commandman: CommandManager) {
     );
 }
 
-function help(interaction: Interaction, man: Guildman): boolean {
+function help(interaction: Interaction, man: Guildman, client: Client): boolean {
     new EmbedBuilder()
         .title(`Goblin Child v${BOT_VERSION}`)
         .text(stripIndents`
@@ -32,7 +32,7 @@ function help(interaction: Interaction, man: Guildman): boolean {
         `)
         .color("blue")
         .footer(">:)")
-        .interact(interaction);
+        .interact(interaction, client, man);
     return true;
 }
 

@@ -1,4 +1,4 @@
-import { CommandInteraction, NewsChannel, TextChannel } from "discord.js";
+import { Client, CommandInteraction, NewsChannel, TextChannel } from "discord.js";
 import { CommandManager } from "../../command";
 import { EmbedBuilder } from "../../embed";
 import { Guildman } from "../../guildman";
@@ -17,12 +17,12 @@ export function registerGame(commandman: CommandManager) {
     */
 }
 
-function game(interaction: CommandInteraction, man: Guildman): boolean {
-    if (interaction.channel.type == "dm") {
+function game(interaction: CommandInteraction, man: Guildman, client: Client): boolean {
+    if (interaction.channel.type == "DM") {
         new EmbedBuilder()
             .title("This command is disabled in DMs.")
             .color("red")
-            .interact(interaction);
+            .interact(interaction, client, man);
         return;
     }
 
@@ -44,14 +44,14 @@ function game(interaction: CommandInteraction, man: Guildman): boolean {
                     // we were unable to delete this message, but that's fine. Just ignore
                 });
             })
-            .interact(interaction, man);
+            .interact(interaction, client, man);
     }
     else {
         new EmbedBuilder()
             .title("Starting a new game...")
             .text("Please wait while data is set up and generated.")
             .color("blue")
-            .interact(interaction);
+            .interact(interaction, client, man);
         enterGameLoop(interaction.channel as TextChannel | NewsChannel, man);
     }
     return true;

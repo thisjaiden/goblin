@@ -1,4 +1,4 @@
-import { CommandInteraction } from "discord.js";
+import { Client, CommandInteraction } from "discord.js";
 import { CommandManager } from "../command";
 import { EmbedBuilder } from "../embed";
 import { Guildman } from "../guildman";
@@ -13,14 +13,14 @@ export function registerFlavor(commandman: CommandManager) {
     );
 }
 
-function flv_interact(interaction: CommandInteraction, man: Guildman): boolean {
+function flv_interact(interaction: CommandInteraction, man: Guildman, client: Client): boolean {
     let rand_select = responses[randInt(responses.length)];
     new EmbedBuilder()
         .title("**ANNOUNCEMENT**")
         .text(`"${interaction.member} is __${rand_select[0]}__"`)
         .footer("Get your own: /flavor")
         .color(rand_select[1])
-        .interact(interaction);
+        .interact(interaction, client, man);
     return true;
 }
 

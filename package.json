@@ -11,11 +11,11 @@
   "author": "thisjaiden",
   "license": "DBAD (license.txt)",
   "dependencies": {
-    "@types/common-tags": "^1.8.0",
+    "@types/common-tags": "^1.8.1",
     "@types/node": "^14.17.3",
     "common-tags": "^1.8.0",
     "discord-api-types": "^0.18.1",
-    "discord.js": "git+https://github.com/discordjs/discord.js.git",
+    "discord.js": "^13.0.0-dev.98c6078.1626264203",
     "dotenv": "^8.6.0",
     "typescript": "^4.3.4"
   }

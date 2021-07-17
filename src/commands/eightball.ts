@@ -1,4 +1,4 @@
-import { CommandInteraction, Interaction, Message } from "discord.js";
+import { Client, CommandInteraction, Interaction, Message } from "discord.js";
 import { CommandManager } from "../command";
 import { EmbedBuilder } from "../embed";
 import { Guildman } from "../guildman";
@@ -21,13 +21,13 @@ export function registerEightball(commandman: CommandManager) {
     commandman.registerInteraction(eightball_inf, ball);
 }
 
-function ball(interaction: CommandInteraction, man: Guildman): boolean {
+function ball(interaction: CommandInteraction, man: Guildman, client: Client): boolean {
     let rand_select = responses[randInt(responses.length)];
     new EmbedBuilder()
         .title(`${interaction.user.username} asked "${interaction.options[0].value}"`)
         .text(`**Magic eight ball says...**\n"${rand_select[0]}"`)
         .color(rand_select[1])
-        .interact(interaction);
+        .interact(interaction, client, man);
     return true;
 }
 
