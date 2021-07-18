@@ -16,9 +16,7 @@ let bot = new Bot(
                 Intents.FLAGS.GUILD_INTEGRATIONS,
                 Intents.FLAGS.DIRECT_MESSAGES,
                 Intents.FLAGS.GUILDS,
-                Intents.FLAGS.GUILD_BANS,
-                Intents.FLAGS.GUILD_MESSAGES,
-                Intents.FLAGS.GUILD_WEBHOOKS,
+                Intents.FLAGS.GUILD_MESSAGES
             ]
         }
     ),

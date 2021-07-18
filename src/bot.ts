@@ -6,15 +6,12 @@ const stripIndents = commontags.stripIndents;
 const fs = require('fs');
 
 // bot version and latest patch notes
-export const BOT_VERSION = "4.0.0";
+export const BOT_VERSION = "4.0.0-alpha-4+";
 
 export const PATCH_NOTES = stripIndents`
 **Goblin Child v${BOT_VERSION}**
 *Features and New Content*
-- Fuck you.
-- Rewrote the bot from scratch.
-- Fuck you.
-- Fuck you, Parker.
+- Rewrote the bot from scratch. Enjoy buttons, a more uniform experience, and general across the board upgrades.
 `;
 
 // discord.js for accessing the discord api
@@ -38,33 +35,29 @@ export class Bot {
         console.log(`Constructed client. Found ${this.reminders.length} reminders and ${this.poll_data.length} polls cached on disk.`);
     }
 
+    /**
+     * Runs all tasks required to get the bot fully functional, like scheduling repeat functions.
+     */
     private startTasks() {
-        // Start everything one hour later after updating
-        setTimeout(() => {
-            // Set the status of the bot to update every 2 mins
-            setInterval(() => {
-                this.client.user.setActivity(`${this.client.guilds.cache.size} servers | /help`, {type: 'WATCHING'});
-            }, 120_000);
-            // Autosave reminders every 5 mins
-            setInterval(() => {
-                fs.writeFileSync(
-                    `reminders.json`,
-                    JSON.stringify(this.reminders)
-                );
-                fs.writeFileSync(
-                    `polls.json`,
-                    JSON.stringify(this.poll_data)
-                );
-                console.log(`Saved ${this.reminders.length} reminders to reminders.json and ${this.poll_data.length} polls to polls.json.`);
-            }, 300_000);
-            this.client.user.setStatus("online")
-        }, 3_600_000);
-        this.client.user.setStatus("dnd");
-        this.client.user.setActivity(`Goblin is restarting...`, {type: 'WATCHING'});
-        // Post patch notes for the bot, if applicable
-        this.postUpdates();
-        this.slashCommands();
-        // Check reminders every min
+        // Set the status of the bot to update every 2 mins with the amount of servers Goblin is in.
+        setInterval(() => {
+            this.client.user.setActivity(`${this.client.guilds.cache.size} servers | /help`, {type: 'WATCHING'});
+        }, 120_000);
+
+        // Autosave data that might be needed between restarts every 5 mins.
+        setInterval(() => {
+            fs.writeFileSync(
+                `reminders.json`,
+                JSON.stringify(this.reminders)
+            );
+            fs.writeFileSync(
+                `polls.json`,
+                JSON.stringify(this.poll_data)
+            );
+            console.log(`Saved ${this.reminders.length} reminders to reminders.json and ${this.poll_data.length} polls to polls.json.`);
+        }, 300_000);
+        
+        // Check reminders every min, and remind users if appropriate
         setInterval(() => {
             let current_time = new Date().getTime();
             let new_reminders = [];
@@ -81,10 +74,20 @@ export class Bot {
             }
             this.reminders = new_reminders;
         }, 60_000);
+
+        // Post patch notes for the bot, if applicable
+        this.postUpdates();
+        // Make sure slash commands are up to date
+        this.slashCommands();
+
         console.log("Finished start tasks.");
     }
+
+    /**
+     * Adds all slash commands to the application command list. This respects similarity,
+     * preventing long startup times while making sure everything is registered.
+     */
     private slashCommands() {
-        // TODO: handle slash commands
         this.client.application.commands.set([
             {
                 name: "poll",
@@ -172,9 +175,16 @@ export class Bot {
             }
         ]);
     }
+    /**
+     * Check if the bot has updated to a new SemVer, and if it has, post patch notes.
+     */
     private postUpdates() {
         // TODO: Check if we've updated, then post patch notes to update channels.
     }
+
+    /**
+     * Starts up the bot, logging in and initalizing all functions.
+     */
     public listen(): Promise<string> {
         this.client.on('ready', () => {
             this.startTasks();
@@ -339,10 +349,16 @@ export class Bot {
 }
 
 // [0-max)
-function randZeroToMax(max) {
+/**
+ * Generates a random number between 0 and max, [inclusive, exclusive)
+ * @param max - The maximum number to generate (exclusive)
+ * @returns The number generated
+ */
+function randZeroToMax(max: number): number {
     return Math.floor(Math.random() * Math.floor(max));
 }
 
+/** This is the list of images used for `/balls`. */
 const balls_responses = [
     // ball pit balls (1)
     "https://funandfunction.com/media/catalog/product/cache/d836d0aca748fb9367c92871c4ca1707/E/Q/EQ1643P_001.jpg",
