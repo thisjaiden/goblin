@@ -234,7 +234,7 @@ export class Bot {
                         interaction.reply({embeds: [message]});
                         break;
                     case "remindme":
-                        let reminder;
+                        let reminder = {};
                         let reminder_options = interaction.options.array();
                         let time_amount;
                         let time_unit;
@@ -251,18 +251,18 @@ export class Bot {
                             }
                         });
                         if (time_unit == "minutes") {
-                            reminder.when = new Date().getTime() + (1000 * 60 * time_amount);
+                            reminder["when"] = new Date().getTime() + (1000 * 60 * time_amount);
                         }
                         if (time_unit == "hours") {
-                            reminder.when = new Date().getTime() + (1000 * 60 * 60 * time_amount);
+                            reminder["when"] = new Date().getTime() + (1000 * 60 * 60 * time_amount);
                         }
                         if (time_unit == "days") {
-                            reminder.when = new Date().getTime() + (1000 * 60 * 60 * 24 * time_amount);
+                            reminder["when"] = new Date().getTime() + (1000 * 60 * 60 * 24 * time_amount);
                         }
-                        reminder.user_atable = interaction.user.toString();
-                        reminder.channel_id = interaction.channelId;
-                        reminder.guild_id = interaction.guildId;
-                        reminder.reminder = text;
+                        reminder["user_atable"] = interaction.user.toString();
+                        reminder["channel_id"] = interaction.channelId;
+                        reminder["guild_id"] = interaction.guildId;
+                        reminder["reminder"] = text;
                         interaction.reply({content: `Reminder set! \nYou will be reminded in ${time_amount} ${time_unit}.`});
                         this.reminders.push(reminder);
                         console.log(`Reminder added. Current count: ${this.reminders.length}`);
