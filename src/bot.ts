@@ -34,7 +34,8 @@ export class Bot {
         this.client = client;
         this.token = token;
         this.reminders = JSON.parse(fs.readFileSync(`reminders.json`, 'utf8'));
-        this.poll_data = [];
+        this.poll_data = JSON.parse(fs.readFileSync(`polls.json`, 'utf8'));
+        console.log(`Constructed client. Found ${this.reminders.length} reminders and ${this.poll_data.length} polls cached on disk.`);
     }
 
     private startTasks() {
@@ -42,18 +43,19 @@ export class Bot {
         setTimeout(() => {
             // Set the status of the bot to update every 2 mins
             setInterval(() => {
-                this.client.user.setActivity(`${this.client.users.cache.array().length} users | /help`, {type: 'WATCHING'});
+                this.client.user.setActivity(`${this.client.guilds.cache.size} servers | /help`, {type: 'WATCHING'});
             }, 120_000);
             // Autosave reminders every 5 mins
             setInterval(() => {
                 fs.writeFileSync(
                     `reminders.json`,
-                    JSON.stringify(this.reminders),
-                    (e) => {
-                        if (e) throw e;
-                        console.log('saved reminders to reminders.json');
-                    },
+                    JSON.stringify(this.reminders)
                 );
+                fs.writeFileSync(
+                    `polls.json`,
+                    JSON.stringify(this.poll_data)
+                );
+                console.log(`Saved ${this.reminders.length} reminders to reminders.json and ${this.poll_data.length} polls to polls.json.`);
             }, 300_000);
             this.client.user.setStatus("online")
         }, 3_600_000);
@@ -70,7 +72,8 @@ export class Bot {
                 let this_reminder = this.reminders[i];
                 if (this_reminder.when <= current_time) {
                     let chan = this.client.guilds.resolve(this_reminder.guild_id).channels.resolve(this_reminder.channel_id) as TextChannel;
-                        chan.send(`Hello ${this_reminder.user_atable}! This is your reminder to ${this_reminder.reminder}!`);
+                        chan.send(`Hello ${this_reminder.user_atable}! This is your reminder! (${this_reminder.reminder})`);
+                    console.log(`A reminder has been sent and removed from the list!`);
                 }
                 else {
                     new_reminders.push(this_reminder);
@@ -128,6 +131,44 @@ export class Bot {
             {
                 name: "balls",
                 description: "Get a picture of balls"
+            },
+            {
+                "name": "remindme",
+                "description": "Set a reminder for the future",
+                "options": [
+                    {
+                        "type": 4,
+                        "name": "time",
+                        "description": "How long until your reminder?",
+                        "required": true
+                    },
+                    {
+                        "type": 3,
+                        "name": "unit",
+                        "description": "What unit of time?",
+                        "required": true,
+                        "choices": [
+                            {
+                                "name": "minutes",
+                                "value": "minutes"
+                            },
+                            {
+                                "name": "hours",
+                                "value": "hours"
+                            },
+                            {
+                                "name": "days",
+                                "value": "days"
+                            }
+                        ]
+                    },
+                    {
+                        "type": 3,
+                        "name": "reminder",
+                        "description": "What do you want to be reminded?",
+                        "required": true
+                    }
+                ]
             }
         ]);
     }
@@ -191,6 +232,40 @@ export class Bot {
                         message.setImage(balls_responses[randZeroToMax(balls_responses.length)]);
                         message.setThumbnail(balls_responses[randZeroToMax(balls_responses.length)]);
                         interaction.reply({embeds: [message]});
+                        break;
+                    case "remindme":
+                        let reminder;
+                        let reminder_options = interaction.options.array();
+                        let time_amount;
+                        let time_unit;
+                        let text;
+                        reminder_options.forEach((option) => {
+                            if (option.name == "time") {
+                                time_amount = option.value;
+                            }
+                            else if (option.name == "unit") {
+                                time_unit = option.value;
+                            }
+                            else if (option.name == "reminder") {
+                                text = option.value;
+                            }
+                        });
+                        if (time_unit == "minutes") {
+                            reminder.when = new Date().getTime() + (1000 * 60 * time_amount);
+                        }
+                        if (time_unit == "hours") {
+                            reminder.when = new Date().getTime() + (1000 * 60 * 60 * time_amount);
+                        }
+                        if (time_unit == "days") {
+                            reminder.when = new Date().getTime() + (1000 * 60 * 60 * 24 * time_amount);
+                        }
+                        reminder.user_atable = interaction.user.toString();
+                        reminder.channel_id = interaction.channelId;
+                        reminder.guild_id = interaction.guildId;
+                        reminder.reminder = text;
+                        interaction.reply({content: `Reminder set! \nYou will be reminded in ${time_amount} ${time_unit}.`});
+                        this.reminders.push(reminder);
+                        console.log(`Reminder added. Current count: ${this.reminders.length}`);
                         break;
                     default:
                         console.error("Encountered an interaction for a command that wasn't avalable!");
