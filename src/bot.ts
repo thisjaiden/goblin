@@ -6,7 +6,7 @@ const stripIndents = commontags.stripIndents;
 const fs = require('fs');
 
 // bot version and latest patch notes
-export const BOT_VERSION = "4.0.0-alpha-4+";
+export const BOT_VERSION = "4.0.0-alpha-5+";
 
 export const PATCH_NOTES = stripIndents`
 **Goblin Child v${BOT_VERSION}**
@@ -172,6 +172,14 @@ export class Bot {
                         "required": true
                     }
                 ]
+            },
+            {
+                name: "invite",
+                description: "Get Goblin's invite link"
+            },
+            {
+                name: "flavor",
+                description: "Get your flavor!"
             }
         ]);
     }
@@ -277,6 +285,34 @@ export class Bot {
                         this.reminders.push(reminder);
                         console.log(`Reminder added. Current count: ${this.reminders.length}`);
                         break;
+                    case "invite":
+                        interaction.reply(
+                            {
+                                embeds: [
+                                    new MessageEmbed()
+                                        .setTitle("Add Goblin Child!")
+                                        .setDescription("You can invite Goblin Child by clicking the button below.")
+                                ],
+                                components: [
+                                    new MessageActionRow().addComponents(
+                                        new MessageButton()
+                                            .setStyle("LINK")
+                                            .setLabel("Invite me!")
+                                            .setURL("https://discord.com/oauth2/authorize?client_id=763525517931839520&permissions=8&scope=bot%20applications.commands")
+                                    )
+                                ]
+                            }
+                        );
+                        break;
+                    case "flavor":
+                        let repo = flavor_responses[randZeroToMax(flavor_responses.length)];
+                        interaction.reply({embeds: [
+                            new MessageEmbed()
+                                .setTitle("**ANNOUNCEMENT**")
+                                .setDescription(`"${interaction.member} is __${repo[0]}__"`)
+                                .setColor(repo[1])
+                        ]});
+                        break;
                     default:
                         console.error("Encountered an interaction for a command that wasn't avalable!");
                         break;
@@ -337,13 +373,13 @@ export class Bot {
                         break;
                 }
             }
-        })
+        });
         this.client.on('guildCreate', (guild: Guild) => {
             console.log(`Goblin was invited to a new guild! (${guild.name} with ${guild.memberCount} members)`);
         });
         this.client.on('guildDelete', (guild: Guild) => {
             console.log(`Goblin was removed from a guild... (${guild.name})`)
-        })
+        });
         return this.client.login(this.token);
     }
 }
@@ -408,4 +444,45 @@ const balls_responses = [
     "https://previews.123rf.com/images/pilgrimiracle/pilgrimiracle1701/pilgrimiracle170100002/69770390-disco-balls-on-the-ceiling.jpg",
     // yarn balls (24)
     "https://previews.123rf.com/images/pjjaruwan/pjjaruwan1501/pjjaruwan150100003/35077423-colorful-wool-yarn-balls.jpg",
+];
+
+const flavor_responses = [
+    // Real flavors (14)
+    ["Grape Flavored", "#ab339f"],
+    ["Strawberry Flavored", "#db2323"],
+    ["Blueberry Flavored", "#243fd6"],
+    ["Lemon Flavored", "#edfa7d"],
+    ["Sour Flavored", "#a8db74"],
+    ["Sweet Flavored", "#f78172"],
+    ["Blueberry Flavored", "#3f3dd9"],
+    ["Avacado Flavored", "#1c613b"],
+    ["Not Flavored :cry:", "#3b6fd1"],
+    ["Cotton Candy Flavored", "#87eaf5"],
+    ["Apple Flavored", "#c41b1b"],
+    ["Banana Flavored", "#e6da32"],
+    ["Cherry Flavored", "#7d040a"],
+    ["Cinnamon Flavored", "#913f04"],
+    // Unusual flavors (15)
+    ["Green Flavored", "#24d63f"],
+    ["**~~VOID~~** Flavored", "#000000"],
+    ["Heaven Flavored", "#ffffff"],
+    ["War Crime Flavored", "#ff0000"],
+    ["Sky Flavored", "#5fc5ed"],
+    ["Weed Flavored", "#31f76a"],
+    ["Shart Flavored", "#5e2d0f"],
+    ["Milf Flavored", "#a221bf"],
+    ["Ronald Flavored :beronald:", "#000000"],
+    ["Gasoline Flavored", "#a9d9ae"],
+    ["Cum Flavored", "#d4d4d4"],
+    ["Breast Milk Flavored", "#d4d4d4"],
+    ["Blood Flavored", "#941212"],
+    ["Unseasoned :cry:", "#3b6fd1"],
+    ["Unsweetened :cry:", "#3b6fd1"],
+    // Unrelated to flavors (6)
+    ["Orange Orange Orange Orange Orange", "#f2992c"],
+    ["dead", "#473838"],
+    ["wanted on multiple counts of manslaughter", "#75161d"],
+    ["**Chunky Monkey**", "#693d15"],
+    ["Piss", "#dde080"],
+    ["not avalable. Please leave a message, after the tone. **BEEEEEEP**", "#52876c"]
 ];
