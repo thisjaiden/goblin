@@ -6,16 +6,28 @@ const stripIndents = commontags.stripIndents;
 const fs = require('fs');
 
 // bot version and latest patch notes
-export const BOT_VERSION = "4.0.0-alpha-5+";
+export const BOT_VERSION = "4.0.0-alpha-6+";
 
 export const PATCH_NOTES = stripIndents`
 **Goblin Child v${BOT_VERSION}**
 *Features and New Content*
 - Rewrote the bot from scratch. Enjoy buttons, a more uniform experience, and general across the board upgrades.
+*Detailed Patch Notes*
+- /poll now uses proper buttons
+- /poll has different text and functionality
+- /remindme requires a reminder to be provided
+- /remindme has different text and functionality
+- /beta was added for beta testing new features
+- /feedback was added for getting community feedback to help improve goblin
+
+*Additional Notes*
+X /help is currently disabled
+X /eightball is currently disabled
+X /fight is currently disabled
 `;
 
 // discord.js for accessing the discord api
-import { Client, Guild, Message, MessageActionRow, MessageButton, MessageEmbed, TextChannel } from 'discord.js';
+import { Client, ColorResolvable, CommandInteraction, Guild, Message, MessageActionRow, MessageButton, MessageEmbed, TextChannel } from 'discord.js';
 
 export class Bot {
     // discord.js Client object used for interfacing with Discord
@@ -23,16 +35,30 @@ export class Bot {
     // token needed to connect `client` to the Discord API
     private readonly token: string;
 
-    private reminders;
+    private reminders: Array<object>;
 
-    private poll_data;
+    private poll_data: Array<object>;
+
+    private beta_tokens: Array<string>;
+
+    private rps_games: Array<object>;
     
     constructor(client: Client, token: string) {
         this.client = client;
         this.token = token;
         this.reminders = JSON.parse(fs.readFileSync(`reminders.json`, 'utf8'));
         this.poll_data = JSON.parse(fs.readFileSync(`polls.json`, 'utf8'));
+        this.rps_games = [];
+        this.beta_tokens = [
+            `gb-${randZeroToMax(999_999_999)}`,
+            `rpsb-${randZeroToMax(999_999_999)}`,
+            `tttb-${randZeroToMax(999_999_999)}`
+        ];
         console.log(`Constructed client. Found ${this.reminders.length} reminders and ${this.poll_data.length} polls cached on disk.`);
+        console.log(`The current beta tokens:`);
+        console.log(`/game proto x00: ${this.beta_tokens[0]}`);
+        console.log(`/rps proto x01:  ${this.beta_tokens[1]}`);
+        console.log(`/ttt proto x02:  ${this.beta_tokens[2]}`);
     }
 
     /**
@@ -63,9 +89,9 @@ export class Bot {
             let new_reminders = [];
             for (let i = 0; i < this.reminders.length; i++) {
                 let this_reminder = this.reminders[i];
-                if (this_reminder.when <= current_time) {
-                    let chan = this.client.guilds.resolve(this_reminder.guild_id).channels.resolve(this_reminder.channel_id) as TextChannel;
-                        chan.send(`Hello ${this_reminder.user_atable}! This is your reminder! (${this_reminder.reminder})`);
+                if (this_reminder["when"] <= current_time) {
+                    let chan = this.client.guilds.resolve(this_reminder["guild_id"]).channels.resolve(this_reminder["channel_id"]) as TextChannel;
+                        chan.send(`Hello ${this_reminder["user_atable"]}! This is your reminder! (${this_reminder["reminder"]})`);
                     console.log(`A reminder has been sent and removed from the list!`);
                 }
                 else {
@@ -136,13 +162,13 @@ export class Bot {
                 description: "Get a picture of balls"
             },
             {
-                "name": "remindme",
-                "description": "Set a reminder for the future",
-                "options": [
+                name: "remindme",
+                description: "Set a reminder for the future",
+                options: [
                     {
-                        "type": 4,
-                        "name": "time",
-                        "description": "How long until your reminder?",
+                        type: 4,
+                        name: "time",
+                        description: "How long until your reminder?",
                         "required": true
                     },
                     {
@@ -180,6 +206,30 @@ export class Bot {
             {
                 name: "flavor",
                 description: "Get your flavor!"
+            },
+            {
+                name: "beta",
+                description: "Participate in a Goblin PBT.",
+                options: [
+                    {
+                        type: 3,
+                        name: "key",
+                        description: "Provide your access key here.",
+                        required: true
+                    }
+                ]
+            },
+            {
+                name: "feedback",
+                description: "Give feedback about Goblin!",
+                options: [
+                    {
+                        type: 3,
+                        name: "feedback",
+                        description: "Provide feedback here.",
+                        required: true
+                    }
+                ]
             }
         ]);
     }
@@ -310,8 +360,73 @@ export class Bot {
                             new MessageEmbed()
                                 .setTitle("**ANNOUNCEMENT**")
                                 .setDescription(`"${interaction.member} is __${repo[0]}__"`)
-                                .setColor(repo[1])
+                                .setColor(repo[1] as ColorResolvable)
                         ]});
+                        break;
+                    case "beta":
+                        if (interaction.options.array()[0].value == this.beta_tokens[0]) {
+                            // game beta x00
+                            console.log("A user entered a proper beta key for gx00.");
+                            newGameFromInteraction(interaction);
+                        }
+                        else if (interaction.options.array()[0].value == this.beta_tokens[1]) {
+                            // rock paper sissors beta x01
+                            console.log("A user entered a proper beta key for rpsx01.");
+                            let rps_instance = {};
+                            rps_instance["rock"] = "rps|" + randZeroToMax(999_999_999_999);
+                            rps_instance["paper"] = "rps|" + randZeroToMax(999_999_999_999);
+                            rps_instance["scissors"] = "rps|" + randZeroToMax(999_999_999_999);
+                            rps_instance["challenger"] = interaction.user.id;
+                            rps_instance["challenged"] = "256444078302953484";
+                            rps_instance["result_challenger"] = 0;
+                            rps_instance["result_challenged"] = 0;
+                            interaction.reply({
+                                embeds: [
+                                    new MessageEmbed()
+                                        .setTitle("Rock, Paper, Scissors, Shoot!")
+                                        .setDescription(`<@${rps_instance["challenged"]}>, you have been challenged to RPS by ${interaction.user.toString()}`)
+                                        .setFooter("challenge someone else with /rps ${beta_program}")
+                                ],
+                                components: [
+                                    new MessageActionRow().addComponents([
+                                        new MessageButton()
+                                            .setLabel("Rock")
+                                            .setStyle("SECONDARY")
+                                            .setCustomId(rps_instance["rock"]),
+                                        new MessageButton()
+                                            .setLabel("Paper")
+                                            .setStyle("PRIMARY")
+                                            .setCustomId(rps_instance["paper"]),
+                                        new MessageButton()
+                                            .setLabel("Scissors")
+                                            .setStyle("DANGER")
+                                            .setCustomId(rps_instance["scissors"])
+                                    ])
+                                ]
+                            });
+                            let msg = await interaction.fetchReply();
+                            rps_instance["message_id"] = msg.id;
+                            this.rps_games.push(rps_instance);
+                        }
+                        else if (interaction.options.array()[0].value == this.beta_tokens[2]) {
+                            /// tick tac toe beta x02
+                            console.log("A user entered a proper beta key for tttx02.");
+                        }
+                        else {
+                            interaction.reply("Invalid beta token.");
+                            console.log(`A user entered the invalid beta key ${interaction.options.array()[0].value}.`);
+                        }
+                        break;
+                    case "feedback":
+                        console.log("Feedback received!");
+                        console.log(`(${interaction.options.array()[0].value})`);
+                        let fbtm = JSON.parse(fs.readFileSync(`feedback.json`, 'utf8'))
+                        fbtm.push(interaction.options.array()[0].value);
+                        fs.writeFileSync(
+                            `feedback.json`,
+                            JSON.stringify(fbtm)
+                        );
+                        interaction.reply({content: "Feedback received!"});
                         break;
                     default:
                         console.error("Encountered an interaction for a command that wasn't avalable!");
@@ -325,9 +440,9 @@ export class Bot {
                 switch (interaction.customId.split("|")[0]) {
                     case "poll":
                         this.poll_data.forEach((poll) => {
-                            if (poll.message_id == interaction.message.id) {
-                                for (let i = 0; i < poll.voted.length; i++) {
-                                    if (interaction.member.user.id == poll.voted[i]) {
+                            if (poll["message_id"] == interaction.message.id) {
+                                for (let i = 0; i < poll["voted"].length; i++) {
+                                    if (interaction.member.user.id == poll["voted"][i]) {
                                         interaction.reply({ephemeral: true, content: "You've already voted on this poll idiot :P"});
                                         console.log("User had already voted on this poll.");
                                         return;
@@ -335,7 +450,7 @@ export class Bot {
                                 }
                                 let button_index = 0;
                                 let finished = false;
-                                poll.buttons.forEach((button) => {
+                                poll["buttons"].forEach((button) => {
                                     if (button.customId == interaction.customId) {
                                         finished = true;
                                     }
@@ -344,29 +459,110 @@ export class Bot {
                                     }
                                     button_index++;
                                 });
-                                poll.values[button_index]++;
+                                poll["values"][button_index]++;
                                 let visuals = new MessageEmbed();
                                 let tmp_text = "";
-                                let total_votes = poll.voted.length;
-                                for (let i = 0; i < poll.buttons.length; i++) {
-                                    tmp_text = tmp_text + poll.buttons[i].label;
+                                let total_votes = poll["voted"].length;
+                                for (let i = 0; i < poll["buttons"].length; i++) {
+                                    tmp_text = tmp_text + poll["buttons"][i].label;
                                     tmp_text = tmp_text + ": ";
-                                    tmp_text = tmp_text + poll.values[i];
+                                    tmp_text = tmp_text + poll["values"][i];
                                     tmp_text = tmp_text + " ";
-                                    tmp_text = tmp_text + '▇'.repeat(poll.values[i]);
+                                    tmp_text = tmp_text + '▇'.repeat(poll["values"][i]);
                                     tmp_text = tmp_text + "\n";
                                 }
-                                visuals.setTitle(poll.question);
+                                visuals.setTitle(poll["question"]);
                                 visuals.setDescription(tmp_text);
                                 visuals.setFooter("make your own with /poll!");
                                 let test_msg = interaction.message as Message;
                                 test_msg.edit({embeds: [visuals]});
-                                poll.voted.push(interaction.member.user.id);
+                                poll["voted"].push(interaction.member.user.id);
                                 console.log("Edited /poll message with new values following interaction.");
                                 interaction.reply({ephemeral: true, content: "Voted!"});
                                 return;
                             }
                         });
+                        break;
+                    case "rps":
+                        let new_games_list = [];
+                        this.rps_games.forEach(game => {
+                            new_games_list.push(game);
+                            if (interaction.message.id == game["message_id"]) {
+                                let interaction_user = "none";
+                                if (interaction.user.id == game["challenger"]) {
+                                    interaction_user = "result_challenger";
+                                }
+                                else if (interaction.user.id == game["challenged"]) {
+                                    interaction_user = "result_challenged";
+                                }
+                                if (interaction_user == "none") {
+                                    interaction.reply({ephemeral: true, content: "This game doesn't involve *you*. >:("});
+                                    return;
+                                }
+                                else {
+                                    if (game[interaction_user] != 0) {
+                                        interaction.reply({ephemeral: true, content: "You've already made your choice idiot :P"});
+                                        return;
+                                    }
+                                    switch (interaction.customId) {
+                                        case game["rock"]:
+                                            game[interaction_user] = 1;
+                                            break;
+                                        case game["paper"]:
+                                            game[interaction_user] = 2;
+                                            break;
+                                        case game["scissors"]:
+                                            game[interaction_user] = 3;
+                                            break;
+                                    }
+                                    if (game["result_challenger"] != 0 && game["result_challenged"] != 0) {
+                                        // game finished, show results and remove from list of wip games
+                                        new_games_list.pop();
+                                        let convert_a = num_to_word_rps(game["result_challenger"]);
+                                        let convert_b = num_to_word_rps(game["result_challenged"]);
+                                        if (game["result_challenger"] == game["result_challenged"]) {
+                                            interaction.reply(`Both <@${game["challenger"]}> and <@${game["challenged"]}> chose ${convert_a}. TIED!`);
+                                            return;
+                                        }
+                                        else if (game["result_challenger"] == 1 && game["result_challenged"] == 2) {
+                                            // r v p
+                                            interaction.reply(`<@${game["challenger"]}> chose ${convert_a}, but <@${game["challenged"]}> chose ${convert_b}.`);
+                                            return;
+                                        }
+                                        else if (game["result_challenger"] == 1 && game["result_challenged"] == 3) {
+                                            // r v s
+                                            interaction.reply(`<@${game["challenger"]}> chose ${convert_a}, beating <@${game["challenged"]}>'s ${convert_b}.`);
+                                            return;
+                                        }
+                                        else if (game["result_challenger"] == 2 && game["result_challenged"] == 1) {
+                                            // p v r
+                                            interaction.reply(`<@${game["challenger"]}> chose ${convert_a}, beating <@${game["challenged"]}>'s ${convert_b}.`);
+                                            return;
+                                        }
+                                        else if (game["result_challenger"] == 2 && game["result_challenged"] == 3) {
+                                            // p v s
+                                            interaction.reply(`<@${game["challenger"]}> chose ${convert_a}, but <@${game["challenged"]}> chose ${convert_b}.`);
+                                            return;
+                                        }
+                                        else if (game["result_challenger"] == 3 && game["result_challenged"] == 1) {
+                                            // s v r
+                                            interaction.reply(`<@${game["challenger"]}> chose ${convert_a}, but <@${game["challenged"]}> chose ${convert_b}.`);
+                                            return;
+                                        }
+                                        else if (game["result_challenger"] == 3 && game["result_challenged"] == 2) {
+                                            // s v p
+                                            interaction.reply(`<@${game["challenger"]}> chose ${convert_a}, beating <@${game["challenged"]}>'s ${convert_b}.`);
+                                            return;
+                                        }
+                                    }
+                                    else {
+                                        interaction.reply({ephemeral: true, content: "Final decision submitted."});
+                                        return;
+                                    }
+                                }
+                            }
+                        });
+                        this.rps_games = new_games_list;
                         break;
                     default:
                         console.error("Encountered a button interaction for a command that wasn't avalable!");
@@ -486,3 +682,22 @@ const flavor_responses = [
     ["Piss", "#dde080"],
     ["not avalable. Please leave a message, after the tone. **BEEEEEEP**", "#52876c"]
 ];
+
+function newGameFromInteraction(interaction: CommandInteraction) {
+
+}
+
+function num_to_word_rps(number: number): string {
+    switch (number) {
+        case 0:
+            return "NO CHOICE";
+        case 1:
+            return "rock";
+        case 2:
+            return "paper";
+        case 3:
+            return "scissors";
+        default:
+            return "UNKNOWN INDEX";
+    }
+}
