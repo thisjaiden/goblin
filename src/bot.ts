@@ -2,29 +2,10 @@
 const commontags = require('common-tags');
 const stripIndents = commontags.stripIndents;
 
-
 const fs = require('fs');
 
-// bot version and latest patch notes
-export const BOT_VERSION = "4.0.0-alpha-6+";
-
-export const PATCH_NOTES = stripIndents`
-**Goblin Child v${BOT_VERSION}**
-*Features and New Content*
-- Rewrote the bot from scratch. Enjoy buttons, a more uniform experience, and general across the board upgrades.
-*Detailed Patch Notes*
-- /poll now uses proper buttons
-- /poll has different text and functionality
-- /remindme requires a reminder to be provided
-- /remindme has different text and functionality
-- /beta was added for beta testing new features
-- /feedback was added for getting community feedback to help improve goblin
-
-*Additional Notes*
-X /help is currently disabled
-X /eightball is currently disabled
-X /fight is currently disabled
-`;
+// bot version
+export const BOT_VERSION = "4.0.0";
 
 // discord.js for accessing the discord api
 import { Client, ColorResolvable, CommandInteraction, Guild, Message, MessageActionRow, MessageButton, MessageEmbed, TextChannel } from 'discord.js';
@@ -101,8 +82,6 @@ export class Bot {
             this.reminders = new_reminders;
         }, 60_000);
 
-        // Post patch notes for the bot, if applicable
-        this.postUpdates();
         // Make sure slash commands are up to date
         this.slashCommands();
 
@@ -230,14 +209,24 @@ export class Bot {
                         required: true
                     }
                 ]
+            },
+            {
+                name: "help",
+                description: "Returns a list of Goblin's commands"
+            },
+            {
+                name: "eightball",
+                description: "Ask the magic 8 ball a question!",
+                options: [
+                    {
+                        type: 3,
+                        name: "question",
+                        description: "The question you want to ask",
+                        required: true
+                    }
+                ]
             }
         ]);
-    }
-    /**
-     * Check if the bot has updated to a new SemVer, and if it has, post patch notes.
-     */
-    private postUpdates() {
-        // TODO: Check if we've updated, then post patch notes to update channels.
     }
 
     /**
@@ -377,7 +366,7 @@ export class Bot {
                             rps_instance["paper"] = "rps|" + randZeroToMax(999_999_999_999);
                             rps_instance["scissors"] = "rps|" + randZeroToMax(999_999_999_999);
                             rps_instance["challenger"] = interaction.user.id;
-                            rps_instance["challenged"] = "256444078302953484";
+                            rps_instance["challenged"] = "297139481708855297";
                             rps_instance["result_challenger"] = 0;
                             rps_instance["result_challenged"] = 0;
                             interaction.reply({
@@ -427,6 +416,39 @@ export class Bot {
                             JSON.stringify(fbtm)
                         );
                         interaction.reply({content: "Feedback received!"});
+                        break;
+                    case "help":
+                        interaction.reply(
+                            {
+                                embeds: [
+                                    new MessageEmbed()
+                                        .setTitle(`Goblin Child v${BOT_VERSION}`)
+                                        .setDescription(stripIndents`
+                                            /balls - Shows a picture of balls. Genuinely SFW.
+                                            /eightball - Answers all your deepest questions.
+                                            /flavor - Ever wondered what flavor you are? Find out now.
+                                            /invite - Get the invite link for Goblin. <3
+                                            /poll - Ask everyone a question.
+                                            /feedback - Give feedback and suggest features.
+                                            /beta - Participate in PBTs.
+                                            /remindme - Set a reminder for yourself.
+                                        `)
+                                ]
+                            }
+                        );
+                        break;
+                    case "eightball":
+                        let rand_select = eb_responses[randZeroToMax(eb_responses.length)];
+                        interaction.reply(
+                            {
+                                embeds: [
+                                    new MessageEmbed()
+                                        .setTitle(`${interaction.user.username} asked "${interaction.options[0].value}`)
+                                        .setDescription(`**Magic eight ball says...**\n"${rand_select[0]}"`)
+                                        .setColor(rand_select[1] as ColorResolvable)
+                                ]
+                            }
+                        );
                         break;
                     default:
                         console.error("Encountered an interaction for a command that wasn't avalable!");
@@ -681,6 +703,33 @@ const flavor_responses = [
     ["**Chunky Monkey**", "#693d15"],
     ["Piss", "#dde080"],
     ["not avalable. Please leave a message, after the tone. **BEEEEEEP**", "#52876c"]
+];
+
+const eb_responses = [
+    // yes (6)
+    ["sure", "green"],
+    ["absoulutely", "green"],
+    ["yes", "green"],
+    ["yeah...", "green"],
+    ["of course!", "green"],
+    ["indeed.", "green"],
+    // unclear (3)
+    ["okeydokey", "blue"],
+    ["the answer is ambigous.", "blue"],
+    ["i am __eight (8) ball__", "blue"],
+    // maybe (4)
+    ["idk", "yellow"],
+    ["maybe", "yellow"],
+    ["possibly.", "yellow"],
+    ["why ask *me*? I don't know.", "yellow"],
+    // no (7)
+    ["nah", "red"],
+    ["**FUCK NO!**", "red"],
+    ["stupid question, obviously not", "red"],
+    ["no", "red"],
+    ["nope", "red"],
+    ["no way", "red"],
+    ["negative.", "red"]
 ];
 
 function newGameFromInteraction(interaction: CommandInteraction) {

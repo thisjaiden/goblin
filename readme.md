@@ -1,8 +1,16 @@
-Build:
+Goblin Child
+===
 
-`npm run watch`
+"your resident shitposting bot"
 
-Run:
+[Patch notes](patch_notes.md)
 
-`node src/index.js`
+Building
+---
+
+Required:
+- Node.js
+- typescript
+
+Start by running `npm run watch` to compile the typescript. Then you can run the bot with `node src/index.js`.
 
