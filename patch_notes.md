@@ -2,7 +2,7 @@
 
 *Features and New Content*
 
-- Rewrote the bot from scratch. Enjoy buttons, a more uniform experience, and general across the board upgrades.
+- Rewrote the bot from scratch. Enjoy buttons, a more uniform experience, and general across the board upgrades. This will allow content to be created much faster
 
 *Detailed Patch Notes*
 
@@ -17,4 +17,4 @@
 *Additional Notes*
 
 - /fight is has been removed. Don't worry, there will be new ways to compete with your peers soon
-- Previous reminders from /remindme have been cleared
+- Previous reminders from /remindme have been cleared. This won't happen again in the future
