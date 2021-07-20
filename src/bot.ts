@@ -443,7 +443,7 @@ export class Bot {
                             {
                                 embeds: [
                                     new MessageEmbed()
-                                        .setTitle(`${interaction.user.username} asked "${interaction.options[0].value}`)
+                                        .setTitle(`${interaction.user.username} asked "${interaction.options.array()[0].value}"`)
                                         .setDescription(`**Magic eight ball says...**\n"${rand_select[0]}"`)
                                         .setColor(rand_select[1] as ColorResolvable)
                                 ]
