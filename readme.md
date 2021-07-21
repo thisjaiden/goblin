@@ -10,6 +10,10 @@ Building
 Required:
 - Node.js
 - typescript
+- A valid Discord bot token
 
-Start by running `npm run watch` to compile the typescript. Then you can run the bot with `node src/index.js`.
-
+You will need to modify some files to set up the bot.  
+1. Create two files called `polls.json` and `reminders.json` at the root directory, and put the text `[]` in both.
+2. Create a file called `.env` at the root directory, putting your Discord bot token in the file as shown in `.env.example`.
+3. Run `npm run watch` to compile the typescript.
+4. Run the bot with `node src/index.js`!
