@@ -2,8 +2,7 @@ Goblin Child
 ===
 
 "your resident shitposting bot"
-
-[Patch notes](patch_notes.md)
+[Invite](https://discord.com/oauth2/authorize?client_id=763525517931839520&permissions=8&scope=bot%20applications.commands) | [Patch notes](patch_notes.md)
 
 Building
 ---
