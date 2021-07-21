@@ -1,3 +1,12 @@
+**Goblin Child v4.1.0**
+
+*Features and New Content*
+- /rps - Challenge your friends today!
+
+*Fixes*
+- Using /poll in DMs gives an error to the user instead of crashing the bot
+
+
 **Goblin Child v4.0.0**
 
 *Features and New Content*

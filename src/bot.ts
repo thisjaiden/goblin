@@ -5,7 +5,7 @@ const stripIndents = commontags.stripIndents;
 const fs = require('fs');
 
 // bot version
-export const BOT_VERSION = "4.0.0";
+export const BOT_VERSION = "4.1.0";
 
 // discord.js for accessing the discord api
 import { Client, ColorResolvable, CommandInteraction, Guild, Message, MessageActionRow, MessageButton, MessageEmbed, TextChannel } from 'discord.js';
@@ -32,14 +32,12 @@ export class Bot {
         this.rps_games = [];
         this.beta_tokens = [
             `gb-${randZeroToMax(999_999_999)}`,
-            `rpsb-${randZeroToMax(999_999_999)}`,
             `tttb-${randZeroToMax(999_999_999)}`
         ];
         console.log(`Constructed client. Found ${this.reminders.length} reminders and ${this.poll_data.length} polls cached on disk.`);
         console.log(`The current beta tokens:`);
         console.log(`/game proto x00: ${this.beta_tokens[0]}`);
-        console.log(`/rps proto x01:  ${this.beta_tokens[1]}`);
-        console.log(`/ttt proto x02:  ${this.beta_tokens[2]}`);
+        console.log(`/ttt proto x02:  ${this.beta_tokens[1]}`);
     }
 
     /**
@@ -225,6 +223,18 @@ export class Bot {
                         required: true
                     }
                 ]
+            },
+            {
+                name: "rps",
+                description: "Challenge someone to Rock Paper Scissors.",
+                options: [
+                    {
+                        type: 6,
+                        name: "user",
+                        description: "The user to challenge",
+                        required: true
+                    }
+                ]
             }
         ]);
     }
@@ -242,6 +252,10 @@ export class Bot {
                 console.log(`Interaction begin: /${interaction.commandName}`);
                 switch (interaction.commandName) {
                     case "poll":
+                        if (!interaction.inGuild()) {
+                            interaction.reply("You can't create a poll in DMs.");
+                            return;
+                        }
                         let poll_options = interaction.options.array();
                         let poll_question;
                         let poll_responses = [];
@@ -359,45 +373,6 @@ export class Bot {
                             newGameFromInteraction(interaction);
                         }
                         else if (interaction.options.array()[0].value == this.beta_tokens[1]) {
-                            // rock paper sissors beta x01
-                            console.log("A user entered a proper beta key for rpsx01.");
-                            let rps_instance = {};
-                            rps_instance["rock"] = "rps|" + randZeroToMax(999_999_999_999);
-                            rps_instance["paper"] = "rps|" + randZeroToMax(999_999_999_999);
-                            rps_instance["scissors"] = "rps|" + randZeroToMax(999_999_999_999);
-                            rps_instance["challenger"] = interaction.user.id;
-                            rps_instance["challenged"] = "297139481708855297";
-                            rps_instance["result_challenger"] = 0;
-                            rps_instance["result_challenged"] = 0;
-                            interaction.reply({
-                                embeds: [
-                                    new MessageEmbed()
-                                        .setTitle("Rock, Paper, Scissors, Shoot!")
-                                        .setDescription(`<@${rps_instance["challenged"]}>, you have been challenged to RPS by ${interaction.user.toString()}`)
-                                        .setFooter("challenge someone else with /rps ${beta_program}")
-                                ],
-                                components: [
-                                    new MessageActionRow().addComponents([
-                                        new MessageButton()
-                                            .setLabel("Rock")
-                                            .setStyle("SECONDARY")
-                                            .setCustomId(rps_instance["rock"]),
-                                        new MessageButton()
-                                            .setLabel("Paper")
-                                            .setStyle("PRIMARY")
-                                            .setCustomId(rps_instance["paper"]),
-                                        new MessageButton()
-                                            .setLabel("Scissors")
-                                            .setStyle("DANGER")
-                                            .setCustomId(rps_instance["scissors"])
-                                    ])
-                                ]
-                            });
-                            let msg = await interaction.fetchReply();
-                            rps_instance["message_id"] = msg.id;
-                            this.rps_games.push(rps_instance);
-                        }
-                        else if (interaction.options.array()[0].value == this.beta_tokens[2]) {
                             /// tick tac toe beta x02
                             console.log("A user entered a proper beta key for tttx02.");
                         }
@@ -405,6 +380,43 @@ export class Bot {
                             interaction.reply("Invalid beta token.");
                             console.log(`A user entered the invalid beta key ${interaction.options.array()[0].value}.`);
                         }
+                        break;
+                    case "rps":
+                        let rps_instance = {};
+                        rps_instance["rock"] = "rps|" + randZeroToMax(999_999_999_999);
+                        rps_instance["paper"] = "rps|" + randZeroToMax(999_999_999_999);
+                        rps_instance["scissors"] = "rps|" + randZeroToMax(999_999_999_999);
+                        rps_instance["challenger"] = interaction.user.id;
+                        rps_instance["challenged"] = interaction.options.array()[0].user.id;
+                        rps_instance["result_challenger"] = 0;
+                        rps_instance["result_challenged"] = 0;
+                        interaction.reply({
+                            embeds: [
+                                new MessageEmbed()
+                                    .setTitle("Rock, Paper, Scissors, Shoot!")
+                                    .setDescription(`<@${rps_instance["challenged"]}>, you have been challenged to RPS by ${interaction.user.toString()}`)
+                                    .setFooter("challenge someone else with /rps")
+                            ],
+                            components: [
+                                new MessageActionRow().addComponents([
+                                    new MessageButton()
+                                        .setLabel("Rock")
+                                        .setStyle("SECONDARY")
+                                        .setCustomId(rps_instance["rock"]),
+                                    new MessageButton()
+                                        .setLabel("Paper")
+                                        .setStyle("PRIMARY")
+                                        .setCustomId(rps_instance["paper"]),
+                                    new MessageButton()
+                                        .setLabel("Scissors")
+                                        .setStyle("DANGER")
+                                        .setCustomId(rps_instance["scissors"])
+                                ])
+                            ]
+                        });
+                        let rps_msg = await interaction.fetchReply();
+                        rps_instance["message_id"] = rps_msg.id;
+                        this.rps_games.push(rps_instance);
                         break;
                     case "feedback":
                         console.log("Feedback received!");
