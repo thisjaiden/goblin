@@ -5,7 +5,7 @@ const stripIndents = commontags.stripIndents;
 const fs = require('fs');
 
 // bot version
-export const BOT_VERSION = "4.1.0";
+export const BOT_VERSION = "4.1.1";
 
 // discord.js for accessing the discord api
 import { Client, ColorResolvable, CommandInteraction, Guild, Message, MessageActionRow, MessageButton, MessageEmbed, TextChannel } from 'discord.js';
@@ -334,9 +334,14 @@ export class Bot {
                         reminder["channel_id"] = interaction.channelId;
                         reminder["guild_id"] = interaction.guildId;
                         reminder["reminder"] = text;
-                        interaction.reply({content: `Reminder set! \nYou will be reminded in ${time_amount} ${time_unit}.`});
-                        this.reminders.push(reminder);
-                        console.log(`Reminder added. Current count: ${this.reminders.length}`);
+                        if (reminder["guild_id"]) {
+                            interaction.reply({content: `Reminder set! \nYou will be reminded in ${time_amount} ${time_unit}.`});
+                            this.reminders.push(reminder);
+                            console.log(`Reminder added. Current count: ${this.reminders.length}`);
+                        }
+                        else {
+                            interaction.reply("Unfortunately, due to technical restraints, you cannot set reminders in DMs yet.");
+                        }
                         break;
                     case "invite":
                         interaction.reply(
@@ -382,6 +387,14 @@ export class Bot {
                         }
                         break;
                     case "rps":
+                        if (interaction.options.array()[0].user.bot) {
+                            interaction.reply("You can't challenge a bot to RPS! (weirdo...)");
+                            return;
+                        }
+                        if (interaction.options.array()[0].user.id == interaction.user.id) {
+                            interaction.reply("You can't challenge yourself to RPS, idiot.");
+                            return;
+                        }
                         let rps_instance = {};
                         rps_instance["rock"] = "rps|" + randZeroToMax(999_999_999_999);
                         rps_instance["paper"] = "rps|" + randZeroToMax(999_999_999_999);
@@ -441,6 +454,7 @@ export class Bot {
                                             /flavor - Ever wondered what flavor you are? Find out now.
                                             /invite - Get the invite link for Goblin. <3
                                             /poll - Ask everyone a question.
+                                            /rps - Challenge someone to rock paper scissors.
                                             /feedback - Give feedback and suggest features.
                                             /beta - Participate in PBTs.
                                             /remindme - Set a reminder for yourself.

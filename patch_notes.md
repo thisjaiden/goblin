@@ -1,3 +1,10 @@
+**Goblin Child v4.1.1**
+*Fixes*
+- You can no longer challenge bots to /rps
+- You can no longer challenge yourself to /rps
+- /help includes /rps, oops
+- Using /remindme in DMs gives an error to the user instead of crashing the bot
+
 **Goblin Child v4.1.0**
 
 *Features and New Content*
