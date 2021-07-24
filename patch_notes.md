@@ -1,4 +1,14 @@
+**Goblin Child v4.2.0**
+
+*Features and New Content*
+- /ttt - Challenge your friends today!
+- /remindme now functions in DMs!
+
+*Additional Notes*
+- /beta has been removed
+
 **Goblin Child v4.1.1**
+
 *Fixes*
 - You can no longer challenge bots to /rps
 - You can no longer challenge yourself to /rps

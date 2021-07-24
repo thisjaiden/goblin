@@ -5,10 +5,10 @@ const stripIndents = commontags.stripIndents;
 const fs = require('fs');
 
 // bot version
-export const BOT_VERSION = "4.1.1";
+export const BOT_VERSION = "4.2.0";
 
 // discord.js for accessing the discord api
-import { Client, ColorResolvable, CommandInteraction, Guild, Message, MessageActionRow, MessageButton, MessageEmbed, TextChannel } from 'discord.js';
+import { Client, ColorResolvable, Guild, Message, MessageActionRow, MessageButton, MessageButtonStyleResolvable, MessageEmbed, TextChannel } from 'discord.js';
 
 export class Bot {
     // discord.js Client object used for interfacing with Discord
@@ -20,9 +20,9 @@ export class Bot {
 
     private poll_data: Array<object>;
 
-    private beta_tokens: Array<string>;
-
     private rps_games: Array<object>;
+
+    private ttt_games: Array<object>;
     
     constructor(client: Client, token: string) {
         this.client = client;
@@ -30,14 +30,8 @@ export class Bot {
         this.reminders = JSON.parse(fs.readFileSync(`reminders.json`, 'utf8'));
         this.poll_data = JSON.parse(fs.readFileSync(`polls.json`, 'utf8'));
         this.rps_games = [];
-        this.beta_tokens = [
-            `gb-${randZeroToMax(999_999_999)}`,
-            `tttb-${randZeroToMax(999_999_999)}`
-        ];
+        this.ttt_games = [];
         console.log(`Constructed client. Found ${this.reminders.length} reminders and ${this.poll_data.length} polls cached on disk.`);
-        console.log(`The current beta tokens:`);
-        console.log(`/game proto x00: ${this.beta_tokens[0]}`);
-        console.log(`/ttt proto x02:  ${this.beta_tokens[1]}`);
     }
 
     /**
@@ -69,7 +63,7 @@ export class Bot {
             for (let i = 0; i < this.reminders.length; i++) {
                 let this_reminder = this.reminders[i];
                 if (this_reminder["when"] <= current_time) {
-                    let chan = this.client.guilds.resolve(this_reminder["guild_id"]).channels.resolve(this_reminder["channel_id"]) as TextChannel;
+                    let chan = this.client.channels.resolve(this_reminder["channel_id"]) as TextChannel;
                         chan.send(`Hello ${this_reminder["user_atable"]}! This is your reminder! (${this_reminder["reminder"]})`);
                     console.log(`A reminder has been sent and removed from the list!`);
                 }
@@ -185,18 +179,6 @@ export class Bot {
                 description: "Get your flavor!"
             },
             {
-                name: "beta",
-                description: "Participate in a Goblin PBT.",
-                options: [
-                    {
-                        type: 3,
-                        name: "key",
-                        description: "Provide your access key here.",
-                        required: true
-                    }
-                ]
-            },
-            {
                 name: "feedback",
                 description: "Give feedback about Goblin!",
                 options: [
@@ -227,6 +209,18 @@ export class Bot {
             {
                 name: "rps",
                 description: "Challenge someone to Rock Paper Scissors.",
+                options: [
+                    {
+                        type: 6,
+                        name: "user",
+                        description: "The user to challenge",
+                        required: true
+                    }
+                ]
+            },
+            {
+                name: "ttt",
+                description: "Challenge someone to Tic Tac Toe.",
                 options: [
                     {
                         type: 6,
@@ -332,16 +326,10 @@ export class Bot {
                         }
                         reminder["user_atable"] = interaction.user.toString();
                         reminder["channel_id"] = interaction.channelId;
-                        reminder["guild_id"] = interaction.guildId;
                         reminder["reminder"] = text;
-                        if (reminder["guild_id"]) {
-                            interaction.reply({content: `Reminder set! \nYou will be reminded in ${time_amount} ${time_unit}.`});
-                            this.reminders.push(reminder);
-                            console.log(`Reminder added. Current count: ${this.reminders.length}`);
-                        }
-                        else {
-                            interaction.reply("Unfortunately, due to technical restraints, you cannot set reminders in DMs yet.");
-                        }
+                        interaction.reply({content: `Reminder set! \nYou will be reminded in ${time_amount} ${time_unit}.`});
+                        this.reminders.push(reminder);
+                        console.log(`Reminder added. Current count: ${this.reminders.length}`);
                         break;
                     case "invite":
                         interaction.reply(
@@ -371,20 +359,79 @@ export class Bot {
                                 .setColor(repo[1] as ColorResolvable)
                         ]});
                         break;
-                    case "beta":
-                        if (interaction.options.array()[0].value == this.beta_tokens[0]) {
-                            // game beta x00
-                            console.log("A user entered a proper beta key for gx00.");
-                            newGameFromInteraction(interaction);
+                    case "ttt":
+                        if (interaction.options.array()[0].user.bot) {
+                            interaction.reply("You can't challenge a bot to TTT! (weirdo...)");
+                            return;
                         }
-                        else if (interaction.options.array()[0].value == this.beta_tokens[1]) {
-                            /// tick tac toe beta x02
-                            console.log("A user entered a proper beta key for tttx02.");
+                        if (interaction.options.array()[0].user.id == interaction.user.id) {
+                            interaction.reply("You can't challenge yourself to TTT, idiot.");
+                            return;
                         }
-                        else {
-                            interaction.reply("Invalid beta token.");
-                            console.log(`A user entered the invalid beta key ${interaction.options.array()[0].value}.`);
+                        let ttt_instance = {};
+                        ttt_instance["challenger"] = interaction.user.id;
+                        ttt_instance["challenged"] = interaction.options.array()[0].user.id;
+                        let board = [];
+                        for (let i = 0; i < 9; i++) {
+                            board.push({button_id: "ttt|" + randZeroToMax(999_999_999_999), state: 0});
                         }
+                        ttt_instance["board"] = board;
+                        ttt_instance["turn"] = 0;
+                        interaction.reply({
+                            embeds: [
+                                new MessageEmbed()
+                                    .setTitle("Tic Tac Toe Time")
+                                    .setDescription(`<@${ttt_instance["challenged"]}>, you have been challenged to TTT by ${interaction.user.toString()}`)
+                                    .setFooter("challenge someone else with /ttt")
+                            ],
+                            components: [
+                                new MessageActionRow().addComponents([
+                                    new MessageButton()
+                                        .setLabel(" ")
+                                        .setStyle("SECONDARY")
+                                        .setCustomId(ttt_instance["board"][0]["button_id"]),
+                                    new MessageButton()
+                                        .setLabel(" ")
+                                        .setStyle("SECONDARY")
+                                        .setCustomId(ttt_instance["board"][1]["button_id"]),
+                                    new MessageButton()
+                                        .setLabel(" ")
+                                        .setStyle("SECONDARY")
+                                        .setCustomId(ttt_instance["board"][2]["button_id"])
+                                ]),
+                                new MessageActionRow().addComponents([
+                                    new MessageButton()
+                                        .setLabel(" ")
+                                        .setStyle("SECONDARY")
+                                        .setCustomId(ttt_instance["board"][3]["button_id"]),
+                                    new MessageButton()
+                                        .setLabel(" ")
+                                        .setStyle("SECONDARY")
+                                        .setCustomId(ttt_instance["board"][4]["button_id"]),
+                                    new MessageButton()
+                                        .setLabel(" ")
+                                        .setStyle("SECONDARY")
+                                        .setCustomId(ttt_instance["board"][5]["button_id"])
+                                ]),
+                                new MessageActionRow().addComponents([
+                                    new MessageButton()
+                                        .setLabel(" ")
+                                        .setStyle("SECONDARY")
+                                        .setCustomId(ttt_instance["board"][6]["button_id"]),
+                                    new MessageButton()
+                                        .setLabel(" ")
+                                        .setStyle("SECONDARY")
+                                        .setCustomId(ttt_instance["board"][7]["button_id"]),
+                                    new MessageButton()
+                                        .setLabel(" ")
+                                        .setStyle("SECONDARY")
+                                        .setCustomId(ttt_instance["board"][8]["button_id"])
+                                ])
+                            ]
+                        });
+                        let ttt_msg = await interaction.fetchReply();
+                        ttt_instance["message_id"] = ttt_msg.id;
+                        this.ttt_games.push(ttt_instance);
                         break;
                     case "rps":
                         if (interaction.options.array()[0].user.bot) {
@@ -612,6 +659,132 @@ export class Bot {
                         });
                         this.rps_games = new_games_list;
                         break;
+                    case "ttt":
+                        let new_games_list_ttt = [];
+                        this.ttt_games.forEach(game => {
+                            new_games_list_ttt.push(game);
+                            if (interaction.message.id == game["message_id"]) {
+                                if ((interaction.user.id == game["challenger"] && game["turn"] == 0) || (interaction.user.id == game["challenged"] && game["turn"] == 1)) {
+                                    interaction.reply("It's not your turn!");
+                                    return;
+                                }
+                                for (let w = 0; w < game["board"].length; w++) {
+                                    let spot = game["board"][w];
+                                    if (spot["button_id"] == interaction.customId) {
+                                        if (spot["state"] == 0) {
+                                            if (interaction.user.id == game["challenger"]) {
+                                                spot["state"] = 2;
+                                            }
+                                            else {
+                                                spot["state"] = 1;
+                                            }
+                                            game["turn"]++;
+                                            if (game["turn"] == 2) {
+                                                game["turn"] = 0;
+                                            }
+                                            
+                                            // TODO: update board
+                                            let button_colors = [];
+                                            let button_words = [];
+                                            for (let i = 0; i < game["board"].length; i++) {
+                                                button_colors.push(num_to_button_color(game["board"][i]["state"]));
+                                                button_words.push(num_to_button_word(game["board"][i]["state"]))
+                                            }
+                                            let root_rows = [];
+                                            for (let i = 0; i < 3; i++) {
+                                                let this_row = new MessageActionRow();
+                                                for (let j = 0; j < 3; j++) {
+                                                    let this_button = new MessageButton();
+                                                    this_button.setCustomId(game["board"][i*3+j]["button_id"]);
+                                                    this_button.setStyle(button_colors[i*3+j]);
+                                                    this_button.setLabel(button_words[i*3+j]);
+                                                    this_row.addComponents([this_button]);
+                                                }
+                                                root_rows.push(this_row);
+                                            }
+                                            let msg = interaction.message as Message;
+                                            msg.edit({ components: root_rows });
+                                            // TODO: check win cond
+                                            let consumed_tiles = 0;
+                                            for (let x = 0; x < game["board"].length; x++) {
+                                                let part = game["board"][x];
+                                                if (part["state"] != 0) {
+                                                    consumed_tiles++;
+                                                }
+                                            }
+                                            if (consumed_tiles < 5) {
+                                                interaction.reply({ephemeral:true, content:"Move made."});
+                                                return;
+                                            }
+                                            for (let i = 0; i < 3; i++) {
+                                                if (game["board"][i*3]["state"] == game["board"][i*3+1]["state"] && game["board"][i*3+1]["state"] == game["board"][i*3+2]["state"]) {
+                                                    switch (game["turn"]) {
+                                                        case 1:
+                                                            interaction.reply(`<@${game["challenged"]}> wins!`);
+                                                            new_games_list_ttt.pop();
+                                                            return;
+                                                        case 0:
+                                                            msg.reply(`<@${game["challenger"]}> wins!`);
+                                                            new_games_list_ttt.pop();
+                                                            return;
+                                                    }
+                                                }
+                                                else if (game["board"][i]["state"] == game["board"][3+i]["state"] && game["board"][3+i]["state"] == game["board"][6+i]["state"]) {
+                                                    switch (game["turn"]) {
+                                                        case 1:
+                                                            interaction.reply(`${game["challenged"]} wins!`);
+                                                            new_games_list_ttt.pop();
+                                                            return;
+                                                        case 0:
+                                                            interaction.reply(`${game["challenger"]} wins!`);
+                                                            new_games_list_ttt.pop();
+                                                            return;
+                                                    }
+                                                }
+                                            }
+                                            // X
+                                            //   X
+                                            //     X
+                                            if (game["board"][0]["state"] == game["board"][4]["state"] && game["board"][4]["state"] == game["board"][8]["state"]) {
+                                                switch (game["turn"]) {
+                                                    case 1:
+                                                        interaction.reply(`${game["challenged"]} wins!`);
+                                                        new_games_list_ttt.pop();
+                                                        return;
+                                                    case 0:
+                                                        interaction.reply(`${game["challenger"]} wins!`);
+                                                        new_games_list_ttt.pop();
+                                                        return;
+                                                }
+                                            }
+                                            //   X
+                                            //  X
+                                            // X
+                                            if (game["board"][2]["state"] == game["board"][4]["state"] && game["board"][4]["state"] == game["board"][6]["state"]) {
+                                                switch (game["turn"]) {
+                                                    case 1:
+                                                        interaction.reply(`${game["challenged"]} wins!`);
+                                                        new_games_list_ttt.pop();
+                                                        return;
+                                                    case 0:
+                                                        interaction.reply(`${game["challenger"]} wins!`);
+                                                        new_games_list_ttt.pop();
+                                                        return;
+                                                }
+                                            }
+                                            interaction.reply({ephemeral:true, content:"Move made."});
+                                            return;
+                                        }
+                                        else {
+                                            interaction.reply("A move has already been made in this spot!");
+                                            return;
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                        this.ttt_games = new_games_list_ttt;
+                        break;
                     default:
                         console.error("Encountered a button interaction for a command that wasn't avalable!");
                         break;
@@ -758,10 +931,6 @@ const eb_responses = [
     ["negative.", "red"]
 ];
 
-function newGameFromInteraction(interaction: CommandInteraction) {
-
-}
-
 function num_to_word_rps(number: number): string {
     switch (number) {
         case 0:
@@ -774,5 +943,31 @@ function num_to_word_rps(number: number): string {
             return "scissors";
         default:
             return "UNKNOWN INDEX";
+    }
+}
+
+function num_to_button_color(number: number): MessageButtonStyleResolvable {
+    switch (number) {
+        case 0:
+            return "SECONDARY";
+        case 1:
+            return "DANGER";
+        case 2:
+            return "PRIMARY";
+        default:
+            return "SUCCESS";
+    }
+}
+
+function num_to_button_word(number: number): string {
+    switch (number) {
+        case 0:
+            return " ";
+        case 1:
+            return "X";
+        case 2:
+            return "O";
+        default:
+            return "ERR";
     }
 }
