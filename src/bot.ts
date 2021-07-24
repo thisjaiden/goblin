@@ -664,8 +664,12 @@ export class Bot {
                         this.ttt_games.forEach(game => {
                             new_games_list_ttt.push(game);
                             if (interaction.message.id == game["message_id"]) {
+                                if (interaction.user.id != game["challenger"] && interaction.user.id != game["challenged"]) {
+                                    interaction.reply({ephemeral:true,content:"This isn't your game, loser. Fuck off."});
+                                    return;
+                                }
                                 if ((interaction.user.id == game["challenger"] && game["turn"] == 0) || (interaction.user.id == game["challenged"] && game["turn"] == 1)) {
-                                    interaction.reply("It's not your turn!");
+                                    interaction.reply({ephemeral:true,content:"It's not your turn!"});
                                     return;
                                 }
                                 for (let w = 0; w < game["board"].length; w++) {
@@ -732,11 +736,11 @@ export class Bot {
                                                 else if (game["board"][i]["state"] == game["board"][3+i]["state"] && game["board"][3+i]["state"] == game["board"][6+i]["state"]) {
                                                     switch (game["turn"]) {
                                                         case 1:
-                                                            interaction.reply(`${game["challenged"]} wins!`);
+                                                            interaction.reply(`<@${game["challenged"]}> wins!`);
                                                             new_games_list_ttt.pop();
                                                             return;
                                                         case 0:
-                                                            interaction.reply(`${game["challenger"]} wins!`);
+                                                            interaction.reply(`<@${game["challenger"]}> wins!`);
                                                             new_games_list_ttt.pop();
                                                             return;
                                                     }
@@ -748,11 +752,11 @@ export class Bot {
                                             if (game["board"][0]["state"] == game["board"][4]["state"] && game["board"][4]["state"] == game["board"][8]["state"]) {
                                                 switch (game["turn"]) {
                                                     case 1:
-                                                        interaction.reply(`${game["challenged"]} wins!`);
+                                                        interaction.reply(`<@${game["challenged"]}> wins!`);
                                                         new_games_list_ttt.pop();
                                                         return;
                                                     case 0:
-                                                        interaction.reply(`${game["challenger"]} wins!`);
+                                                        interaction.reply(`<@${game["challenger"]}> wins!`);
                                                         new_games_list_ttt.pop();
                                                         return;
                                                 }
@@ -763,11 +767,11 @@ export class Bot {
                                             if (game["board"][2]["state"] == game["board"][4]["state"] && game["board"][4]["state"] == game["board"][6]["state"]) {
                                                 switch (game["turn"]) {
                                                     case 1:
-                                                        interaction.reply(`${game["challenged"]} wins!`);
+                                                        interaction.reply(`<@${game["challenged"]}> wins!`);
                                                         new_games_list_ttt.pop();
                                                         return;
                                                     case 0:
-                                                        interaction.reply(`${game["challenger"]} wins!`);
+                                                        interaction.reply(`<@${game["challenger"]}> wins!`);
                                                         new_games_list_ttt.pop();
                                                         return;
                                                 }
@@ -776,7 +780,7 @@ export class Bot {
                                             return;
                                         }
                                         else {
-                                            interaction.reply("A move has already been made in this spot!");
+                                            interaction.reply({ephemeral:true,content:"A move has already been made in this spot!"});
                                             return;
                                         }
                                     }
