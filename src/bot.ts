@@ -5,10 +5,12 @@ const stripIndents = commontags.stripIndents;
 const fs = require('fs');
 
 // bot version
-export const BOT_VERSION = "4.2.0";
+export const BOT_VERSION = "4.4.2";
 
 // discord.js for accessing the discord api
-import { Client, ColorResolvable, Guild, Message, MessageActionRow, MessageButton, MessageButtonStyleResolvable, MessageEmbed, TextChannel } from 'discord.js';
+import { Client, ColorResolvable, Guild, Message, MessageActionRow, MessageButton, MessageButtonStyleResolvable, MessageEmbed, NewsChannel, TextChannel, ThreadChannel, Webhook } from 'discord.js';
+
+let anonwebhook;
 
 export class Bot {
     // discord.js Client object used for interfacing with Discord
@@ -175,6 +177,10 @@ export class Bot {
                 description: "Get Goblin's invite link"
             },
             {
+                name: "game",
+                description: "Play a very fun game!"
+            },
+            {
                 name: "flavor",
                 description: "Get your flavor!"
             },
@@ -229,6 +235,18 @@ export class Bot {
                         required: true
                     }
                 ]
+            },
+            {
+                name: "anon",
+                description: "Post an anonymous message.",
+                options: [
+                    {
+                        type: 3,
+                        name: "message",
+                        description: "The message to send.",
+                        required: true
+                    }
+                ]
             }
         ]);
     }
@@ -239,12 +257,37 @@ export class Bot {
     public listen(): Promise<string> {
         this.client.on('ready', () => {
             this.startTasks();
+            anonwebhook = new Webhook(this.client);
         });
         this.client.on('interactionCreate', async (interaction) => {
             if (interaction.isCommand()) {
                 /// TODO: all commands should be switched or hooked here
                 console.log(`Interaction begin: /${interaction.commandName}`);
                 switch (interaction.commandName) {
+                    case "anon":
+                        if (!interaction.inGuild()) {
+                            interaction.reply("You can't anon post in DMs.");
+                            return;
+                        }
+                        interaction.reply({"content": "Message sent.", "ephemeral": true});
+                        let post_options = interaction.options.array();
+                        let webhooks = (await interaction.guild.fetchWebhooks()).array();
+                        let contains_goblin_hook = false;
+                        for (let i = 0; i < webhooks.length; i++) {
+                            let this_webhook = webhooks[i];
+                            if (this_webhook.name == "Anon") {
+                                contains_goblin_hook = true;
+                                (await this_webhook.edit({"channel": interaction.channelId}));
+                                this_webhook.send(`${post_options[0].value}`);
+                                break;
+                            }
+                        }
+                        let chan = interaction.channel as TextChannel | NewsChannel;
+                        if (!contains_goblin_hook) {
+                            let new_webhook = chan.createWebhook("Anon", {"avatar": "https://cdn.discordapp.com/attachments/882260949006966826/891006265923354634/image0.gif"});
+                            (await new_webhook).send(`${post_options[0].value}`);
+                        }
+                        break;
                     case "poll":
                         if (!interaction.inGuild()) {
                             interaction.reply("You can't create a poll in DMs.");
@@ -503,7 +546,8 @@ export class Bot {
                                             /poll - Ask everyone a question.
                                             /rps - Challenge someone to rock paper scissors.
                                             /feedback - Give feedback and suggest features.
-                                            /beta - Participate in PBTs.
+                                            /anon - Post a message anonomously.
+                                            /game - Play a fun game!
                                             /remindme - Set a reminder for yourself.
                                         `)
                                 ]
@@ -519,6 +563,19 @@ export class Bot {
                                         .setTitle(`${interaction.user.username} asked "${interaction.options.array()[0].value}"`)
                                         .setDescription(`**Magic eight ball says...**\n"${rand_select[0]}"`)
                                         .setColor(rand_select[1] as ColorResolvable)
+                                ]
+                            }
+                        );
+                        break;
+                    case "game":
+                        interaction.reply(
+                            {
+                                embeds: [
+                                    new MessageEmbed()
+                                        .setTitle(`${interaction.user.username}, are you suffering from Gaming Disorder?`)
+                                        .setDescription(`Try the following resource:\nhttps://www.who.int/news-room/q-a-detail/addictive-behaviours-gaming-disorder`)
+                                        .setURL("https://www.who.int/news-room/q-a-detail/addictive-behaviours-gaming-disorder")
+                                        .setColor("#8B4513")
                                 ]
                             }
                         );
@@ -721,7 +778,8 @@ export class Bot {
                                                 return;
                                             }
                                             for (let i = 0; i < 3; i++) {
-                                                if (game["board"][i*3]["state"] == game["board"][i*3+1]["state"] && game["board"][i*3+1]["state"] == game["board"][i*3+2]["state"]) {
+                                                if ((game["board"][(i*3)]["state"] === game["board"][(i*3)+1]["state"]) === true && (game["board"][(i*3)+1]["state"] === game["board"][(i*3)+2]["state"]) === true) {
+                                                    console.log(`wincon1: ${JSON.stringify(game["board"])}`);
                                                     switch (game["turn"]) {
                                                         case 1:
                                                             interaction.reply(`<@${game["challenged"]}> wins!`);
@@ -733,7 +791,8 @@ export class Bot {
                                                             return;
                                                     }
                                                 }
-                                                else if (game["board"][i]["state"] == game["board"][3+i]["state"] && game["board"][3+i]["state"] == game["board"][6+i]["state"]) {
+                                                else if ((game["board"][i]["state"] === game["board"][3+i]["state"]) === true && (game["board"][3+i]["state"] === game["board"][6+i]["state"]) === true) {
+                                                    console.log(`wincon2: ${JSON.stringify(game["board"])}`);
                                                     switch (game["turn"]) {
                                                         case 1:
                                                             interaction.reply(`<@${game["challenged"]}> wins!`);
@@ -749,7 +808,8 @@ export class Bot {
                                             // X
                                             //   X
                                             //     X
-                                            if (game["board"][0]["state"] == game["board"][4]["state"] && game["board"][4]["state"] == game["board"][8]["state"]) {
+                                            if ((game["board"][0]["state"] === game["board"][4]["state"]) && (game["board"][4]["state"] === game["board"][8]["state"])) {
+                                                console.log(`wincon3: ${JSON.stringify(game["board"])}`);
                                                 switch (game["turn"]) {
                                                     case 1:
                                                         interaction.reply(`<@${game["challenged"]}> wins!`);
@@ -764,7 +824,8 @@ export class Bot {
                                             //   X
                                             //  X
                                             // X
-                                            if (game["board"][2]["state"] == game["board"][4]["state"] && game["board"][4]["state"] == game["board"][6]["state"]) {
+                                            if ((game["board"][2]["state"] === game["board"][4]["state"]) && (game["board"][4]["state"] === game["board"][6]["state"])) {
+                                                console.log(`wincon4: ${JSON.stringify(game["board"])}`);
                                                 switch (game["turn"]) {
                                                     case 1:
                                                         interaction.reply(`<@${game["challenged"]}> wins!`);
@@ -905,7 +966,8 @@ const flavor_responses = [
     ["wanted on multiple counts of manslaughter", "#75161d"],
     ["**Chunky Monkey**", "#693d15"],
     ["Piss", "#dde080"],
-    ["not avalable. Please leave a message, after the tone. **BEEEEEEP**", "#52876c"]
+    ["not avalable. Please leave a message, after the tone. **BEEEEEEP**", "#52876c"],
+    ["Frog", "#00FF00"]
 ];
 
 const eb_responses = [

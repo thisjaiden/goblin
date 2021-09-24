@@ -1,11 +1,10 @@
 {
   "name": "goblin",
-  "version": "4.2.0",
+  "version": "4.4.2",
   "main": "index.js",
   "scripts": {
     "start": "node src/index.js",
-    "watch": "tsc -p tsconfig.json -w",
-    "test": "mocha -r ts-node/register \"tests/**/*.spec.ts\""
+    "watch": "tsc -p tsconfig.json -w"
   },
   "author": "thisjaiden",
   "license": "DBAD (license.txt)",

@@ -1,3 +1,19 @@
+**Goblin Child v4.4.2**
+*Changes and Tweaks*
+- Updated /help
+
+**Goblin Child v4.4.1**
+*Changes and Tweaks*
+- /anon is slightly more streamlined.
+
+**Goblin Child v4.4.0**
+*Features and New Content*
+- /anon - Post an anonymous message in a channel.
+
+**Goblin Child v4.3.0**
+*Features and New Content*
+- /game - Video Gaming
+
 **Goblin Child v4.2.0**
 
 *Features and New Content*
