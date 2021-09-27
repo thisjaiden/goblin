@@ -6,3 +6,4 @@ node_modules
 polls.json
 reminders.json
 feedback.json
+anon.json

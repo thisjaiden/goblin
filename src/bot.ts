@@ -5,10 +5,10 @@ const stripIndents = commontags.stripIndents;
 const fs = require('fs');
 
 // bot version
-export const BOT_VERSION = "4.4.2";
+export const BOT_VERSION = "4.5.0";
 
 // discord.js for accessing the discord api
-import { Client, ColorResolvable, Guild, Message, MessageActionRow, MessageButton, MessageButtonStyleResolvable, MessageEmbed, NewsChannel, TextChannel, ThreadChannel, Webhook } from 'discord.js';
+import { Client, ColorResolvable, Guild, Message, MessageActionRow, MessageButton, MessageButtonStyleResolvable, MessageEmbed, NewsChannel, Permissions, TextChannel, ThreadChannel, Webhook } from 'discord.js';
 
 let anonwebhook;
 
@@ -25,15 +25,18 @@ export class Bot {
     private rps_games: Array<object>;
 
     private ttt_games: Array<object>;
+
+    private disabled_anon: Array<String>;
     
     constructor(client: Client, token: string) {
         this.client = client;
         this.token = token;
         this.reminders = JSON.parse(fs.readFileSync(`reminders.json`, 'utf8'));
         this.poll_data = JSON.parse(fs.readFileSync(`polls.json`, 'utf8'));
+        this.disabled_anon = JSON.parse(fs.readFileSync(`anon.json`, 'utf8'));
         this.rps_games = [];
         this.ttt_games = [];
-        console.log(`Constructed client. Found ${this.reminders.length} reminders and ${this.poll_data.length} polls cached on disk.`);
+        console.log(`Constructed client. Found ${this.disabled_anon.length} servers with anon disabled, ${this.reminders.length} reminders, and ${this.poll_data.length} polls cached on disk.`);
     }
 
     /**
@@ -54,6 +57,10 @@ export class Bot {
             fs.writeFileSync(
                 `polls.json`,
                 JSON.stringify(this.poll_data)
+            );
+            fs.writeFileSync(
+                `anon.json`,
+                JSON.stringify(this.disabled_anon)
             );
             console.log(`Saved ${this.reminders.length} reminders to reminders.json and ${this.poll_data.length} polls to polls.json.`);
         }, 300_000);
@@ -247,7 +254,19 @@ export class Bot {
                         required: true
                     }
                 ]
-            }
+            }//},
+             //{
+             //   name: "admin",
+             //   description: "Complete various admin actions.",
+             //   options: [
+             //       {
+             //           type: 3,
+             //           name: "command",
+             //           description: "The command to use.",
+             //           required: true
+             //       }
+             //   ]
+             //}
         ]);
     }
 
@@ -264,24 +283,45 @@ export class Bot {
                 /// TODO: all commands should be switched or hooked here
                 console.log(`Interaction begin: /${interaction.commandName}`);
                 switch (interaction.commandName) {
+                    case "admin":
+                        if (interaction.inGuild() == false) {
+                            interaction.reply("You can't use /admin in DMs.");
+                            return;
+                        }
+                        if (interaction.guild.members.resolve(interaction.user).roles.highest.permissions.has(Permissions.FLAGS.ADMINISTRATOR) || interaction.guild.ownerId == interaction.user.id) {
+                            let section_response = interaction.options.data.values().next().value; 
+                            if (section_response == "disableAnon") {
+
+                            }
+                        }
+                        else {
+                            interaction.reply({content: "You don't have permission to use /admin here!", ephemeral: true});
+                            return;
+                        }
+                        break;
                     case "anon":
-                        if (!interaction.inGuild()) {
+                        if (interaction.inGuild() == false) {
                             interaction.reply("You can't anon post in DMs.");
                             return;
                         }
-                        interaction.reply({"content": "Message sent.", "ephemeral": true});
-                        let post_options = interaction.options.array();
-                        let webhooks = (await interaction.guild.fetchWebhooks()).array();
-                        let contains_goblin_hook = false;
-                        for (let i = 0; i < webhooks.length; i++) {
-                            let this_webhook = webhooks[i];
-                            if (this_webhook.name == "Anon") {
-                                contains_goblin_hook = true;
-                                (await this_webhook.edit({"channel": interaction.channelId}));
-                                this_webhook.send(`${post_options[0].value}`);
-                                break;
+                        for (let i = 0; i < this.disabled_anon.length; i++) {
+                            if (this.disabled_anon[i] == interaction.guildId) {
+                                interaction.reply({"content": "Anon is disabled in this server.", "ephemeral": true});
+                                return;
                             }
                         }
+                        interaction.reply({"content": "Message sent.", "ephemeral": true});
+                        let post_options = interaction.options;
+                        let webhooks = (await interaction.guild.fetchWebhooks());
+                        let contains_goblin_hook = false;
+                        webhooks.forEach(async (hook) => {
+                            if (hook.name == "Anon") {
+                                contains_goblin_hook = true;
+                                (await hook.edit({channel: interaction.channelId}));
+                                hook.send(`${post_options.data[0].value}`);
+                                return;
+                            }
+                        });
                         let chan = interaction.channel as TextChannel | NewsChannel;
                         if (!contains_goblin_hook) {
                             let new_webhook = chan.createWebhook("Anon", {"avatar": "https://cdn.discordapp.com/attachments/882260949006966826/891006265923354634/image0.gif"});
@@ -289,14 +329,14 @@ export class Bot {
                         }
                         break;
                     case "poll":
-                        if (!interaction.inGuild()) {
+                        if (interaction.inGuild() == false) {
                             interaction.reply("You can't create a poll in DMs.");
                             return;
                         }
-                        let poll_options = interaction.options.array();
+                        let poll_options = interaction.options;
                         let poll_question;
                         let poll_responses = [];
-                        poll_options.forEach((option) => {
+                        poll_options.data.forEach((option) => {
                             if (option.name == "question") {
                                 poll_question = option.value;
                             }
@@ -343,11 +383,11 @@ export class Bot {
                         break;
                     case "remindme":
                         let reminder = {};
-                        let reminder_options = interaction.options.array();
+                        let reminder_options = interaction.options;
                         let time_amount;
                         let time_unit;
                         let text;
-                        reminder_options.forEach((option) => {
+                        reminder_options.data.forEach((option) => {
                             if (option.name == "time") {
                                 time_amount = option.value;
                             }
@@ -403,17 +443,17 @@ export class Bot {
                         ]});
                         break;
                     case "ttt":
-                        if (interaction.options.array()[0].user.bot) {
+                        if (interaction.options.data[0].user.bot) {
                             interaction.reply("You can't challenge a bot to TTT! (weirdo...)");
                             return;
                         }
-                        if (interaction.options.array()[0].user.id == interaction.user.id) {
+                        if (interaction.options.data[0].user.id == interaction.user.id) {
                             interaction.reply("You can't challenge yourself to TTT, idiot.");
                             return;
                         }
                         let ttt_instance = {};
                         ttt_instance["challenger"] = interaction.user.id;
-                        ttt_instance["challenged"] = interaction.options.array()[0].user.id;
+                        ttt_instance["challenged"] = interaction.options.data[0].user.id;
                         let board = [];
                         for (let i = 0; i < 9; i++) {
                             board.push({button_id: "ttt|" + randZeroToMax(999_999_999_999), state: 0});
@@ -477,11 +517,11 @@ export class Bot {
                         this.ttt_games.push(ttt_instance);
                         break;
                     case "rps":
-                        if (interaction.options.array()[0].user.bot) {
+                        if (interaction.options.data[0].user.bot) {
                             interaction.reply("You can't challenge a bot to RPS! (weirdo...)");
                             return;
                         }
-                        if (interaction.options.array()[0].user.id == interaction.user.id) {
+                        if (interaction.options.data[0].user.id == interaction.user.id) {
                             interaction.reply("You can't challenge yourself to RPS, idiot.");
                             return;
                         }
@@ -490,7 +530,7 @@ export class Bot {
                         rps_instance["paper"] = "rps|" + randZeroToMax(999_999_999_999);
                         rps_instance["scissors"] = "rps|" + randZeroToMax(999_999_999_999);
                         rps_instance["challenger"] = interaction.user.id;
-                        rps_instance["challenged"] = interaction.options.array()[0].user.id;
+                        rps_instance["challenged"] = interaction.options.data[0].user.id;
                         rps_instance["result_challenger"] = 0;
                         rps_instance["result_challenged"] = 0;
                         interaction.reply({
@@ -523,9 +563,9 @@ export class Bot {
                         break;
                     case "feedback":
                         console.log("Feedback received!");
-                        console.log(`(${interaction.options.array()[0].value})`);
+                        console.log(`(${interaction.options.data[0].value})`);
                         let fbtm = JSON.parse(fs.readFileSync(`feedback.json`, 'utf8'))
-                        fbtm.push(interaction.options.array()[0].value);
+                        fbtm.push(interaction.options.data[0].value);
                         fs.writeFileSync(
                             `feedback.json`,
                             JSON.stringify(fbtm)
@@ -549,6 +589,7 @@ export class Bot {
                                             /anon - Post a message anonomously.
                                             /game - Play a fun game!
                                             /remindme - Set a reminder for yourself.
+                                            /admin - Run basic admin commands.
                                         `)
                                 ]
                             }
@@ -560,7 +601,7 @@ export class Bot {
                             {
                                 embeds: [
                                     new MessageEmbed()
-                                        .setTitle(`${interaction.user.username} asked "${interaction.options.array()[0].value}"`)
+                                        .setTitle(`${interaction.user.username} asked "${interaction.options.data[0].value}"`)
                                         .setDescription(`**Magic eight ball says...**\n"${rand_select[0]}"`)
                                         .setColor(rand_select[1] as ColorResolvable)
                                 ]

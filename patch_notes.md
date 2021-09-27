@@ -1,3 +1,14 @@
+**Goblin Child v4.5.0**
+*Features and New Content*
+- /admin - Allows for basic admin commands.
+- - Requires Administrator or higher privledges.
+- - /admin removeMessages x - Removes x messages
+- - /admin disableAnon - Disables /anon
+- - /admin enableAnon - Enables /anon
+- - /admin debug - Posts debug information about this server
+*Changes and Tweaks*
+- Updated to the latest version of discord.js
+
 **Goblin Child v4.4.2**
 *Changes and Tweaks*
 - Updated /help
