@@ -5,6 +5,9 @@
 - - /admin removeMessages x - Removes x messages
 - - /admin disableAnon - Disables /anon
 - - /admin enableAnon - Enables /anon
+- - /admin enableSnitching - Enables snitch messages
+- - /admin disableSnitching - Disables snitch messages
+- - For more info on snitching, please visit [the snitching page](https://github.com/thisjaiden/goblin/blob/main/snitching.md).
 - - /admin debug - Posts debug information about this server
 *Changes and Tweaks*
 - Updated to the latest version of discord.js

@@ -27,13 +27,17 @@ export class Bot {
     private ttt_games: Array<object>;
 
     private disabled_anon: Array<String>;
+
+    private report_anon: Array<String>;
     
     constructor(client: Client, token: string) {
         this.client = client;
         this.token = token;
         this.reminders = JSON.parse(fs.readFileSync(`reminders.json`, 'utf8'));
         this.poll_data = JSON.parse(fs.readFileSync(`polls.json`, 'utf8'));
-        this.disabled_anon = JSON.parse(fs.readFileSync(`anon.json`, 'utf8'));
+        this.disabled_anon = JSON.parse(fs.readFileSync(`anon_blocked.json`, 'utf8'));
+        this.report_anon = JSON.parse(fs.readFileSync(`report_anon.json`, 'utf8'));
+
         this.rps_games = [];
         this.ttt_games = [];
         console.log(`Constructed client. Found ${this.disabled_anon.length} servers with anon disabled, ${this.reminders.length} reminders, and ${this.poll_data.length} polls cached on disk.`);
@@ -59,8 +63,12 @@ export class Bot {
                 JSON.stringify(this.poll_data)
             );
             fs.writeFileSync(
-                `anon.json`,
+                `anon_blocked.json`,
                 JSON.stringify(this.disabled_anon)
+            );
+            fs.writeFileSync(
+                `report_anon.json`,
+                JSON.stringify(this.report_anon)
             );
             console.log(`Saved ${this.reminders.length} reminders to reminders.json and ${this.poll_data.length} polls to polls.json.`);
         }, 300_000);
@@ -291,7 +299,67 @@ export class Bot {
                         if (interaction.guild.members.resolve(interaction.user).roles.highest.permissions.has(Permissions.FLAGS.ADMINISTRATOR) || interaction.guild.ownerId == interaction.user.id) {
                             let section_response = interaction.options.data.values().next().value; 
                             if (section_response == "disableAnon") {
-
+                                let already_disabled = false;
+                                for (let i = 0; i < this.disabled_anon.length; i++) {
+                                    if (this.disabled_anon[i] == interaction.guildId) {
+                                        already_disabled = true;
+                                    }
+                                }
+                                if (already_disabled == false) {
+                                    this.disabled_anon.push(interaction.guildId);
+                                    interaction.reply({content: "Anon has been disabled in this server.", ephemeral: true});
+                                }
+                                else {
+                                    interaction.reply({content: "Anon is already disabled in this server.", ephemeral: true});
+                                }
+                            }
+                            else if (section_response == "enableAnon") {
+                                let new_state = [];
+                                for (let i = 0; i < this.disabled_anon.length; i++) {
+                                    if (this.disabled_anon[i] == interaction.guildId) {
+                                        interaction.reply({content: "Anon has been enabled in this server.", ephemeral: true});
+                                    }
+                                    else {
+                                        new_state.push(this.disabled_anon[i]);
+                                    }
+                                }
+                                this.disabled_anon = new_state;
+                            }
+                            else if (section_response == "enableSnitching") {
+                                let already_enabled = false;
+                                for (let i = 0; i < this.report_anon.length; i++) {
+                                    if (this.report_anon[i] == interaction.guildId) {
+                                        already_enabled = true;
+                                    }
+                                }
+                                if (already_enabled == false) {
+                                    this.report_anon.push(interaction.guildId);
+                                    interaction.reply({content: "Snitching has been enabled in this server."});
+                                }
+                                else {
+                                    interaction.reply({content: "Snitching is already enabled in this server.", ephemeral: true});
+                                }
+                            }
+                            else if (section_response == "disableSnitching") {
+                                let new_state = [];
+                                for (let i = 0; i < this.report_anon.length; i++) {
+                                    if (this.report_anon[i] == interaction.guildId) {
+                                        interaction.reply({content: "Snitching has been disabled in this server."});
+                                    }
+                                    else {
+                                        new_state.push(this.report_anon[i]);
+                                    }
+                                }
+                                this.report_anon = new_state;
+                            }
+                            else {
+                                if (section_response.split(" ")[0] == "removeMessages") {
+                                    let messages = (await interaction.channel.messages.fetch({"limit": section_response.split(" ")[1]}));
+                                    messages.forEach((message) => {
+                                        interaction.channel.messages.delete(message);
+                                    })
+                                }
+                                interaction.reply({content: "Deleted.", ephemeral: true});
                             }
                         }
                         else {
@@ -311,7 +379,33 @@ export class Bot {
                             }
                         }
                         interaction.reply({"content": "Message sent.", "ephemeral": true});
+                        
                         let post_options = interaction.options;
+
+                        for (let i = 0; i < post_options.data[0].value.toString().split(" ").length; i++) {
+                            for (let j = 0; j < concerning_words.length; j++) {
+                                if (post_options.data[0].value.toString().split(" ")[i] == concerning_words[j]) {
+                                    // THIS POST CONTAINS POTENTIALLY SENSITIVE CONTENT
+                                    console.log("An anon message contained potentially concerning phrases.");
+                                    let server_reports = false;
+                                    for (let k = 0; k < this.report_anon.length; k++) {
+                                        if (this.report_anon[k] == interaction.guildId) {
+                                            server_reports = true;
+                                        }
+                                    }
+                                    if (server_reports) {
+                                        console.log("The server with this message reported it to the server owner.");
+                                        console.log(`${interaction.user.toString()}|${interaction.user.id}: (${post_options.data[0]})`);
+                                        (await interaction.guild.fetchOwner()).send("Hey, someone said some concerning things as anon in your server. Here's a bit more info on them. Make sure they're ok!");
+                                        (await interaction.guild.fetchOwner()).send(`${interaction.user.toString()}|${interaction.user.id}: (${post_options.data[0]})`);
+                                    }
+                                    else {
+                                        console.log("The server with this message has snitching disabled.");
+                                    }
+                                }
+                            }
+                        }
+
                         let webhooks = (await interaction.guild.fetchWebhooks());
                         let contains_goblin_hook = false;
                         webhooks.forEach(async (hook) => {
@@ -325,7 +419,7 @@ export class Bot {
                         let chan = interaction.channel as TextChannel | NewsChannel;
                         if (!contains_goblin_hook) {
                             let new_webhook = chan.createWebhook("Anon", {"avatar": "https://cdn.discordapp.com/attachments/882260949006966826/891006265923354634/image0.gif"});
-                            (await new_webhook).send(`${post_options[0].value}`);
+                            (await new_webhook).send(`${post_options.data[0].value}`);
                         }
                         break;
                     case "poll":
@@ -573,6 +667,12 @@ export class Bot {
                         interaction.reply({content: "Feedback received!"});
                         break;
                     case "help":
+                        let snitch_status = "**DISABLED**";    
+                        for (let i = 0; i < this.report_anon.length; i++) {
+                            if (this.report_anon[i] == interaction.guildId) {
+                                snitch_status = "**ENABLED**";
+                            }
+                        }
                         interaction.reply(
                             {
                                 embeds: [
@@ -591,6 +691,7 @@ export class Bot {
                                             /remindme - Set a reminder for yourself.
                                             /admin - Run basic admin commands.
                                         `)
+                                        .setFooter(`Snitching is ${snitch_status} on this server.`)
                                 ]
                             }
                         );
@@ -1036,6 +1137,22 @@ const eb_responses = [
     ["nope", "red"],
     ["no way", "red"],
     ["negative.", "red"]
+];
+
+const concerning_words = [
+    "ending",
+    "cut",
+    "cutter",
+    "cutting",
+    "suicide",
+    "suicidal",
+    "kill",
+    "killing",
+    "killer",
+    "bomb",
+    "bombing",
+    "bomber",
+    "terrorist"
 ];
 
 function num_to_word_rps(number: number): string {
