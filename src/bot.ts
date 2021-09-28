@@ -262,19 +262,19 @@ export class Bot {
                         required: true
                     }
                 ]
-            }//},
-             //{
-             //   name: "admin",
-             //   description: "Complete various admin actions.",
-             //   options: [
-             //       {
-             //           type: 3,
-             //           name: "command",
-             //           description: "The command to use.",
-             //           required: true
-             //       }
-             //   ]
-             //}
+            },
+            {
+                name: "admin",
+                description: "Complete various admin actions.",
+                options: [
+                    {
+                        type: 3,
+                        name: "command",
+                        description: "The command to use.",
+                        required: true
+                    }
+                ]
+            }
         ]);
     }
 
