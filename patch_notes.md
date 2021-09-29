@@ -1,3 +1,7 @@
+**Goblin Child v4.6.1**
+*Changes and Tweaks*
+- Fixed issues with /riddle
+
 **Goblin Child v4.6.0**
 *Features and New Content*
 - /riddle - Get a riddle! (short list right now, more coming soon)

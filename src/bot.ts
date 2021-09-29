@@ -5,7 +5,7 @@ const stripIndents = commontags.stripIndents;
 const fs = require('fs');
 
 // bot version
-export const BOT_VERSION = "4.6.0";
+export const BOT_VERSION = "4.6.1";
 
 // discord.js for accessing the discord api
 import { Client, ColorResolvable, Guild, Message, MessageActionRow, MessageButton, MessageButtonStyleResolvable, MessageEmbed, NewsChannel, Permissions, TextChannel, ThreadChannel, Webhook } from 'discord.js';
@@ -287,7 +287,8 @@ export class Bot {
                             {
                                 type: 4,
                                 name: "number",
-                                description: "The number of the riddle you'd like"
+                                description: "The number of the riddle you'd like",
+                                required: true
                             }
                         ]
                     },
@@ -299,7 +300,8 @@ export class Bot {
                             {
                                 type: 4,
                                 name: "number",
-                                description: "The number of the riddle you'd like"
+                                description: "The number of the riddle you'd like",
+                                required: true
                             }
                         ]
                     }
@@ -322,12 +324,12 @@ export class Bot {
                 console.log(`Interaction begin: /${interaction.commandName}`);
                 switch (interaction.commandName) {
                     case "riddle":
-                        let id = interaction.options.data[1].value as number;
+                        let id = interaction.options.data[0].options[0].value as number;
                         if (id > riddles.length) {
                             interaction.reply(`Invalid riddle ID. Please pick a number between 0-${riddles.length}`);
                             return;
                         }
-                        if (interaction.options[0].name == "question") {
+                        if (interaction.options.data[0].name == "question") {
                             interaction.reply(`Riddle #${id}: ${riddles[id][0]}`);
                         }
                         else {
