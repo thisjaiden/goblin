@@ -1,3 +1,11 @@
+**Goblin Child v4.6.0**
+*Features and New Content*
+- /riddle - Get a riddle! (short list right now, more coming soon)
+- /admin help - Exactly what you'd expect
+*Changes and Tweaks*
+- Fixed Snitching sending [object Object]
+- Fixed nonsensical responses from /admin
+
 **Goblin Child v4.5.0**
 *Features and New Content*
 - /admin - Allows for basic admin commands.

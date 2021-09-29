@@ -5,7 +5,7 @@ const stripIndents = commontags.stripIndents;
 const fs = require('fs');
 
 // bot version
-export const BOT_VERSION = "4.5.0";
+export const BOT_VERSION = "4.6.0";
 
 // discord.js for accessing the discord api
 import { Client, ColorResolvable, Guild, Message, MessageActionRow, MessageButton, MessageButtonStyleResolvable, MessageEmbed, NewsChannel, Permissions, TextChannel, ThreadChannel, Webhook } from 'discord.js';
@@ -274,6 +274,36 @@ export class Bot {
                         required: true
                     }
                 ]
+            },
+            {
+                name: "riddle",
+                description: "Get a riddle!",
+                options: [
+                    {
+                        type: 1,
+                        name: "question",
+                        description: "Get an actual riddle",
+                        options: [
+                            {
+                                type: 4,
+                                name: "number",
+                                description: "The number of the riddle you'd like"
+                            }
+                        ]
+                    },
+                    {
+                        type: 1,
+                        name: "soulution",
+                        description: "Get the soulution to a riddle",
+                        options: [
+                            {
+                                type: 4,
+                                name: "number",
+                                description: "The number of the riddle you'd like"
+                            }
+                        ]
+                    }
+                ]
             }
         ]);
     }
@@ -291,13 +321,26 @@ export class Bot {
                 /// TODO: all commands should be switched or hooked here
                 console.log(`Interaction begin: /${interaction.commandName}`);
                 switch (interaction.commandName) {
+                    case "riddle":
+                        let id = interaction.options.data[1].value as number;
+                        if (id > riddles.length) {
+                            interaction.reply(`Invalid riddle ID. Please pick a number between 0-${riddles.length}`);
+                            return;
+                        }
+                        if (interaction.options[0].name == "question") {
+                            interaction.reply(`Riddle #${id}: ${riddles[id][0]}`);
+                        }
+                        else {
+                            interaction.reply({content: `${riddles[id][1]}`, ephemeral: true});
+                        }
+                        break;
                     case "admin":
                         if (interaction.inGuild() == false) {
                             interaction.reply("You can't use /admin in DMs.");
                             return;
                         }
                         if (interaction.guild.members.resolve(interaction.user).roles.highest.permissions.has(Permissions.FLAGS.ADMINISTRATOR) || interaction.guild.ownerId == interaction.user.id) {
-                            let section_response = interaction.options.data.values().next().value; 
+                            let section_response = interaction.options.data[0].value.toString(); 
                             if (section_response == "disableAnon") {
                                 let already_disabled = false;
                                 for (let i = 0; i < this.disabled_anon.length; i++) {
@@ -352,14 +395,20 @@ export class Bot {
                                 }
                                 this.report_anon = new_state;
                             }
+                            else if (section_response == "help") {
+                                interaction.reply({content: "removeMessages x || disableAnon || enableAnon || enableSnitching || disableSnitching", ephemeral: true})
+                            }
                             else {
                                 if (section_response.split(" ")[0] == "removeMessages") {
-                                    let messages = (await interaction.channel.messages.fetch({"limit": section_response.split(" ")[1]}));
+                                    let messages = (await interaction.channel.messages.fetch({"limit": parseInt(section_response.split(" ")[1])}));
                                     messages.forEach((message) => {
                                         interaction.channel.messages.delete(message);
-                                    })
+                                    });
+                                    interaction.reply({content: "Deleted.", ephemeral: true});
                                 }
-                                interaction.reply({content: "Deleted.", ephemeral: true});
+                                else {
+                                    interaction.reply({content: "Unknown command. Try `/admin help` for a list of commands.", ephemeral: true});
+                                }
                             }
                         }
                         else {
@@ -395,9 +444,9 @@ export class Bot {
                                     }
                                     if (server_reports) {
                                         console.log("The server with this message reported it to the server owner.");
-                                        console.log(`${interaction.user.toString()}|${interaction.user.id}: (${post_options.data[0]})`);
+                                        console.log(`${interaction.user.toString()}|${interaction.user.id}: (${post_options.data[0].value})`);
                                         (await interaction.guild.fetchOwner()).send("Hey, someone said some concerning things as anon in your server. Here's a bit more info on them. Make sure they're ok!");
-                                        (await interaction.guild.fetchOwner()).send(`${interaction.user.toString()}|${interaction.user.id}: (${post_options.data[0]})`);
+                                        (await interaction.guild.fetchOwner()).send(`${interaction.user.toString()}|${interaction.user.id}: (${post_options.data[0].value})`);
                                     }
                                     else {
                                         console.log("The server with this message has snitching disabled.");
@@ -689,6 +738,7 @@ export class Bot {
                                             /anon - Post a message anonomously.
                                             /game - Play a fun game!
                                             /remindme - Set a reminder for yourself.
+                                            /riddle - Get a riddle.
                                             /admin - Run basic admin commands.
                                         `)
                                         .setFooter(`Snitching is ${snitch_status} on this server.`)
@@ -1137,6 +1187,45 @@ const eb_responses = [
     ["nope", "red"],
     ["no way", "red"],
     ["negative.", "red"]
+];
+
+const riddles = [
+    [
+        "I move without wings, Between silken string, I leave as you find, My substance behind.",
+        "Spider"
+    ],
+    [
+        "What flies forever, Rests never?",
+        "Wind"
+    ],
+    [
+        "I appear in the morning. But am always there. You can never see me. Though I am everywhere. By night I am gone, though I sometimes never was. Nothing can defeat me. But I am easily gone.",
+        "Sunlight"
+    ],
+    [
+        "I crawl on the earth. And rise on a pillar.",
+        "Shadow"
+    ],
+    [
+        "They are many and one, they wave and they drum, Used to cover a state, they go with you everywhere.",
+        "Hands"
+    ],
+    [
+        "What must be in the oven yet can not be baked? Grows in the heat yet shuns the light of day? What sinks in water but rises with air? Looks like skin but is fine as hair?",
+        "Yeast"
+    ],
+    [
+        "I have holes on the top and bottom. I have holes on my left and on my right. And I have holes in the middle, Yet I still hold water.",
+        "Sponge"
+    ],
+    [
+        "What can be swallowed, But can also swallow you?",
+        "Pride"
+    ],
+    [
+        "You get many of me, but never enough. After the last one, your life soon will snuff. You may have one of me but one day a year, When the last one is gone, your life disappears.",
+        "Birthday"
+    ]
 ];
 
 const concerning_words = [
