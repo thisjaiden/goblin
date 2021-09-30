@@ -1,3 +1,12 @@
+**Goblin Child v4.7.0**
+*Features and New Content*
+- /admin reactionRoles - Reaction roles! With Goblin!
+*Changes and Tweaks*
+- Goblin now tells you who has looked up the answer to a riddle.
+- Fixed /eightball (how long has this been broken???)
+- Fixed formatting issues with /admin help
+- Fixed crashes with /riddle
+
 **Goblin Child v4.6.1**
 *Changes and Tweaks*
 - Fixed issues with /riddle

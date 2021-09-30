@@ -5,12 +5,10 @@ const stripIndents = commontags.stripIndents;
 const fs = require('fs');
 
 // bot version
-export const BOT_VERSION = "4.6.1";
+export const BOT_VERSION = "4.7.0";
 
 // discord.js for accessing the discord api
-import { Client, ColorResolvable, Guild, Message, MessageActionRow, MessageButton, MessageButtonStyleResolvable, MessageEmbed, NewsChannel, Permissions, TextChannel, ThreadChannel, Webhook } from 'discord.js';
-
-let anonwebhook;
+import { Client, ColorResolvable, Guild, Message, MessageActionRow, MessageButton, MessageButtonStyleResolvable, MessageEmbed, NewsChannel, Permissions, TextChannel, Webhook } from 'discord.js';
 
 export class Bot {
     // discord.js Client object used for interfacing with Discord
@@ -26,6 +24,8 @@ export class Bot {
 
     private ttt_games: Array<object>;
 
+    private reaction_roles: Array<object>;
+
     private disabled_anon: Array<String>;
 
     private report_anon: Array<String>;
@@ -37,6 +37,7 @@ export class Bot {
         this.poll_data = JSON.parse(fs.readFileSync(`polls.json`, 'utf8'));
         this.disabled_anon = JSON.parse(fs.readFileSync(`anon_blocked.json`, 'utf8'));
         this.report_anon = JSON.parse(fs.readFileSync(`report_anon.json`, 'utf8'));
+        this.reaction_roles = JSON.parse(fs.readFileSync(`reaction_roles.json`, 'utf8'));
 
         this.rps_games = [];
         this.ttt_games = [];
@@ -70,6 +71,10 @@ export class Bot {
                 `report_anon.json`,
                 JSON.stringify(this.report_anon)
             );
+            fs.writeFileSync(
+                `reaction_roles.json`,
+                JSON.stringify(this.reaction_roles)
+            )
             console.log(`Saved ${this.reminders.length} reminders to reminders.json and ${this.poll_data.length} polls to polls.json.`);
         }, 300_000);
         
@@ -316,7 +321,6 @@ export class Bot {
     public listen(): Promise<string> {
         this.client.on('ready', () => {
             this.startTasks();
-            anonwebhook = new Webhook(this.client);
         });
         this.client.on('interactionCreate', async (interaction) => {
             if (interaction.isCommand()) {
@@ -325,8 +329,8 @@ export class Bot {
                 switch (interaction.commandName) {
                     case "riddle":
                         let id = interaction.options.data[0].options[0].value as number;
-                        if (id > riddles.length) {
-                            interaction.reply(`Invalid riddle ID. Please pick a number between 0-${riddles.length}`);
+                        if (id > riddles.length - 1) {
+                            interaction.reply(`Invalid riddle ID. Please pick a number between 0-${riddles.length - 1}`);
                             return;
                         }
                         if (interaction.options.data[0].name == "question") {
@@ -334,6 +338,7 @@ export class Bot {
                         }
                         else {
                             interaction.reply({content: `${riddles[id][1]}`, ephemeral: true});
+                            interaction.channel.send(`${interaction.user.toString()} looked up the answer to riddle #${id}!`);
                         }
                         break;
                     case "admin":
@@ -398,7 +403,7 @@ export class Bot {
                                 this.report_anon = new_state;
                             }
                             else if (section_response == "help") {
-                                interaction.reply({content: "removeMessages x || disableAnon || enableAnon || enableSnitching || disableSnitching", ephemeral: true})
+                                interaction.reply({content: "removeMessages x \\|| reactionRoles a b c ... z \\|| disableAnon \\|| enableAnon \\|| enableSnitching \\|| disableSnitching", ephemeral: true})
                             }
                             else {
                                 if (section_response.split(" ")[0] == "removeMessages") {
@@ -407,6 +412,37 @@ export class Bot {
                                         interaction.channel.messages.delete(message);
                                     });
                                     interaction.reply({content: "Deleted.", ephemeral: true});
+                                }
+                                else if (section_response.split(" ")[0] == "reactionRoles") {
+                                    let buttons = [];
+                                    if (section_response.split(" ").length < 2) {
+                                        interaction.reply("Invalid arguments.");
+                                        return;
+                                    }
+                                    let content = section_response.split(" ")[1];
+                                    for (let i = 0; i < content.split(">").length - 1; i++) {
+                                        console.log(`Attempting to resolve ${content.split(">")[i]} via ${content.split(">")[i].replace("<@&", "")}.`);
+                                        let role = interaction.guild.roles.resolve(content.split(">")[i].replace("<@&", ""));
+                                        let new_button = new MessageButton();
+                                        new_button.setCustomId(`role|${randZeroToMax(999_999_999_999)}`);
+                                        new_button.setStyle("PRIMARY");
+                                        new_button.setLabel(role.name);
+                                        console.log(`Registered reaction role button: ${JSON.stringify(new_button.toJSON())}`);
+                                        buttons.push(new_button);
+                                        this.reaction_roles.push({
+                                            button_id: new_button.customId,
+                                            guild_id: interaction.guildId,
+                                            role_id: role.id
+                                        });
+                                    }
+                                    let rows = [];
+                                    for (let i = 0; i < buttons.length; i += 5) {
+                                        rows.push(new MessageActionRow());
+                                    }
+                                    for (let i = 0; i < buttons.length; i++) {
+                                        rows[Math.floor(i/5)].addComponents(buttons[i]);
+                                    }
+                                    interaction.reply({content: "Reaction Roles!", components: rows});
                                 }
                                 else {
                                     interaction.reply({content: "Unknown command. Try `/admin help` for a list of commands.", ephemeral: true});
@@ -784,6 +820,22 @@ export class Bot {
                 /// TODO: all buttons should be managed here
                 console.log(`Button interaction (customId: ${interaction.customId})`);
                 switch (interaction.customId.split("|")[0]) {
+                    case "role":
+                        this.reaction_roles.forEach((rrole) => {
+                            if (rrole["button_id"] == interaction.customId) {
+                                if (this.client.guilds.resolve(rrole["guild_id"]).members.resolve(interaction.user).roles.cache.has(rrole["role_id"])) {
+                                    this.client.guilds.resolve(rrole["guild_id"]).members.resolve(interaction.user).roles.remove(interaction.guild.roles.resolve(rrole["role_id"]));
+                                    console.log("Role removed via reaction roles.");
+                                    interaction.reply({ephemeral: true, content: "Role removed!"});
+                                }
+                                else {
+                                    this.client.guilds.resolve(rrole["guild_id"]).members.resolve(interaction.user).roles.add(interaction.guild.roles.resolve(rrole["role_id"]));
+                                    console.log("Role given via reaction roles.");
+                                    interaction.reply({ephemeral: true, content: "Role given!"});
+                                }
+                            }
+                        });
+                        break;
                     case "poll":
                         this.poll_data.forEach((poll) => {
                             if (poll["message_id"] == interaction.message.id) {
@@ -1166,29 +1218,29 @@ const flavor_responses = [
 
 const eb_responses = [
     // yes (6)
-    ["sure", "green"],
-    ["absoulutely", "green"],
-    ["yes", "green"],
-    ["yeah...", "green"],
-    ["of course!", "green"],
-    ["indeed.", "green"],
+    ["sure", "GREEN"],
+    ["absoulutely", "GREEN"],
+    ["yes", "GREEN"],
+    ["yeah...", "GREEN"],
+    ["of course!", "GREEN"],
+    ["indeed.", "GREEN"],
     // unclear (3)
-    ["okeydokey", "blue"],
-    ["the answer is ambigous.", "blue"],
-    ["i am __eight (8) ball__", "blue"],
+    ["okeydokey", "BLUE"],
+    ["the answer is ambigous.", "BLUE"],
+    ["i am __eight (8) ball__", "BLUE"],
     // maybe (4)
-    ["idk", "yellow"],
-    ["maybe", "yellow"],
-    ["possibly.", "yellow"],
-    ["why ask *me*? I don't know.", "yellow"],
+    ["idk", "YELLOW"],
+    ["maybe", "YELLOW"],
+    ["possibly.", "YELLOW"],
+    ["why ask *me*? I don't know.", "YELLOW"],
     // no (7)
-    ["nah", "red"],
-    ["**FUCK NO!**", "red"],
-    ["stupid question, obviously not", "red"],
-    ["no", "red"],
-    ["nope", "red"],
-    ["no way", "red"],
-    ["negative.", "red"]
+    ["nah", "RED"],
+    ["**FUCK NO!**", "RED"],
+    ["stupid question, obviously not", "RED"],
+    ["no", "RED"],
+    ["nope", "RED"],
+    ["no way", "RED"],
+    ["negative.", "RED"]
 ];
 
 const riddles = [
