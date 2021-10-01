@@ -1,3 +1,11 @@
+**Goblin Child v4.8.0**
+*Features and New Content*
+- /language - Change localization for your messages! Currently supported langauges include American and Canadian English, and partial support for French and Spanish.
+*Changes and Tweaks*
+- Much of Goblin's text has been updated.
+*Additional Notes*
+- If you'd like to help contribute translations, leave some info with /feedback!
+
 **Goblin Child v4.7.0**
 *Features and New Content*
 - /admin reactionRoles - Reaction roles! With Goblin!

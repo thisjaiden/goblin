@@ -1,14 +1,8 @@
-// commontags allows more diverse usage of `` tags
-const commontags = require('common-tags');
-const stripIndents = commontags.stripIndents;
-
 const fs = require('fs');
-
-// bot version
-export const BOT_VERSION = "4.7.0";
 
 // discord.js for accessing the discord api
 import { Client, ColorResolvable, Guild, Message, MessageActionRow, MessageButton, MessageButtonStyleResolvable, MessageEmbed, NewsChannel, Permissions, TextChannel, Webhook } from 'discord.js';
+import { DEFAULT_LANG, find_lang, translate_string } from './lang';
 
 export class Bot {
     // discord.js Client object used for interfacing with Discord
@@ -17,18 +11,13 @@ export class Bot {
     private readonly token: string;
 
     private reminders: Array<object>;
-
     private poll_data: Array<object>;
-
     private rps_games: Array<object>;
-
     private ttt_games: Array<object>;
-
     private reaction_roles: Array<object>;
-
     private disabled_anon: Array<String>;
-
     private report_anon: Array<String>;
+    private lang_overrides: Array<object>;
     
     constructor(client: Client, token: string) {
         this.client = client;
@@ -38,6 +27,7 @@ export class Bot {
         this.disabled_anon = JSON.parse(fs.readFileSync(`anon_blocked.json`, 'utf8'));
         this.report_anon = JSON.parse(fs.readFileSync(`report_anon.json`, 'utf8'));
         this.reaction_roles = JSON.parse(fs.readFileSync(`reaction_roles.json`, 'utf8'));
+        this.lang_overrides = JSON.parse(fs.readFileSync(`lang_overrides.json`, 'utf8'));
 
         this.rps_games = [];
         this.ttt_games = [];
@@ -74,7 +64,11 @@ export class Bot {
             fs.writeFileSync(
                 `reaction_roles.json`,
                 JSON.stringify(this.reaction_roles)
-            )
+            );
+            fs.writeFileSync(
+                `lang_overrides.json`,
+                JSON.stringify(this.lang_overrides)
+            );
             console.log(`Saved ${this.reminders.length} reminders to reminders.json and ${this.poll_data.length} polls to polls.json.`);
         }, 300_000);
         
@@ -86,7 +80,7 @@ export class Bot {
                 let this_reminder = this.reminders[i];
                 if (this_reminder["when"] <= current_time) {
                     let chan = this.client.channels.resolve(this_reminder["channel_id"]) as TextChannel;
-                        chan.send(`Hello ${this_reminder["user_atable"]}! This is your reminder! (${this_reminder["reminder"]})`);
+                    chan.send(`Hello ${this_reminder["user_atable"]}! This is your reminder! (${this_reminder["reminder"]})`);
                     console.log(`A reminder has been sent and removed from the list!`);
                 }
                 else {
@@ -281,6 +275,28 @@ export class Bot {
                 ]
             },
             {
+                name: "language",
+                description: "Pick a different language for Goblin to use for you.",
+                options: [
+                    {
+                        type: 1,
+                        name: "en_us",
+                        description: translate_string("lang.en_us", DEFAULT_LANG),
+                        options: [
+
+                        ]
+                    },
+                    {
+                        type: 1,
+                        name: "en_ca",
+                        description: translate_string("lang.en_ca", DEFAULT_LANG),
+                        options: [
+
+                        ]
+                    }
+                ]
+            },
+            {
                 name: "riddle",
                 description: "Get a riddle!",
                 options: [
@@ -324,7 +340,7 @@ export class Bot {
         });
         this.client.on('interactionCreate', async (interaction) => {
             if (interaction.isCommand()) {
-                /// TODO: all commands should be switched or hooked here
+                let u_lang = find_lang(this.lang_overrides, interaction);
                 console.log(`Interaction begin: /${interaction.commandName}`);
                 switch (interaction.commandName) {
                     case "riddle":
@@ -509,9 +525,21 @@ export class Bot {
                             (await new_webhook).send(`${post_options.data[0].value}`);
                         }
                         break;
+                    case "language":
+                        for (let i = 0; i < this.lang_overrides.length; i++) {
+                            if (interaction.user.id == this.lang_overrides[i]["user_id"]) {
+                                this.lang_overrides.splice(i, 1);
+                            }
+                        }
+                        this.lang_overrides.push({
+                            user_id: interaction.user.id,
+                            lang_id: interaction.options.data[0].name
+                        });
+                        interaction.reply({content: translate_string(`lang.switch.${interaction.options.data[0].name}`, interaction.options.data[0].name), ephemeral: true})
+                        break;
                     case "poll":
                         if (interaction.inGuild() == false) {
-                            interaction.reply("You can't create a poll in DMs.");
+                            interaction.reply(translate_string("poll.dms", find_lang(this.lang_overrides, interaction)));
                             return;
                         }
                         let poll_options = interaction.options;
@@ -751,35 +779,22 @@ export class Bot {
                             `feedback.json`,
                             JSON.stringify(fbtm)
                         );
-                        interaction.reply({content: "Feedback received!"});
+                        interaction.reply({content: translate_string("feedback.text", u_lang)});
                         break;
                     case "help":
-                        let snitch_status = "**DISABLED**";    
+                        let snitch_status = translate_string("help.snitch.disabled", u_lang);   
                         for (let i = 0; i < this.report_anon.length; i++) {
                             if (this.report_anon[i] == interaction.guildId) {
-                                snitch_status = "**ENABLED**";
+                                snitch_status = translate_string("help.snitch.enabled", u_lang);
                             }
                         }
                         interaction.reply(
                             {
                                 embeds: [
                                     new MessageEmbed()
-                                        .setTitle(`Goblin Child v${BOT_VERSION}`)
-                                        .setDescription(stripIndents`
-                                            /balls - Shows a picture of balls. Genuinely SFW.
-                                            /eightball - Answers all your deepest questions.
-                                            /flavor - Ever wondered what flavor you are? Find out now.
-                                            /invite - Get the invite link for Goblin. <3
-                                            /poll - Ask everyone a question.
-                                            /rps - Challenge someone to rock paper scissors.
-                                            /feedback - Give feedback and suggest features.
-                                            /anon - Post a message anonomously.
-                                            /game - Play a fun game!
-                                            /remindme - Set a reminder for yourself.
-                                            /riddle - Get a riddle.
-                                            /admin - Run basic admin commands.
-                                        `)
-                                        .setFooter(`Snitching is ${snitch_status} on this server.`)
+                                        .setTitle(`Goblin Child v${translate_string("bot.version", u_lang)}`)
+                                        .setDescription(translate_string("help.text", u_lang))
+                                        .setFooter(`${translate_string("help.snitch.pre", u_lang)}${snitch_status}${translate_string("help.snitch.post", u_lang)}`)
                                 ]
                             }
                         );
@@ -802,9 +817,9 @@ export class Bot {
                             {
                                 embeds: [
                                     new MessageEmbed()
-                                        .setTitle(`${interaction.user.username}, are you suffering from Gaming Disorder?`)
-                                        .setDescription(`Try the following resource:\nhttps://www.who.int/news-room/q-a-detail/addictive-behaviours-gaming-disorder`)
-                                        .setURL("https://www.who.int/news-room/q-a-detail/addictive-behaviours-gaming-disorder")
+                                        .setTitle(`${interaction.user.username}${translate_string("game.title", u_lang)}`)
+                                        .setDescription(`${translate_string("game.description", u_lang)}${translate_string("game.url", u_lang)}`)
+                                        .setURL(translate_string("game.url", u_lang))
                                         .setColor("#8B4513")
                                 ]
                             }
@@ -817,7 +832,6 @@ export class Bot {
                 console.log(`Interaction end: /${interaction.commandName}`);
             }
             if (interaction.isButton()) {
-                /// TODO: all buttons should be managed here
                 console.log(`Button interaction (customId: ${interaction.customId})`);
                 switch (interaction.customId.split("|")[0]) {
                     case "role":
