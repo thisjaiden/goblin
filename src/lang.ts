@@ -29,3 +29,16 @@ export function find_lang(list, inter) {
     }
     return DEFAULT_LANG;
 }
+
+export function random_string(list) {
+    return list[randZeroToMax(list.length)];
+}
+
+/**
+ * Generates a random number between 0 and max, [inclusive, exclusive)
+ * @param max - The maximum number to generate (exclusive)
+ * @returns The number generated
+ */
+ function randZeroToMax(max: number): number {
+    return Math.floor(Math.random() * Math.floor(max));
+}

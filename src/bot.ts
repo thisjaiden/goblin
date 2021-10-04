@@ -419,7 +419,7 @@ export class Bot {
                                 this.report_anon = new_state;
                             }
                             else if (section_response == "help") {
-                                interaction.reply({content: "removeMessages x \\|| reactionRoles a b c ... z \\|| disableAnon \\|| enableAnon \\|| enableSnitching \\|| disableSnitching", ephemeral: true})
+                                interaction.reply({content: translate_string("admin.help.text", u_lang), ephemeral: true})
                             }
                             else {
                                 if (section_response.split(" ")[0] == "removeMessages") {
@@ -432,7 +432,7 @@ export class Bot {
                                 else if (section_response.split(" ")[0] == "reactionRoles") {
                                     let buttons = [];
                                     if (section_response.split(" ").length < 2) {
-                                        interaction.reply("Invalid arguments.");
+                                        interaction.reply(translate_string("admin.roles.arguments", u_lang));
                                         return;
                                     }
                                     let content = section_response.split(" ")[1];
@@ -458,15 +458,15 @@ export class Bot {
                                     for (let i = 0; i < buttons.length; i++) {
                                         rows[Math.floor(i/5)].addComponents(buttons[i]);
                                     }
-                                    interaction.reply({content: "Reaction Roles!", components: rows});
+                                    interaction.reply({content: translate_string("admin.roles.text", u_lang), components: rows});
                                 }
                                 else {
-                                    interaction.reply({content: "Unknown command. Try `/admin help` for a list of commands.", ephemeral: true});
+                                    interaction.reply({content: translate_string("admin.unknown", u_lang), ephemeral: true});
                                 }
                             }
                         }
                         else {
-                            interaction.reply({content: "You don't have permission to use /admin here!", ephemeral: true});
+                            interaction.reply({content: translate_string("admin.permission", u_lang), ephemeral: true});
                             return;
                         }
                         break;
@@ -499,7 +499,7 @@ export class Bot {
                                     if (server_reports) {
                                         console.log("The server with this message reported it to the server owner.");
                                         console.log(`${interaction.user.toString()}|${interaction.user.id}: (${post_options.data[0].value})`);
-                                        (await interaction.guild.fetchOwner()).send("Hey, someone said some concerning things as anon in your server. Here's a bit more info on them. Make sure they're ok!");
+                                        (await interaction.guild.fetchOwner()).send(translate_string("snitch.text", u_lang));
                                         (await interaction.guild.fetchOwner()).send(`${interaction.user.toString()}|${interaction.user.id}: (${post_options.data[0].value})`);
                                     }
                                     else {
@@ -586,8 +586,8 @@ export class Bot {
                         message.setTitle("balls");
                         message.setDescription("balls");
                         message.setFooter("balls");
-                        message.setImage(balls_responses[randZeroToMax(balls_responses.length)]);
-                        message.setThumbnail(balls_responses[randZeroToMax(balls_responses.length)]);
+                        message.setImage(translate_string("balls.url", u_lang));
+                        message.setThumbnail(translate_string("balls.url", u_lang));
                         interaction.reply({embeds: [message]});
                         break;
                     case "remindme":
@@ -800,14 +800,14 @@ export class Bot {
                         );
                         break;
                     case "eightball":
-                        let rand_select = eb_responses[randZeroToMax(eb_responses.length)];
+                        let response = translate_string("eightball.response", u_lang);
                         interaction.reply(
                             {
                                 embeds: [
                                     new MessageEmbed()
-                                        .setTitle(`${interaction.user.username} asked "${interaction.options.data[0].value}"`)
-                                        .setDescription(`**Magic eight ball says...**\n"${rand_select[0]}"`)
-                                        .setColor(rand_select[1] as ColorResolvable)
+                                        .setTitle(`${interaction.user.username}${translate_string("eightball.title", u_lang)}${translate_string("format.quote.left", u_lang)}${interaction.options.data[0].value}${translate_string("format.quote.right", u_lang)}`)
+                                        .setDescription(`${translate_string("eightball.text", u_lang)}"${response[0]}"`)
+                                        .setColor(response[1] as ColorResolvable)
                                 ]
                             }
                         );
@@ -832,6 +832,7 @@ export class Bot {
                 console.log(`Interaction end: /${interaction.commandName}`);
             }
             if (interaction.isButton()) {
+                let u_lang = find_lang(this.lang_overrides, interaction);
                 console.log(`Button interaction (customId: ${interaction.customId})`);
                 switch (interaction.customId.split("|")[0]) {
                     case "role":
@@ -840,12 +841,12 @@ export class Bot {
                                 if (this.client.guilds.resolve(rrole["guild_id"]).members.resolve(interaction.user).roles.cache.has(rrole["role_id"])) {
                                     this.client.guilds.resolve(rrole["guild_id"]).members.resolve(interaction.user).roles.remove(interaction.guild.roles.resolve(rrole["role_id"]));
                                     console.log("Role removed via reaction roles.");
-                                    interaction.reply({ephemeral: true, content: "Role removed!"});
+                                    interaction.reply({ephemeral: true, content: translate_string("role.remove", u_lang)});
                                 }
                                 else {
                                     this.client.guilds.resolve(rrole["guild_id"]).members.resolve(interaction.user).roles.add(interaction.guild.roles.resolve(rrole["role_id"]));
                                     console.log("Role given via reaction roles.");
-                                    interaction.reply({ephemeral: true, content: "Role given!"});
+                                    interaction.reply({ephemeral: true, content: translate_string("role.grant", u_lang)});
                                 }
                             }
                         });
@@ -1126,67 +1127,14 @@ export class Bot {
     }
 }
 
-// [0-max)
 /**
  * Generates a random number between 0 and max, [inclusive, exclusive)
  * @param max - The maximum number to generate (exclusive)
  * @returns The number generated
  */
-function randZeroToMax(max: number): number {
+ function randZeroToMax(max: number): number {
     return Math.floor(Math.random() * Math.floor(max));
 }
-
-/** This is the list of images used for `/balls`. */
-const balls_responses = [
-    // ball pit balls (1)
-    "https://funandfunction.com/media/catalog/product/cache/d836d0aca748fb9367c92871c4ca1707/E/Q/EQ1643P_001.jpg",
-    // various balls (2)
-    "https://images-na.ssl-images-amazon.com/images/I/81S%2B7h513XL._AC_SL1500_.jpg",
-    // basketballs (3)
-    "https://i5.walmartimages.com/asr/a6545c29-961f-46ce-a02b-7f983c1b1d68_1.e895b89031a169c5768024a481465af8.jpeg",
-    // tennis balls (4)
-    "https://cdn.shopify.com/s/files/1/2006/8755/articles/unnamed_07beb919-3965-4407-9e81-1ad788eac4ca_1260x.jpg?v=1596476114",
-    // ping pong balls (5)
-    "https://i.pinimg.com/originals/b9/58/30/b9583014b1b7fd6aaafe3c7215145952.jpg",
-    // volleyballs (6)
-    "https://media.istockphoto.com/photos/white-volleyballs-picture-id1030316400",
-    // footballs (7)
-    "https://www.gophersport.com/cmsstatic/g-62318-wilsonncaa-Sizes.jpg?medium",
-    // soccer balls (8)
-    "https://s7.orientaltrading.com/is/image/OrientalTrading/VIEWER_ZOOM/realistic-soccer-ball-stress-balls~42_2092a",
-    // pickle balls (9)
-    "https://pickleballguide.net/wp-content/uploads/2019/12/Best-Pickleball-Balls-Thumbnail.jpg",
-    // bowling balls (10)
-    "https://www.gophersport.com/cmsstatic/img/834/G-45570-RainbowStrikerRubberBowlingBalls-clean.jpg",
-    // ball mouse (11)
-    "https://images-na.ssl-images-amazon.com/images/I/71lMgtxpDmL._AC_SL1500_.jpg",
-    // yoga balls (12)
-    "https://www.kakaos.com/prodimages/ka-abyb-2200-Lg.jpg",
-    // bouncy balls (13)
-    "https://images-na.ssl-images-amazon.com/images/I/71rPt9VjYNL._AC_SL1500_.jpg",
-    // stress balls (14)
-    "https://images-na.ssl-images-amazon.com/images/I/51W3-YY%2BAcL._AC_.jpg",
-    // poke balls (15)
-    "https://images-na.ssl-images-amazon.com/images/I/81JUMEWEhIL._AC_SL1500_.jpg",
-    // pool balls (16)
-    "https://cdn11.bigcommerce.com/s-c1tzcg0txe/images/stencil/1280x1280/products/1916/2672/ozonepark_2465_773603528__63614.1490639043.jpg?c=2",
-    // cheese balls (17)
-    "https://images-na.ssl-images-amazon.com/images/I/717BQwpafqL._SL1500_.jpg",
-    // baseballs (18)
-    "https://sportshub.cbsistatic.com/i/r/2019/09/25/d32d28df-c89b-46d4-855c-c243af545fdb/thumbnail/1200x675/507126c5b7e654fdc1f629b87139ede8/mlb-baseballs.jpg",
-    // dodgeballs (19)
-    "https://m.media-amazon.com/images/I/81CCz-2TTSL._AC_SL1500_.jpg",
-    // beach balls (20)
-    "https://res.cloudinary.com/gray-malin/image/upload/c_scale,w_1000,q_80,f_auto/gray-malin/products/Beach-Balls_(2).jpg?updated=1507731558",
-    // gumballs (21)
-    "https://m.media-amazon.com/images/I/51z7Zc2RwFL._SX425_.jpg",
-    // cricket balls (22)
-    "https://m.media-amazon.com/images/I/718v4VFCBHL._AC_.jpg",
-    // disco balls (23)
-    "https://previews.123rf.com/images/pilgrimiracle/pilgrimiracle1701/pilgrimiracle170100002/69770390-disco-balls-on-the-ceiling.jpg",
-    // yarn balls (24)
-    "https://previews.123rf.com/images/pjjaruwan/pjjaruwan1501/pjjaruwan150100003/35077423-colorful-wool-yarn-balls.jpg",
-];
 
 const flavor_responses = [
     // Real flavors (14)
@@ -1228,33 +1176,6 @@ const flavor_responses = [
     ["Piss", "#dde080"],
     ["not avalable. Please leave a message, after the tone. **BEEEEEEP**", "#52876c"],
     ["Frog", "#00FF00"]
-];
-
-const eb_responses = [
-    // yes (6)
-    ["sure", "GREEN"],
-    ["absoulutely", "GREEN"],
-    ["yes", "GREEN"],
-    ["yeah...", "GREEN"],
-    ["of course!", "GREEN"],
-    ["indeed.", "GREEN"],
-    // unclear (3)
-    ["okeydokey", "BLUE"],
-    ["the answer is ambigous.", "BLUE"],
-    ["i am __eight (8) ball__", "BLUE"],
-    // maybe (4)
-    ["idk", "YELLOW"],
-    ["maybe", "YELLOW"],
-    ["possibly.", "YELLOW"],
-    ["why ask *me*? I don't know.", "YELLOW"],
-    // no (7)
-    ["nah", "RED"],
-    ["**FUCK NO!**", "RED"],
-    ["stupid question, obviously not", "RED"],
-    ["no", "RED"],
-    ["nope", "RED"],
-    ["no way", "RED"],
-    ["negative.", "RED"]
 ];
 
 const riddles = [
