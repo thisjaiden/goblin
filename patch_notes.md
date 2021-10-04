@@ -1,6 +1,7 @@
 **Goblin Child v4.8.0**
 *Features and New Content*
-- /language - Change localization for your messages! Currently supported langauges include American and Canadian English, and partial support for French and Spanish.
+- /anon - Now has an optional argument for a nickname
+- /language - Change localization for your messages! Currently supported langauges include American and Canadian English, and experimental support for French and Spanish.
 *Changes and Tweaks*
 - Much of Goblin's text has been updated.
 *Additional Notes*

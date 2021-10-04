@@ -24,6 +24,12 @@ export function translate_en_us(key) {
             return "Switched language to Spanish";
         case "poll.dms":
             return "You can't create a poll in DMs.";
+        case "riddle.invalid":
+            return "Invalid riddle ID. Please pick a number from ";
+        case "riddle.riddle":
+            return "Riddle";
+        case "riddle.lookup":
+            return " looked up the answer to riddle ";
         case "help.text":
             return stripIndents`
                 /admin - Run basic admin commands.
@@ -70,8 +76,72 @@ export function translate_en_us(key) {
             return "Reaction roles!";
         case "admin.roles.arguments":
             return "Invalid arguments.";
+        case "admin.dm":
+            return "You can't use /admin in DMs.";
+        case "admin.anon.disable":
+            return "Anon has been disabled in this server.";
+        case "admin.anon.disabled":
+            return "Anon is already disabled in this server.";
+        case "admin.anon.enable":
+            return "Anon has been enabled in this server.";
+        case "admin.snitching.enable":
+            return "Snitching has been enabled in this server.";
+        case "admin.snitching.enabled":
+            return "Snitching is already enabled in this server.";
+        case "admin.snitching.disable":
+            return "Snitching has been disabled in this server.";
         case "admin.help.text":
             return "removeMessages x \\|| reactionRoles a b c ... z \\|| disableAnon \\|| enableAnon \\|| enableSnitching \\|| disableSnitching";
+        case "anon.disabled":
+            return "Anon is disabled in this server.";
+        case "anon.sent":
+            return "Message sent.";
+        case "flavor.title":
+            return "**ANNOUNCEMENT**";
+        case "flavor.text":
+            return " is ";
+        case "flavor.flavor":
+            return random_string([
+                // Real flavors (14)
+                ["Grape Flavored", "#ab339f"],
+                ["Strawberry Flavored", "#db2323"],
+                ["Blueberry Flavored", "#243fd6"],
+                ["Lemon Flavored", "#edfa7d"],
+                ["Sour Flavored", "#a8db74"],
+                ["Sweet Flavored", "#f78172"],
+                ["Blueberry Flavored", "#3f3dd9"],
+                ["Avacado Flavored", "#1c613b"],
+                ["Not Flavored :cry:", "#3b6fd1"],
+                ["Cotton Candy Flavored", "#87eaf5"],
+                ["Apple Flavored", "#c41b1b"],
+                ["Banana Flavored", "#e6da32"],
+                ["Cherry Flavored", "#7d040a"],
+                ["Cinnamon Flavored", "#913f04"],
+                // Unusual flavors (15)
+                ["Green Flavored", "#24d63f"],
+                ["**~~VOID~~** Flavored", "#000000"],
+                ["Heaven Flavored", "#ffffff"],
+                ["War Crime Flavored", "#ff0000"],
+                ["Sky Flavored", "#5fc5ed"],
+                ["Weed Flavored", "#31f76a"],
+                ["Shart Flavored", "#5e2d0f"],
+                ["Milf Flavored", "#a221bf"],
+                ["Ronald Flavored :beronald:", "#000000"],
+                ["Gasoline Flavored", "#a9d9ae"],
+                ["Cum Flavored", "#d4d4d4"],
+                ["Breast Milk Flavored", "#d4d4d4"],
+                ["Blood Flavored", "#941212"],
+                ["Unseasoned :cry:", "#3b6fd1"],
+                ["Unsweetened :cry:", "#3b6fd1"],
+                // Unrelated to flavors (6)
+                ["Orange Orange Orange Orange Orange", "#f2992c"],
+                ["dead", "#473838"],
+                ["wanted on multiple counts of manslaughter", "#75161d"],
+                ["**Chunky Monkey**", "#693d15"],
+                ["Piss", "#dde080"],
+                ["not avalable. Please leave a message, after the tone. **BEEEEEEP**", "#52876c"],
+                ["Frog", "#00FF00"]
+            ]);
         case "eightball.title":
             return " asked ";
         case "eightball.text":

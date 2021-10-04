@@ -259,6 +259,11 @@ export class Bot {
                         name: "message",
                         description: "The message to send.",
                         required: true
+                    },
+                    {
+                        type: 3,
+                        name: "name",
+                        description: "A name for this anon."
                     }
                 ]
             },
@@ -290,6 +295,22 @@ export class Bot {
                         type: 1,
                         name: "en_ca",
                         description: translate_string("lang.en_ca", DEFAULT_LANG),
+                        options: [
+
+                        ]
+                    },
+                    {
+                        type: 1,
+                        name: "fr",
+                        description: translate_string("lang.fr", DEFAULT_LANG),
+                        options: [
+
+                        ]
+                    },
+                    {
+                        type: 1,
+                        name: "sp",
+                        description: translate_string("lang.sp", DEFAULT_LANG),
                         options: [
 
                         ]
@@ -346,20 +367,20 @@ export class Bot {
                     case "riddle":
                         let id = interaction.options.data[0].options[0].value as number;
                         if (id > riddles.length - 1) {
-                            interaction.reply(`Invalid riddle ID. Please pick a number between 0-${riddles.length - 1}`);
+                            interaction.reply(`${translate_string("riddle.invalid", u_lang)}0-${riddles.length - 1}`);
                             return;
                         }
                         if (interaction.options.data[0].name == "question") {
-                            interaction.reply(`Riddle #${id}: ${riddles[id][0]}`);
+                            interaction.reply(`${translate_string("riddle.riddle", u_lang)} #${id}: ${riddles[id][0]}`);
                         }
                         else {
                             interaction.reply({content: `${riddles[id][1]}`, ephemeral: true});
-                            interaction.channel.send(`${interaction.user.toString()} looked up the answer to riddle #${id}!`);
+                            interaction.channel.send(`${interaction.user.toString()}${translate_string("riddle.lookup", u_lang)}#${id}!`);
                         }
                         break;
                     case "admin":
                         if (interaction.inGuild() == false) {
-                            interaction.reply("You can't use /admin in DMs.");
+                            interaction.reply(translate_string("admin.dm", u_lang));
                             return;
                         }
                         if (interaction.guild.members.resolve(interaction.user).roles.highest.permissions.has(Permissions.FLAGS.ADMINISTRATOR) || interaction.guild.ownerId == interaction.user.id) {
@@ -373,17 +394,17 @@ export class Bot {
                                 }
                                 if (already_disabled == false) {
                                     this.disabled_anon.push(interaction.guildId);
-                                    interaction.reply({content: "Anon has been disabled in this server.", ephemeral: true});
+                                    interaction.reply({content: translate_string("admin.anon.disable", u_lang), ephemeral: true});
                                 }
                                 else {
-                                    interaction.reply({content: "Anon is already disabled in this server.", ephemeral: true});
+                                    interaction.reply({content: translate_string("admin.anon.disabled", u_lang), ephemeral: true});
                                 }
                             }
                             else if (section_response == "enableAnon") {
                                 let new_state = [];
                                 for (let i = 0; i < this.disabled_anon.length; i++) {
                                     if (this.disabled_anon[i] == interaction.guildId) {
-                                        interaction.reply({content: "Anon has been enabled in this server.", ephemeral: true});
+                                        interaction.reply({content: translate_string("admin.anon.enable", u_lang), ephemeral: true});
                                     }
                                     else {
                                         new_state.push(this.disabled_anon[i]);
@@ -400,17 +421,17 @@ export class Bot {
                                 }
                                 if (already_enabled == false) {
                                     this.report_anon.push(interaction.guildId);
-                                    interaction.reply({content: "Snitching has been enabled in this server."});
+                                    interaction.reply({content: translate_string("admin.snitching.enable", u_lang)});
                                 }
                                 else {
-                                    interaction.reply({content: "Snitching is already enabled in this server.", ephemeral: true});
+                                    interaction.reply({content: translate_string("admin.snitching.enabled", u_lang), ephemeral: true});
                                 }
                             }
                             else if (section_response == "disableSnitching") {
                                 let new_state = [];
                                 for (let i = 0; i < this.report_anon.length; i++) {
                                     if (this.report_anon[i] == interaction.guildId) {
-                                        interaction.reply({content: "Snitching has been disabled in this server."});
+                                        interaction.reply({content: translate_string("admin.snitching.disable", u_lang)});
                                     }
                                     else {
                                         new_state.push(this.report_anon[i]);
@@ -477,11 +498,11 @@ export class Bot {
                         }
                         for (let i = 0; i < this.disabled_anon.length; i++) {
                             if (this.disabled_anon[i] == interaction.guildId) {
-                                interaction.reply({"content": "Anon is disabled in this server.", "ephemeral": true});
+                                interaction.reply({"content": translate_string("anon.disabled", u_lang), "ephemeral": true});
                                 return;
                             }
                         }
-                        interaction.reply({"content": "Message sent.", "ephemeral": true});
+                        interaction.reply({"content": translate_string("anon.sent", u_lang), "ephemeral": true});
                         
                         let post_options = interaction.options;
 
@@ -511,17 +532,26 @@ export class Bot {
 
                         let webhooks = (await interaction.guild.fetchWebhooks());
                         let contains_goblin_hook = false;
+                        let has_name = false;
+                        let anon_name = "Anon";
+                        if (interaction.options.data.length > 1) {
+                            has_name = true;
+                        }
+                        if (has_name) {
+                            anon_name = interaction.options.data[1].value as string;
+                        }
                         webhooks.forEach(async (hook) => {
-                            if (hook.name == "Anon") {
+                            if (hook.owner.id == this.client.user.id) {
                                 contains_goblin_hook = true;
                                 (await hook.edit({channel: interaction.channelId}));
+                                (await hook.edit({name: anon_name}));
                                 hook.send(`${post_options.data[0].value}`);
                                 return;
                             }
                         });
                         let chan = interaction.channel as TextChannel | NewsChannel;
                         if (!contains_goblin_hook) {
-                            let new_webhook = chan.createWebhook("Anon", {"avatar": "https://cdn.discordapp.com/attachments/882260949006966826/891006265923354634/image0.gif"});
+                            let new_webhook = chan.createWebhook(anon_name, {"avatar": "https://cdn.discordapp.com/attachments/882260949006966826/891006265923354634/image0.gif"});
                             (await new_webhook).send(`${post_options.data[0].value}`);
                         }
                         break;
@@ -643,11 +673,11 @@ export class Bot {
                         );
                         break;
                     case "flavor":
-                        let repo = flavor_responses[randZeroToMax(flavor_responses.length)];
+                        let repo = translate_string("flavor.flavor", u_lang);
                         interaction.reply({embeds: [
                             new MessageEmbed()
-                                .setTitle("**ANNOUNCEMENT**")
-                                .setDescription(`"${interaction.member} is __${repo[0]}__"`)
+                                .setTitle(translate_string("flavor.title", u_lang))
+                                .setDescription(`"${interaction.member}${translate_string("flavor.text", u_lang)}__${repo[0]}__"`)
                                 .setColor(repo[1] as ColorResolvable)
                         ]});
                         break;
@@ -1135,48 +1165,6 @@ export class Bot {
  function randZeroToMax(max: number): number {
     return Math.floor(Math.random() * Math.floor(max));
 }
-
-const flavor_responses = [
-    // Real flavors (14)
-    ["Grape Flavored", "#ab339f"],
-    ["Strawberry Flavored", "#db2323"],
-    ["Blueberry Flavored", "#243fd6"],
-    ["Lemon Flavored", "#edfa7d"],
-    ["Sour Flavored", "#a8db74"],
-    ["Sweet Flavored", "#f78172"],
-    ["Blueberry Flavored", "#3f3dd9"],
-    ["Avacado Flavored", "#1c613b"],
-    ["Not Flavored :cry:", "#3b6fd1"],
-    ["Cotton Candy Flavored", "#87eaf5"],
-    ["Apple Flavored", "#c41b1b"],
-    ["Banana Flavored", "#e6da32"],
-    ["Cherry Flavored", "#7d040a"],
-    ["Cinnamon Flavored", "#913f04"],
-    // Unusual flavors (15)
-    ["Green Flavored", "#24d63f"],
-    ["**~~VOID~~** Flavored", "#000000"],
-    ["Heaven Flavored", "#ffffff"],
-    ["War Crime Flavored", "#ff0000"],
-    ["Sky Flavored", "#5fc5ed"],
-    ["Weed Flavored", "#31f76a"],
-    ["Shart Flavored", "#5e2d0f"],
-    ["Milf Flavored", "#a221bf"],
-    ["Ronald Flavored :beronald:", "#000000"],
-    ["Gasoline Flavored", "#a9d9ae"],
-    ["Cum Flavored", "#d4d4d4"],
-    ["Breast Milk Flavored", "#d4d4d4"],
-    ["Blood Flavored", "#941212"],
-    ["Unseasoned :cry:", "#3b6fd1"],
-    ["Unsweetened :cry:", "#3b6fd1"],
-    // Unrelated to flavors (6)
-    ["Orange Orange Orange Orange Orange", "#f2992c"],
-    ["dead", "#473838"],
-    ["wanted on multiple counts of manslaughter", "#75161d"],
-    ["**Chunky Monkey**", "#693d15"],
-    ["Piss", "#dde080"],
-    ["not avalable. Please leave a message, after the tone. **BEEEEEEP**", "#52876c"],
-    ["Frog", "#00FF00"]
-];
 
 const riddles = [
     [
