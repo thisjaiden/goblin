@@ -28,9 +28,14 @@ async fn main() {
     }
 }
 
-fn run_interaction(ctx: Context, interaction: ApplicationCommandInteraction) {
+async fn run_interaction(ctx: Context, interaction: ApplicationCommandInteraction) {
     match interaction.data.name.as_str() {
         "help" => {
+            interaction.create_interaction_response(ctx.http, |response| {
+                response.interaction_response_data(|data| {
+                    data.content("test")
+                })
+            }).await;
             //interaction.create_followup_message();
         }
         _ => {
@@ -46,7 +51,7 @@ impl EventHandler for Handler {
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
         match interaction {
             Interaction::ApplicationCommand(inter) => {
-                run_interaction(ctx, inter);
+                run_interaction(ctx, inter).await;
             }
             _ => {
                 // We don't handle these types of interactions.
