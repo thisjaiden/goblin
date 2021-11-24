@@ -1,0 +1,2 @@
+pub const TOKEN: &str = "TOKEN_GOES_HERE";
+pub const APP_ID: u64 = 0; // APP_ID GOES HERE
