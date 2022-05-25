@@ -1,15 +1,29 @@
+**Goblin Child v4.9.0**
+
+*Changes and Tweaks*
+- Votes can be changed on polls
+
+*Removed*
+- /language and related features have been removed
+- /riddle has been removed
+
 **Goblin Child v4.8.0**
+
 *Features and New Content*
 - /anon - Now has an optional argument for a nickname
 - /language - Change localization for your messages! Currently supported langauges include American and Canadian English, and experimental support for French and Spanish.
+
 *Changes and Tweaks*
 - Much of Goblin's text has been updated.
+
 *Additional Notes*
 - If you'd like to help contribute translations, leave some info with /feedback!
 
 **Goblin Child v4.7.0**
+
 *Features and New Content*
 - /admin reactionRoles - Reaction roles! With Goblin!
+
 *Changes and Tweaks*
 - Goblin now tells you who has looked up the answer to a riddle.
 - Fixed /eightball (how long has this been broken???)
@@ -17,18 +31,22 @@
 - Fixed crashes with /riddle
 
 **Goblin Child v4.6.1**
+
 *Changes and Tweaks*
 - Fixed issues with /riddle
 
 **Goblin Child v4.6.0**
+
 *Features and New Content*
 - /riddle - Get a riddle! (short list right now, more coming soon)
 - /admin help - Exactly what you'd expect
+
 *Changes and Tweaks*
 - Fixed Snitching sending [object Object]
 - Fixed nonsensical responses from /admin
 
 **Goblin Child v4.5.0**
+
 *Features and New Content*
 - /admin - Allows for basic admin commands.
 - - Requires Administrator or higher privledges.
@@ -39,22 +57,27 @@
 - - /admin disableSnitching - Disables snitch messages
 - - For more info on snitching, please visit [the snitching page](https://github.com/thisjaiden/goblin/blob/main/snitching.md).
 - - /admin debug - Posts debug information about this server
+
 *Changes and Tweaks*
 - Updated to the latest version of discord.js
 
 **Goblin Child v4.4.2**
+
 *Changes and Tweaks*
 - Updated /help
 
 **Goblin Child v4.4.1**
+
 *Changes and Tweaks*
 - /anon is slightly more streamlined.
 
 **Goblin Child v4.4.0**
+
 *Features and New Content*
 - /anon - Post an anonymous message in a channel.
 
 **Goblin Child v4.3.0**
+
 *Features and New Content*
 - /game - Video Gaming
 
