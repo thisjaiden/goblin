@@ -111,6 +111,36 @@ ${this.reaction_roles.length} reaction roles
     private slashCommands() {
         this.client.application.commands.set([
             {
+                name: "dms",
+                description: "Enable or disable anonymous dms",
+                options: [
+                    {
+                        type: "BOOLEAN",
+                        name: "enable",
+                        description: "Enable or disable anonymous dms",
+                        required: true
+                    }
+                ]
+            },
+            {
+                name: "anondm",
+                description: "Message someone anonomously",
+                options: [
+                    {
+                        type: "USER",
+                        name: "who",
+                        description: "Who to send this message to",
+                        required: true
+                    },
+                    {
+                        type: "STRING",
+                        name: "message",
+                        description: "What to send to this user",
+                        required: true
+                    }
+                ]
+            },
+            {
                 name: "poll",
                 description: "Create a poll and get results",
                 options: [
@@ -468,7 +498,11 @@ ${this.reaction_roles.length} reaction roles
                                 contains_goblin_hook = true;
                                 (await hook.edit({channel: interaction.channelId}));
                                 (await hook.edit({name: anon_name}));
-                                hook.send(`${post_options.data[0].value}`);
+                                let cleaned_output = post_options.data[0].value.toString();
+                                // prevent mentions
+                                cleaned_output.replace("<@", "<");
+
+                                hook.send(`${cleaned_output}`);
                                 return;
                             }
                         });

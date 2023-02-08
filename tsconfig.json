@@ -23,6 +23,8 @@
         "noFallthroughCasesInSwitch": true,
         "downlevelIteration": true,
         "removeComments": true,
+        "strictNullChecks": false,
+        "skipLibCheck": true
     },
     "exclude": [
         "node_modules"

@@ -20,7 +20,7 @@ let bot = new Bot(
             ]
         }
     ),
-    process.env.token
+    process.env.token as string
 );
 
 // Start up the Discord bot.

@@ -1,3 +1,10 @@
+**Goblin Child v4.10.0**
+*Features and New Content*
+- More /flavors
+
+*Changes and Tweaks*
+- /anon is no longer able to mention roles and users
+
 **Goblin Child v4.9.0**
 
 *Changes and Tweaks*

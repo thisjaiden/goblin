@@ -76,14 +76,13 @@ export function translate_string(key) {
             return " is ";
         case "flavor.flavor":
             return random_string([
-                // Real flavors (14)
+                // Real flavors
                 ["Grape Flavored", "#ab339f"],
                 ["Strawberry Flavored", "#db2323"],
                 ["Blueberry Flavored", "#243fd6"],
                 ["Lemon Flavored", "#edfa7d"],
                 ["Sour Flavored", "#a8db74"],
                 ["Sweet Flavored", "#f78172"],
-                ["Blueberry Flavored", "#3f3dd9"],
                 ["Avacado Flavored", "#1c613b"],
                 ["Not Flavored :cry:", "#3b6fd1"],
                 ["Cotton Candy Flavored", "#87eaf5"],
@@ -91,7 +90,14 @@ export function translate_string(key) {
                 ["Banana Flavored", "#e6da32"],
                 ["Cherry Flavored", "#7d040a"],
                 ["Cinnamon Flavored", "#913f04"],
-                // Unusual flavors (15)
+                ["Vanilla Flavored", "#ffffff"],
+                ["Blueberry Lemon Flavored", "#e8b015"],
+                ["Lemon Poppy Seed Flavored", "#edd287"],
+                ["Bacon Flavored", "#571508"],
+                ["Garlic Flavored", "#ffffff"],
+                // Unusual flavors
+                ["Yellow Flavor", "#ffff00"],
+                ["\"Fruit\" Flavored :stuck_out_tongue_winking_eye:", "#750707"],
                 ["Green Flavored", "#24d63f"],
                 ["**~~VOID~~** Flavored", "#000000"],
                 ["Heaven Flavored", "#ffffff"],
@@ -107,13 +113,21 @@ export function translate_string(key) {
                 ["Blood Flavored", "#941212"],
                 ["Unseasoned :cry:", "#3b6fd1"],
                 ["Unsweetened :cry:", "#3b6fd1"],
-                // Unrelated to flavors (6)
+                ["Horny Flavored", "#fc7c7c"],
+                ["Gay Flavored", "#fc3595"],
+                ["Smoke Flavored", "#696969"],
+                ["Texas Flavored", "#b51919"],
+                ["Pie Flavored", "#ffffff"],
+                // Unrelated to flavors
+                ["ginemenasaurus, what do you say, gigantasaurus, jamenas... uh bwa menamoris... some menafmorphis, gigandanordisis. Mhm. Jarmornous.", "#ff8000"],
+                ["in massive amounts of back pain", "#c79052"],
                 ["Orange Orange Orange Orange Orange", "#f2992c"],
                 ["dead", "#473838"],
                 ["wanted on multiple counts of manslaughter", "#75161d"],
                 ["**Chunky Monkey**", "#693d15"],
                 ["Piss", "#dde080"],
                 ["not avalable. Please leave a message, after the tone. **BEEEEEEP**", "#52876c"],
+                ["not avalable. (spelled incorrectly!) Please leave a message, after the tone. **BEEEEEEP**", "#52876c"],
                 ["Frog", "#00FF00"]
             ]);
         case "eightball.title":
@@ -149,16 +163,13 @@ export function translate_string(key) {
             ]);
         case "balls.url":
             return random_string([
-                "https://funandfunction.com/media/catalog/product/cache/d836d0aca748fb9367c92871c4ca1707/E/Q/EQ1643P_001.jpg",
                 "https://images-na.ssl-images-amazon.com/images/I/81S%2B7h513XL._AC_SL1500_.jpg",
                 "https://i5.walmartimages.com/asr/a6545c29-961f-46ce-a02b-7f983c1b1d68_1.e895b89031a169c5768024a481465af8.jpeg",
                 "https://cdn.shopify.com/s/files/1/2006/8755/articles/unnamed_07beb919-3965-4407-9e81-1ad788eac4ca_1260x.jpg?v=1596476114",
                 "https://i.pinimg.com/originals/b9/58/30/b9583014b1b7fd6aaafe3c7215145952.jpg",
                 "https://media.istockphoto.com/photos/white-volleyballs-picture-id1030316400",
-                "https://www.gophersport.com/cmsstatic/g-62318-wilsonncaa-Sizes.jpg?medium",
                 "https://s7.orientaltrading.com/is/image/OrientalTrading/VIEWER_ZOOM/realistic-soccer-ball-stress-balls~42_2092a",
                 "https://pickleballguide.net/wp-content/uploads/2019/12/Best-Pickleball-Balls-Thumbnail.jpg",
-                "https://www.gophersport.com/cmsstatic/img/834/G-45570-RainbowStrikerRubberBowlingBalls-clean.jpg",
                 "https://images-na.ssl-images-amazon.com/images/I/71lMgtxpDmL._AC_SL1500_.jpg",
                 "https://www.kakaos.com/prodimages/ka-abyb-2200-Lg.jpg",
                 "https://images-na.ssl-images-amazon.com/images/I/71rPt9VjYNL._AC_SL1500_.jpg",
@@ -179,7 +190,7 @@ export function translate_string(key) {
         case "format.quote.right":
             return "\"";
         case "bot.version":
-            return "4.9.0";
+            return "4.10.0";
         default:
             return key;
     }
