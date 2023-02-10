@@ -95,6 +95,8 @@ export function translate_string(key) {
                 ["Lemon Poppy Seed Flavored", "#edd287"],
                 ["Bacon Flavored", "#571508"],
                 ["Garlic Flavored", "#ffffff"],
+                ["Blackberry Flavored", "#140a1a"],
+                ["Raspberry Flavored", "#470920"],
                 // Unusual flavors
                 ["Yellow Flavor", "#ffff00"],
                 ["\"Fruit\" Flavored :stuck_out_tongue_winking_eye:", "#750707"],
@@ -118,6 +120,10 @@ export function translate_string(key) {
                 ["Smoke Flavored", "#696969"],
                 ["Texas Flavored", "#b51919"],
                 ["Pie Flavored", "#ffffff"],
+                ["Napkin Flavored", "#ffffff"],
+                ["Twink Flavored", "#ffffff"],
+                ["Hydrogen Flavored", "#475f7d"],
+                ["Star Flavored", "##481463"],
                 // Unrelated to flavors
                 ["ginemenasaurus, what do you say, gigantasaurus, jamenas... uh bwa menamoris... some menafmorphis, gigandanordisis. Mhm. Jarmornous.", "#ff8000"],
                 ["in massive amounts of back pain", "#c79052"],
@@ -128,7 +134,12 @@ export function translate_string(key) {
                 ["Piss", "#dde080"],
                 ["not avalable. Please leave a message, after the tone. **BEEEEEEP**", "#52876c"],
                 ["not avalable. (spelled incorrectly!) Please leave a message, after the tone. **BEEEEEEP**", "#52876c"],
-                ["Frog", "#00FF00"]
+                ["Frog", "#00FF00"],
+                ["an Emo", "#000000"],
+                ["forg :forg:", "#658063"],
+                ["several large raccoons stacked in a trench coat that almost passed as human in 2017", "#757373"],
+                ["under investigation by the FBI", "#a83232"],
+                ["has *Huge* Balls!", "#32a852"],
             ]);
         case "eightball.title":
             return " asked ";
@@ -190,7 +201,7 @@ export function translate_string(key) {
         case "format.quote.right":
             return "\"";
         case "bot.version":
-            return "4.10.0";
+            return "4.11.0";
         default:
             return key;
     }

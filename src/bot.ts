@@ -1,7 +1,8 @@
 const fs = require('fs');
 
 import { Client, ColorResolvable, Guild, Message, MessageActionRow, MessageButton, MessageButtonStyleResolvable, MessageEmbed, NewsChannel, Permissions, TextChannel, Webhook } from 'discord.js';
-import { translate_string } from './lang';
+import { translate_string } from "./lang";
+import { commands } from "./commands"
 
 export class Bot {
     // discord.js Client object used for interfacing with Discord
@@ -15,26 +16,26 @@ export class Bot {
     private poll_data: Array<object>;
     // /rps data
     private rps_games: Array<object>;
-    // /ttt data
-    private ttt_games: Array<object>;
     // /admin reactionRoles data
     private reaction_roles: Array<object>;
     // /admin disableAnon data
     private disabled_anon: Array<String>;
     // /admin enableSnitching data
     private report_anon: Array<String>;
-    
+    // /rps elo
+    private rps_data: Array<object>;
+
     constructor(client: Client, token: string) {
         this.client = client;
         this.token = token;
-        this.reminders = JSON.parse(fs.readFileSync(`reminders.json`, 'utf8'));
-        this.poll_data = JSON.parse(fs.readFileSync(`polls.json`, 'utf8'));
-        this.disabled_anon = JSON.parse(fs.readFileSync(`anon_blocked.json`, 'utf8'));
-        this.report_anon = JSON.parse(fs.readFileSync(`report_anon.json`, 'utf8'));
-        this.reaction_roles = JSON.parse(fs.readFileSync(`reaction_roles.json`, 'utf8'));
+        this.reminders = get_or_init_file("data/reminders");
+        this.poll_data = get_or_init_file("data/polls");
+        this.disabled_anon = get_or_init_file("data/anon_blocked");
+        this.report_anon = get_or_init_file("data/report_anon");
+        this.reaction_roles = get_or_init_file("data/reaction_roles");
+        this.rps_data = get_or_init_file("data/rps");
 
         this.rps_games = [];
-        this.ttt_games = [];
         console.log(`
 Constructed client.
 ========================================
@@ -43,6 +44,7 @@ ${this.poll_data.length} polls
 ${this.disabled_anon.length} anons disabled
 ${this.report_anon.length} anon snitchers
 ${this.reaction_roles.length} reaction roles
+${this.rps_data.length} rps elo notes
 ========================================`);
     }
 
@@ -58,26 +60,29 @@ ${this.reaction_roles.length} reaction roles
         // Autosave data that might be needed between restarts every 5 mins.
         setInterval(() => {
             fs.writeFileSync(
-                `reminders.json`,
+                `data/reminders.json`,
                 JSON.stringify(this.reminders)
             );
             fs.writeFileSync(
-                `polls.json`,
+                `data/polls.json`,
                 JSON.stringify(this.poll_data)
             );
             fs.writeFileSync(
-                `anon_blocked.json`,
+                `data/anon_blocked.json`,
                 JSON.stringify(this.disabled_anon)
             );
             fs.writeFileSync(
-                `report_anon.json`,
+                `data/report_anon.json`,
                 JSON.stringify(this.report_anon)
             );
             fs.writeFileSync(
-                `reaction_roles.json`,
+                `data/reaction_roles.json`,
                 JSON.stringify(this.reaction_roles)
             );
-            console.log(`Saved ${this.reminders.length} reminders to reminders.json and ${this.poll_data.length} polls to polls.json.`);
+            fs.writeFileSync(
+                `data/rps.json`,
+                JSON.stringify(this.rps_data)
+            );
         }, 300_000);
         
         // Check reminders every min, and remind users if appropriate
@@ -109,215 +114,7 @@ ${this.reaction_roles.length} reaction roles
      * preventing long startup times while making sure everything is registered.
      */
     private slashCommands() {
-        this.client.application.commands.set([
-            {
-                name: "dms",
-                description: "Enable or disable anonymous dms",
-                options: [
-                    {
-                        type: "BOOLEAN",
-                        name: "enable",
-                        description: "Enable or disable anonymous dms",
-                        required: true
-                    }
-                ]
-            },
-            {
-                name: "anondm",
-                description: "Message someone anonomously",
-                options: [
-                    {
-                        type: "USER",
-                        name: "who",
-                        description: "Who to send this message to",
-                        required: true
-                    },
-                    {
-                        type: "STRING",
-                        name: "message",
-                        description: "What to send to this user",
-                        required: true
-                    }
-                ]
-            },
-            {
-                name: "poll",
-                description: "Create a poll and get results",
-                options: [
-                    {
-                        type: 3,
-                        name: "question",
-                        description: "The question to ask in this poll",
-                        required: true
-                    },
-                    {
-                        type: 3,
-                        name: "answer",
-                        description: "The first answer to this poll",
-                        required: true
-                    },
-                    {
-                        type: 3,
-                        name: "answer2",
-                        description: "The second answer to this poll",
-                        required: true
-                    },
-                    {
-                        type: 3,
-                        name: "answer3",
-                        description: "The third answer to this poll (optional)",
-                        required: false
-                    },
-                    {
-                        type: 3,
-                        name: "answer4",
-                        description: "The fourth answer to this poll (optional)",
-                        required: false
-                    },
-                    {
-                        type: 3,
-                        name: "answer5",
-                        description: "The fifth answer to this poll (optional)",
-                        required: false
-                    }
-                ]
-            },
-            {
-                name: "balls",
-                description: "Get a picture of balls"
-            },
-            {
-                name: "remindme",
-                description: "Set a reminder for the future",
-                options: [
-                    {
-                        type: 4,
-                        name: "time",
-                        description: "How long until your reminder?",
-                        "required": true
-                    },
-                    {
-                        "type": 3,
-                        "name": "unit",
-                        "description": "What unit of time?",
-                        "required": true,
-                        "choices": [
-                            {
-                                "name": "minutes",
-                                "value": "minutes"
-                            },
-                            {
-                                "name": "hours",
-                                "value": "hours"
-                            },
-                            {
-                                "name": "days",
-                                "value": "days"
-                            }
-                        ]
-                    },
-                    {
-                        "type": 3,
-                        "name": "reminder",
-                        "description": "What do you want to be reminded?",
-                        "required": true
-                    }
-                ]
-            },
-            {
-                name: "invite",
-                description: "Get Goblin's invite link"
-            },
-            {
-                name: "game",
-                description: "Play a very fun game!"
-            },
-            {
-                name: "flavor",
-                description: "Get your flavor!"
-            },
-            {
-                name: "feedback",
-                description: "Give feedback about Goblin!",
-                options: [
-                    {
-                        type: 3,
-                        name: "feedback",
-                        description: "Provide feedback here.",
-                        required: true
-                    }
-                ]
-            },
-            {
-                name: "help",
-                description: "Returns a list of Goblin's commands"
-            },
-            {
-                name: "eightball",
-                description: "Ask the magic 8 ball a question!",
-                options: [
-                    {
-                        type: 3,
-                        name: "question",
-                        description: "The question you want to ask",
-                        required: true
-                    }
-                ]
-            },
-            {
-                name: "rps",
-                description: "Challenge someone to Rock Paper Scissors.",
-                options: [
-                    {
-                        type: 6,
-                        name: "user",
-                        description: "The user to challenge",
-                        required: true
-                    }
-                ]
-            },
-            {
-                name: "ttt",
-                description: "Challenge someone to Tic Tac Toe.",
-                options: [
-                    {
-                        type: 6,
-                        name: "user",
-                        description: "The user to challenge",
-                        required: true
-                    }
-                ]
-            },
-            {
-                name: "anon",
-                description: "Post an anonymous message.",
-                options: [
-                    {
-                        type: 3,
-                        name: "message",
-                        description: "The message to send.",
-                        required: true
-                    },
-                    {
-                        type: 3,
-                        name: "name",
-                        description: "A name for this anon."
-                    }
-                ]
-            },
-            {
-                name: "admin",
-                description: "Complete various admin actions.",
-                options: [
-                    {
-                        type: 3,
-                        name: "command",
-                        description: "The command to use.",
-                        required: true
-                    }
-                ]
-            },
-        ]);
+        this.client.application.commands.set(commands());
     }
 
     /**
@@ -500,7 +297,8 @@ ${this.reaction_roles.length} reaction roles
                                 (await hook.edit({name: anon_name}));
                                 let cleaned_output = post_options.data[0].value.toString();
                                 // prevent mentions
-                                cleaned_output.replace("<@", "<");
+                                console.log(cleaned_output);
+                                cleaned_output = cleaned_output.replace("<@", "<");
 
                                 hook.send(`${cleaned_output}`);
                                 return;
@@ -621,83 +419,9 @@ ${this.reaction_roles.length} reaction roles
                         interaction.reply({embeds: [
                             new MessageEmbed()
                                 .setTitle(translate_string("flavor.title"))
-                                .setDescription(`"${interaction.member}${translate_string("flavor.text")}__${repo[0]}__"`)
+                                .setDescription(`"${interaction.user}${translate_string("flavor.text")}__${repo[0]}__"`)
                                 .setColor(repo[1] as ColorResolvable)
                         ]});
-                        break;
-                    case "ttt":
-                        if (interaction.options.data[0].user.bot) {
-                            interaction.reply("You can't challenge a bot to TTT! (weirdo...)");
-                            return;
-                        }
-                        if (interaction.options.data[0].user.id == interaction.user.id) {
-                            interaction.reply("You can't challenge yourself to TTT, idiot.");
-                            return;
-                        }
-                        let ttt_instance = {};
-                        ttt_instance["challenger"] = interaction.user.id;
-                        ttt_instance["challenged"] = interaction.options.data[0].user.id;
-                        let board = [];
-                        for (let i = 0; i < 9; i++) {
-                            board.push({button_id: "ttt|" + randZeroToMax(999_999_999_999), state: 0});
-                        }
-                        ttt_instance["board"] = board;
-                        ttt_instance["turn"] = 0;
-                        interaction.reply({
-                            embeds: [
-                                new MessageEmbed()
-                                    .setTitle("Tic Tac Toe Time")
-                                    .setDescription(`<@${ttt_instance["challenged"]}>, you have been challenged to TTT by ${interaction.user.toString()}`)
-                                    .setFooter("challenge someone else with /ttt")
-                            ],
-                            components: [
-                                new MessageActionRow().addComponents([
-                                    new MessageButton()
-                                        .setLabel(" ")
-                                        .setStyle("SECONDARY")
-                                        .setCustomId(ttt_instance["board"][0]["button_id"]),
-                                    new MessageButton()
-                                        .setLabel(" ")
-                                        .setStyle("SECONDARY")
-                                        .setCustomId(ttt_instance["board"][1]["button_id"]),
-                                    new MessageButton()
-                                        .setLabel(" ")
-                                        .setStyle("SECONDARY")
-                                        .setCustomId(ttt_instance["board"][2]["button_id"])
-                                ]),
-                                new MessageActionRow().addComponents([
-                                    new MessageButton()
-                                        .setLabel(" ")
-                                        .setStyle("SECONDARY")
-                                        .setCustomId(ttt_instance["board"][3]["button_id"]),
-                                    new MessageButton()
-                                        .setLabel(" ")
-                                        .setStyle("SECONDARY")
-                                        .setCustomId(ttt_instance["board"][4]["button_id"]),
-                                    new MessageButton()
-                                        .setLabel(" ")
-                                        .setStyle("SECONDARY")
-                                        .setCustomId(ttt_instance["board"][5]["button_id"])
-                                ]),
-                                new MessageActionRow().addComponents([
-                                    new MessageButton()
-                                        .setLabel(" ")
-                                        .setStyle("SECONDARY")
-                                        .setCustomId(ttt_instance["board"][6]["button_id"]),
-                                    new MessageButton()
-                                        .setLabel(" ")
-                                        .setStyle("SECONDARY")
-                                        .setCustomId(ttt_instance["board"][7]["button_id"]),
-                                    new MessageButton()
-                                        .setLabel(" ")
-                                        .setStyle("SECONDARY")
-                                        .setCustomId(ttt_instance["board"][8]["button_id"])
-                                ])
-                            ]
-                        });
-                        let ttt_msg = await interaction.fetchReply();
-                        ttt_instance["message_id"] = ttt_msg.id;
-                        this.ttt_games.push(ttt_instance);
                         break;
                     case "rps":
                         if (interaction.options.data[0].user.bot) {
@@ -747,10 +471,10 @@ ${this.reaction_roles.length} reaction roles
                     case "feedback":
                         console.log("Feedback received!");
                         console.log(`(${interaction.options.data[0].value})`);
-                        let fbtm = JSON.parse(fs.readFileSync(`feedback.json`, 'utf8'))
+                        let fbtm = get_or_init_file("data/feedback");
                         fbtm.push(interaction.options.data[0].value);
                         fs.writeFileSync(
-                            `feedback.json`,
+                            `data/feedback.json`,
                             JSON.stringify(fbtm)
                         );
                         interaction.reply({content: translate_string("feedback.text")});
@@ -825,8 +549,10 @@ ${this.reaction_roles.length} reaction roles
                         });
                         break;
                     case "poll":
+                        let found_poll = false;
                         this.poll_data.forEach((poll) => {
                             if (poll["message_id"] == interaction.message.id) {
+                                found_poll = true;
                                 let button_index = 0;
                                 let finished = false;
                                 poll["buttons"].forEach((button) => {
@@ -877,6 +603,9 @@ ${this.reaction_roles.length} reaction roles
                                 return;
                             }
                         });
+                        if (!found_poll) {
+                            interaction.reply("This poll is from an earlier version of Goblin and can no longer be voted on.");
+                        }
                         break;
                     case "rps":
                         let new_games_list = [];
@@ -915,40 +644,51 @@ ${this.reaction_roles.length} reaction roles
                                         new_games_list.pop();
                                         let convert_a = num_to_word_rps(game["result_challenger"]);
                                         let convert_b = num_to_word_rps(game["result_challenged"]);
+                                        let winner = "challenger";
                                         if (game["result_challenger"] == game["result_challenged"]) {
                                             interaction.reply(`Both <@${game["challenger"]}> and <@${game["challenged"]}> chose ${convert_a}. TIED!`);
+                                            this.rps_data.push({
+                                                challenger: game["challenger"],
+                                                challenged: game["challenged"],
+                                                winner: "tied",
+                                                timestamp: new Date().getTime()
+                                            });
                                             return;
                                         }
                                         else if (game["result_challenger"] == 1 && game["result_challenged"] == 2) {
                                             // r v p
                                             interaction.reply(`<@${game["challenger"]}> chose ${convert_a}, but <@${game["challenged"]}> chose ${convert_b}.`);
-                                            return;
+                                            winner = "challenged";
                                         }
                                         else if (game["result_challenger"] == 1 && game["result_challenged"] == 3) {
                                             // r v s
                                             interaction.reply(`<@${game["challenger"]}> chose ${convert_a}, beating <@${game["challenged"]}>'s ${convert_b}.`);
-                                            return;
                                         }
                                         else if (game["result_challenger"] == 2 && game["result_challenged"] == 1) {
                                             // p v r
                                             interaction.reply(`<@${game["challenger"]}> chose ${convert_a}, beating <@${game["challenged"]}>'s ${convert_b}.`);
-                                            return;
                                         }
                                         else if (game["result_challenger"] == 2 && game["result_challenged"] == 3) {
                                             // p v s
                                             interaction.reply(`<@${game["challenger"]}> chose ${convert_a}, but <@${game["challenged"]}> chose ${convert_b}.`);
-                                            return;
+                                            winner = "challenged";
                                         }
                                         else if (game["result_challenger"] == 3 && game["result_challenged"] == 1) {
                                             // s v r
                                             interaction.reply(`<@${game["challenger"]}> chose ${convert_a}, but <@${game["challenged"]}> chose ${convert_b}.`);
-                                            return;
+                                            winner = "challenged";
                                         }
                                         else if (game["result_challenger"] == 3 && game["result_challenged"] == 2) {
                                             // s v p
                                             interaction.reply(`<@${game["challenger"]}> chose ${convert_a}, beating <@${game["challenged"]}>'s ${convert_b}.`);
-                                            return;
                                         }
+                                        this.rps_data.push({
+                                            challenger: game["challenger"],
+                                            challenged: game["challenged"],
+                                            winner: winner,
+                                            timestamp: new Date().getTime()
+                                        });
+                                        return;
                                     }
                                     else {
                                         interaction.reply({ephemeral: true, content: "Final decision submitted."});
@@ -958,140 +698,6 @@ ${this.reaction_roles.length} reaction roles
                             }
                         });
                         this.rps_games = new_games_list;
-                        break;
-                    case "ttt":
-                        let new_games_list_ttt = [];
-                        this.ttt_games.forEach(game => {
-                            new_games_list_ttt.push(game);
-                            if (interaction.message.id == game["message_id"]) {
-                                if (interaction.user.id != game["challenger"] && interaction.user.id != game["challenged"]) {
-                                    interaction.reply({ephemeral:true,content:"This isn't your game, loser. Fuck off."});
-                                    return;
-                                }
-                                if ((interaction.user.id == game["challenger"] && game["turn"] == 0) || (interaction.user.id == game["challenged"] && game["turn"] == 1)) {
-                                    interaction.reply({ephemeral:true,content:"It's not your turn!"});
-                                    return;
-                                }
-                                for (let w = 0; w < game["board"].length; w++) {
-                                    let spot = game["board"][w];
-                                    if (spot["button_id"] == interaction.customId) {
-                                        if (spot["state"] == 0) {
-                                            if (interaction.user.id == game["challenger"]) {
-                                                spot["state"] = 2;
-                                            }
-                                            else {
-                                                spot["state"] = 1;
-                                            }
-                                            game["turn"]++;
-                                            if (game["turn"] == 2) {
-                                                game["turn"] = 0;
-                                            }
-                                            
-                                            // TODO: update board
-                                            let button_colors = [];
-                                            let button_words = [];
-                                            for (let i = 0; i < game["board"].length; i++) {
-                                                button_colors.push(num_to_button_color(game["board"][i]["state"]));
-                                                button_words.push(num_to_button_word(game["board"][i]["state"]))
-                                            }
-                                            let root_rows = [];
-                                            for (let i = 0; i < 3; i++) {
-                                                let this_row = new MessageActionRow();
-                                                for (let j = 0; j < 3; j++) {
-                                                    let this_button = new MessageButton();
-                                                    this_button.setCustomId(game["board"][i*3+j]["button_id"]);
-                                                    this_button.setStyle(button_colors[i*3+j]);
-                                                    this_button.setLabel(button_words[i*3+j]);
-                                                    this_row.addComponents([this_button]);
-                                                }
-                                                root_rows.push(this_row);
-                                            }
-                                            let msg = interaction.message as Message;
-                                            msg.edit({ components: root_rows });
-                                            // TODO: check win cond
-                                            let consumed_tiles = 0;
-                                            for (let x = 0; x < game["board"].length; x++) {
-                                                let part = game["board"][x];
-                                                if (part["state"] != 0) {
-                                                    consumed_tiles++;
-                                                }
-                                            }
-                                            if (consumed_tiles < 5) {
-                                                interaction.reply({ephemeral:true, content:"Move made."});
-                                                return;
-                                            }
-                                            for (let i = 0; i < 3; i++) {
-                                                if ((game["board"][(i*3)]["state"] === game["board"][(i*3)+1]["state"]) === true && (game["board"][(i*3)+1]["state"] === game["board"][(i*3)+2]["state"]) === true) {
-                                                    console.log(`wincon1: ${JSON.stringify(game["board"])}`);
-                                                    switch (game["turn"]) {
-                                                        case 1:
-                                                            interaction.reply(`<@${game["challenged"]}> wins!`);
-                                                            new_games_list_ttt.pop();
-                                                            return;
-                                                        case 0:
-                                                            msg.reply(`<@${game["challenger"]}> wins!`);
-                                                            new_games_list_ttt.pop();
-                                                            return;
-                                                    }
-                                                }
-                                                else if ((game["board"][i]["state"] === game["board"][3+i]["state"]) === true && (game["board"][3+i]["state"] === game["board"][6+i]["state"]) === true) {
-                                                    console.log(`wincon2: ${JSON.stringify(game["board"])}`);
-                                                    switch (game["turn"]) {
-                                                        case 1:
-                                                            interaction.reply(`<@${game["challenged"]}> wins!`);
-                                                            new_games_list_ttt.pop();
-                                                            return;
-                                                        case 0:
-                                                            interaction.reply(`<@${game["challenger"]}> wins!`);
-                                                            new_games_list_ttt.pop();
-                                                            return;
-                                                    }
-                                                }
-                                            }
-                                            // X
-                                            //   X
-                                            //     X
-                                            if ((game["board"][0]["state"] === game["board"][4]["state"]) && (game["board"][4]["state"] === game["board"][8]["state"])) {
-                                                console.log(`wincon3: ${JSON.stringify(game["board"])}`);
-                                                switch (game["turn"]) {
-                                                    case 1:
-                                                        interaction.reply(`<@${game["challenged"]}> wins!`);
-                                                        new_games_list_ttt.pop();
-                                                        return;
-                                                    case 0:
-                                                        interaction.reply(`<@${game["challenger"]}> wins!`);
-                                                        new_games_list_ttt.pop();
-                                                        return;
-                                                }
-                                            }
-                                            //   X
-                                            //  X
-                                            // X
-                                            if ((game["board"][2]["state"] === game["board"][4]["state"]) && (game["board"][4]["state"] === game["board"][6]["state"])) {
-                                                console.log(`wincon4: ${JSON.stringify(game["board"])}`);
-                                                switch (game["turn"]) {
-                                                    case 1:
-                                                        interaction.reply(`<@${game["challenged"]}> wins!`);
-                                                        new_games_list_ttt.pop();
-                                                        return;
-                                                    case 0:
-                                                        interaction.reply(`<@${game["challenger"]}> wins!`);
-                                                        new_games_list_ttt.pop();
-                                                        return;
-                                                }
-                                            }
-                                            interaction.reply({ephemeral:true, content:"Move made."});
-                                            return;
-                                        }
-                                        else {
-                                            interaction.reply({ephemeral:true,content:"A move has already been made in this spot!"});
-                                            return;
-                                        }
-                                    }
-                                }
-                            }
-                        });
-                        this.ttt_games = new_games_list_ttt;
                         break;
                     default:
                         console.error("Encountered a button interaction for a command that wasn't avalable!");
@@ -1174,3 +780,16 @@ function num_to_button_word(number: number): string {
             return "ERR";
     }
 }
+
+function get_or_init_file(filename: string): any {
+    try {
+        return JSON.parse(fs.readFileSync(`${filename}.json`, 'utf8'));
+    }
+    catch (_e) {
+        fs.writeFileSync(`${filename}.json`, "[]");
+        return get_or_init_file(filename);
+    }
+}
+
+// Checks that every element in an array is equal.
+const allEqual = arr => arr.every(val => val === arr[0]);
