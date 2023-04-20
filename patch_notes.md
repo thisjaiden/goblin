@@ -1,3 +1,17 @@
+**Goblin Child v4.11.0**
+*Features and New Content*
+- 11 new /flavors!
+
+*Changes and Tweaks*
+- /flavor now properly works in DMs with Goblin Child
+- /anon can no longer ping users and roles
+- Fixed several small crashes and bugs
+- Internal changes to make setting up and forking the bot easier
+- Internal changes to clean up the codebase somewhat
+
+*Removed*
+- /ttt didn't really work. It may make a return Soon:tm:!
+
 **Goblin Child v4.10.0**
 *Features and New Content*
 - More /flavors
