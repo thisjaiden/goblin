@@ -1,4 +1,4 @@
-import { ApplicationCommandDataResolvable } from "discord.js";
+import { ApplicationCommandDataResolvable, ApplicationCommandOptionType } from "discord.js";
 
 export function commands(): ApplicationCommandDataResolvable[] {
     return [
@@ -7,37 +7,37 @@ export function commands(): ApplicationCommandDataResolvable[] {
             description: "Create a poll and get results",
             options: [
                 {
-                    type: "STRING",
+                    type: 3,
                     name: "question",
                     description: "The question to ask in this poll",
                     required: true
                 },
                 {
-                    type: "STRING",
+                    type: 3,
                     name: "answer",
                     description: "The first answer to this poll",
                     required: true
                 },
                 {
-                    type: "STRING",
+                    type: 3,
                     name: "answer2",
                     description: "The second answer to this poll",
                     required: true
                 },
                 {
-                    type: "STRING",
+                    type: 3,
                     name: "answer3",
                     description: "The third answer to this poll (optional)",
                     required: false
                 },
                 {
-                    type: "STRING",
+                    type: 3,
                     name: "answer4",
                     description: "The fourth answer to this poll (optional)",
                     required: false
                 },
                 {
-                    type: "STRING",
+                    type: 3,
                     name: "answer5",
                     description: "The fifth answer to this poll (optional)",
                     required: false
@@ -143,13 +143,13 @@ export function commands(): ApplicationCommandDataResolvable[] {
             description: "Post an anonymous message.",
             options: [
                 {
-                    type: "STRING",
+                    type: 3,
                     name: "message",
                     description: "The message to send.",
                     required: true
                 },
                 {
-                    type: "STRING",
+                    type: 3,
                     name: "name",
                     description: "A name for this anon."
                 }
@@ -160,12 +160,34 @@ export function commands(): ApplicationCommandDataResolvable[] {
             description: "Complete various admin actions.",
             options: [
                 {
-                    type: "STRING",
+                    type: 3,
                     name: "command",
                     description: "The command to use.",
                     required: true
                 }
             ]
         },
+        {
+            name: "roll",
+            description: "Roll some dice.",
+            options: [
+                {
+                    type: ApplicationCommandOptionType.Integer,
+                    name: "sides",
+                    description: "Number of sides on this die.",
+                    min_value: 3,
+                    max_value: 100,
+                    required: true
+                },
+                {
+                    type: ApplicationCommandOptionType.Integer,
+                    name: "amount",
+                    description: "Number of dice to roll.",
+                    min_value: 1,
+                    max_value: 20,
+                    required: false
+                }
+            ]
+        }
     ];
 }

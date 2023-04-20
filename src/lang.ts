@@ -97,6 +97,8 @@ export function translate_string(key) {
                 ["Garlic Flavored", "#ffffff"],
                 ["Blackberry Flavored", "#140a1a"],
                 ["Raspberry Flavored", "#470920"],
+                ["Pepper Flavored", "#4a4a4a"],
+                ["Bubblegum Flavored", "#ed7beb"],
                 // Unusual flavors
                 ["Yellow Flavor", "#ffff00"],
                 ["\"Fruit\" Flavored :stuck_out_tongue_winking_eye:", "#750707"],
@@ -124,6 +126,12 @@ export function translate_string(key) {
                 ["Twink Flavored", "#ffffff"],
                 ["Hydrogen Flavored", "#475f7d"],
                 ["Star Flavored", "#481463"],
+                ["Flavored", "#000000"],
+                ["Car Flavored", "#7a7672"],
+                ["Winter Flavored", "#eeeeee"],
+                ["Chicago Flavored", "#7b94ed"],
+                ["Catgirl Flavored", "#f5a9b8"],
+                ["Dyke Flavored ❤️", "#8403ab"],
                 // Unrelated to flavors
                 ["ginemenasaurus, what do you say, gigantasaurus, jamenas... uh bwa menamoris... some menafmorphis, gigandanordisis. Mhm. Jarmornous.", "#ff8000"],
                 ["in massive amounts of back pain", "#c79052"],
@@ -140,6 +148,14 @@ export function translate_string(key) {
                 ["several large raccoons stacked in a trench coat that almost passed as human in 2017", "#757373"],
                 ["under investigation by the FBI", "#a83232"],
                 ["has *Huge* Balls!", "#32a852"],
+                ["pinging @ everyone", "#ff0000"],
+                ["saying multiple slurs targeted at oppressed minorities", "#ff6666"],
+                ["drinking a large iced coffee and taking several bong rips. They will not regret a large iced coffee and several bong rips.", "#8c6034"],
+                ["gnawing on your carpet", "#614f61"],
+                ["French", "#23381d"],
+                ["getting a STEM degree", "#1d3638"],
+                ["tonsi", "#fc3595"],
+                ["", "#000000"],
             ]);
         case "eightball.title":
             return " asked ";
@@ -201,7 +217,7 @@ export function translate_string(key) {
         case "format.quote.right":
             return "\"";
         case "bot.version":
-            return "4.11.0";
+            return "4.12.0";
         default:
             return key;
     }

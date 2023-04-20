@@ -1,3 +1,12 @@
+**Goblin Child v4.12.0**
+*Features and New Content*
+- /roll - Roll some dice!
+- 16 new /flavors!
+
+*Changes and Tweaks*
+- Internal changes to upgrade to a newer version of the Discord API
+- Polls are still broken, but don't crash the bot
+
 **Goblin Child v4.11.0**
 *Features and New Content*
 - 11 new /flavors!

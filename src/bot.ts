@@ -1,6 +1,14 @@
 const fs = require('fs');
 
-import { Client, ColorResolvable, Guild, Message, MessageActionRow, MessageButton, MessageButtonStyleResolvable, MessageEmbed, NewsChannel, Permissions, TextChannel, Webhook } from 'discord.js';
+// commontags allows more diverse usage of `` tags
+const commontags = require('common-tags');
+const stripIndents = commontags.stripIndents;
+
+import {
+    ActionRowBuilder, ActivityType, ButtonBuilder, ButtonStyle, Client, ColorResolvable,
+    EmbedBuilder, Guild, Message, NewsChannel, PermissionFlagsBits, TextChannel 
+} from 'discord.js';
+
 import { translate_string } from "./lang";
 import { commands } from "./commands"
 
@@ -36,16 +44,17 @@ export class Bot {
         this.rps_data = get_or_init_file("data/rps");
 
         this.rps_games = [];
-        console.log(`
-Constructed client.
-========================================
-${this.reminders.length} reminders
-${this.poll_data.length} polls
-${this.disabled_anon.length} anons disabled
-${this.report_anon.length} anon snitchers
-${this.reaction_roles.length} reaction roles
-${this.rps_data.length} rps elo notes
-========================================`);
+        console.log(stripIndents`
+            Constructed client.
+            ========================================
+            ${this.reminders.length} reminders
+            ${this.poll_data.length} polls
+            ${this.disabled_anon.length} anons disabled
+            ${this.report_anon.length} anon snitchers
+            ${this.reaction_roles.length} reaction roles
+            ${this.rps_data.length} rps elo notes
+            ========================================
+        `);
     }
 
     /**
@@ -54,7 +63,7 @@ ${this.rps_data.length} rps elo notes
     private startTasks() {
         // Set the status of the bot to update every 2 mins with the amount of servers Goblin is in.
         setInterval(() => {
-            this.client.user.setActivity(`${this.client.guilds.cache.size} servers | /help`, {type: 'WATCHING'});
+            this.client.user.setActivity(`${this.client.guilds.cache.size} servers | /help`, {type: ActivityType.Watching});
         }, 120_000);
 
         // Autosave data that might be needed between restarts every 5 mins.
@@ -133,7 +142,7 @@ ${this.rps_data.length} rps elo notes
                             interaction.reply(translate_string("admin.dm"));
                             return;
                         }
-                        if (interaction.guild.members.resolve(interaction.user).roles.highest.permissions.has(Permissions.FLAGS.ADMINISTRATOR) || interaction.guild.ownerId == interaction.user.id) {
+                        if (interaction.guild.members.resolve(interaction.user).roles.highest.permissions.has(PermissionFlagsBits.Administrator) || interaction.guild.ownerId == interaction.user.id) {
                             let section_response = interaction.options.data[0].value.toString(); 
                             if (section_response == "disableAnon") {
                                 let already_disabled = false;
@@ -210,21 +219,22 @@ ${this.rps_data.length} rps elo notes
                                     for (let i = 0; i < content.split(">").length - 1; i++) {
                                         console.log(`Attempting to resolve ${content.split(">")[i]} via ${content.split(">")[i].replace("<@&", "")}.`);
                                         let role = interaction.guild.roles.resolve(content.split(">")[i].replace("<@&", ""));
-                                        let new_button = new MessageButton();
-                                        new_button.setCustomId(`role|${randZeroToMax(999_999_999_999)}`);
-                                        new_button.setStyle("PRIMARY");
+                                        let new_button = new ButtonBuilder();
+                                        let id = `role|${randZeroToMax(999_999_999_999)}`;
+                                        new_button.setCustomId(id);
+                                        new_button.setStyle(ButtonStyle.Primary);
                                         new_button.setLabel(role.name);
                                         console.log(`Registered reaction role button: ${JSON.stringify(new_button.toJSON())}`);
                                         buttons.push(new_button);
                                         this.reaction_roles.push({
-                                            button_id: new_button.customId,
+                                            button_id: id,
                                             guild_id: interaction.guildId,
                                             role_id: role.id
                                         });
                                     }
                                     let rows = [];
                                     for (let i = 0; i < buttons.length; i += 5) {
-                                        rows.push(new MessageActionRow());
+                                        rows.push(new ActionRowBuilder());
                                     }
                                     for (let i = 0; i < buttons.length; i++) {
                                         rows[Math.floor(i/5)].addComponents(buttons[i]);
@@ -306,7 +316,10 @@ ${this.rps_data.length} rps elo notes
                         });
                         let chan = interaction.channel as TextChannel | NewsChannel;
                         if (!contains_goblin_hook) {
-                            let new_webhook = chan.createWebhook(anon_name, {"avatar": "https://cdn.discordapp.com/attachments/882260949006966826/891006265923354634/image0.gif"});
+                            let new_webhook = chan.createWebhook({
+                                name: anon_name,
+                                avatar: "https://cdn.discordapp.com/attachments/882260949006966826/891006265923354634/image0.gif"
+                            });
                             (await new_webhook).send(`${post_options.data[0].value}`);
                         }
                         break;
@@ -326,14 +339,17 @@ ${this.rps_data.length} rps elo notes
                                 poll_responses.push(option.value);
                             }
                         });
-                        let buttons = new MessageActionRow();
-                        let visuals = new MessageEmbed();
+                        let buttons = new ActionRowBuilder<ButtonBuilder>();
+                        let visuals = new EmbedBuilder();
                         let tmp_text = "";
                         let val_tmp = [];
+                        let out_btns = [];
                         poll_responses.forEach((response) => {
-                            let new_button = new MessageButton();
-                            new_button.setCustomId(`poll|${randZeroToMax(999_999_999_999)}`);
-                            new_button.setStyle("PRIMARY");
+                            let new_button = new ButtonBuilder();
+                            let cid = `poll|${randZeroToMax(999_999_999_999)}`
+                            out_btns.push({customId: cid, label: response});
+                            new_button.setCustomId(cid);
+                            new_button.setStyle(ButtonStyle.Primary);
                             new_button.setLabel(response);
                             console.log(`Registered button for this poll: ${JSON.stringify(new_button.toJSON())}`);
                             buttons.addComponents(new_button);
@@ -343,24 +359,59 @@ ${this.rps_data.length} rps elo notes
                         });
                         visuals.setTitle(poll_question);
                         visuals.setDescription(tmp_text);
-                        visuals.setFooter("make your own with /poll!");
+                        visuals.setFooter({text: "make your own with /poll!"});
                         interaction.reply({embeds: [visuals], components: [buttons]});
                         let msg = await interaction.fetchReply();
                         this.poll_data.push({
-                            buttons: buttons.components,
+                            buttons: out_btns,
                             message_id: msg.id,
                             question: poll_question,
                             voted: val_tmp
                         });
                         break;
                     case "balls":
-                        let message = new MessageEmbed();
+                        let message = new EmbedBuilder();
                         message.setTitle("balls");
                         message.setDescription("balls");
-                        message.setFooter("balls");
+                        message.setFooter({text: "balls"});
                         message.setImage(translate_string("balls.url"));
                         message.setThumbnail(translate_string("balls.url"));
                         interaction.reply({embeds: [message]});
+                        break;
+                    case "roll":
+                        let num_sides: number;
+                        let num_dice: number;
+                        interaction.options.data.forEach((option) => {
+                            if (option.name == "sides") {
+                                num_sides = option.value as number;
+                            }
+                            else if (option.name == "amount") {
+                                if (typeof option.value == "number") {
+                                    num_dice = option.value as number;
+                                }
+                                else {
+                                    num_dice = 1;
+                                }
+                            }
+                        });
+                        if (num_dice == undefined) {
+                            num_dice = 1;
+                        }
+                        console.log(`num_dice = ${JSON.stringify(num_dice)}`);
+                        let rolls = [];
+                        for (let i = 0; i < num_dice; i++) {
+                            rolls.push(randZeroToMax(num_sides) + 1);
+                        }
+                        let roll_message = new EmbedBuilder();
+                        if (num_dice > 1) {
+                            roll_message.setTitle("Your Dice Rolls");
+                            roll_message.setDescription(`${num_dice}d${num_sides}: ${rolls}\nSum of dice: ${rolls.reduce((partialSum, a) => partialSum + a, 0)}`);
+                        }
+                        else {
+                            roll_message.setTitle("Your Dice Roll");
+                            roll_message.setDescription(`1d${num_sides}: ${rolls[0]}`);
+                        }
+                        interaction.reply({embeds: [roll_message]});
                         break;
                     case "remindme":
                         let reminder = {};
@@ -399,14 +450,14 @@ ${this.rps_data.length} rps elo notes
                         interaction.reply(
                             {
                                 embeds: [
-                                    new MessageEmbed()
+                                    new EmbedBuilder()
                                         .setTitle("Add Goblin Child!")
                                         .setDescription("You can invite Goblin Child by clicking the button below.")
                                 ],
                                 components: [
-                                    new MessageActionRow().addComponents(
-                                        new MessageButton()
-                                            .setStyle("LINK")
+                                    new ActionRowBuilder<ButtonBuilder>().addComponents(
+                                        new ButtonBuilder()
+                                            .setStyle(ButtonStyle.Link)
                                             .setLabel("Invite me!")
                                             .setURL("https://discord.com/oauth2/authorize?client_id=763525517931839520&permissions=8&scope=bot%20applications.commands")
                                     )
@@ -417,7 +468,7 @@ ${this.rps_data.length} rps elo notes
                     case "flavor":
                         let repo = translate_string("flavor.flavor");
                         interaction.reply({embeds: [
-                            new MessageEmbed()
+                            new EmbedBuilder()
                                 .setTitle(translate_string("flavor.title"))
                                 .setDescription(`"${interaction.user}${translate_string("flavor.text")}__${repo[0]}__"`)
                                 .setColor(repo[1] as ColorResolvable)
@@ -442,24 +493,24 @@ ${this.rps_data.length} rps elo notes
                         rps_instance["result_challenged"] = 0;
                         interaction.reply({
                             embeds: [
-                                new MessageEmbed()
+                                new EmbedBuilder()
                                     .setTitle("Rock, Paper, Scissors, Shoot!")
                                     .setDescription(`<@${rps_instance["challenged"]}>, you have been challenged to RPS by ${interaction.user.toString()}`)
-                                    .setFooter("challenge someone else with /rps")
+                                    .setFooter({text: "challenge someone else with /rps"})
                             ],
                             components: [
-                                new MessageActionRow().addComponents([
-                                    new MessageButton()
+                                new ActionRowBuilder<ButtonBuilder>().addComponents([
+                                    new ButtonBuilder()
                                         .setLabel("Rock")
-                                        .setStyle("SECONDARY")
+                                        .setStyle(ButtonStyle.Secondary)
                                         .setCustomId(rps_instance["rock"]),
-                                    new MessageButton()
+                                    new ButtonBuilder()
                                         .setLabel("Paper")
-                                        .setStyle("PRIMARY")
+                                        .setStyle(ButtonStyle.Primary)
                                         .setCustomId(rps_instance["paper"]),
-                                    new MessageButton()
+                                    new ButtonBuilder()
                                         .setLabel("Scissors")
-                                        .setStyle("DANGER")
+                                        .setStyle(ButtonStyle.Danger)
                                         .setCustomId(rps_instance["scissors"])
                                 ])
                             ]
@@ -489,10 +540,10 @@ ${this.rps_data.length} rps elo notes
                         interaction.reply(
                             {
                                 embeds: [
-                                    new MessageEmbed()
+                                    new EmbedBuilder()
                                         .setTitle(`Goblin Child v${translate_string("bot.version")}`)
                                         .setDescription(translate_string("help.text"))
-                                        .setFooter(`${translate_string("help.snitch.pre")}${snitch_status}${translate_string("help.snitch.post")}`)
+                                        .setFooter({text: `${translate_string("help.snitch.pre")}${snitch_status}${translate_string("help.snitch.post")}`})
                                 ]
                             }
                         );
@@ -502,7 +553,7 @@ ${this.rps_data.length} rps elo notes
                         interaction.reply(
                             {
                                 embeds: [
-                                    new MessageEmbed()
+                                    new EmbedBuilder()
                                         .setTitle(`${interaction.user.username}${translate_string("eightball.title")}${translate_string("format.quote.left")}${interaction.options.data[0].value}${translate_string("format.quote.right")}`)
                                         .setDescription(`${translate_string("eightball.text")}"${response[0]}"`)
                                         .setColor(response[1] as ColorResolvable)
@@ -514,7 +565,7 @@ ${this.rps_data.length} rps elo notes
                         interaction.reply(
                             {
                                 embeds: [
-                                    new MessageEmbed()
+                                    new EmbedBuilder()
                                         .setTitle(`${interaction.user.username}${translate_string("game.title")}`)
                                         .setDescription(`${translate_string("game.description")}${translate_string("game.url")}`)
                                         .setURL(translate_string("game.url"))
@@ -556,11 +607,12 @@ ${this.rps_data.length} rps elo notes
                                 let button_index = 0;
                                 let finished = false;
                                 poll["buttons"].forEach((button) => {
+                                    //console.log(`Checking if ${button.customId} == ${interaction.customId}`);
                                     if (button.customId == interaction.customId) {
                                         finished = true;
-                                    }
-                                    if (finished) {
-                                        return;
+                                        if (finished) {
+                                            return;
+                                        }
                                     }
                                     button_index++;
                                 });
@@ -581,7 +633,7 @@ ${this.rps_data.length} rps elo notes
                                 if (updated == false) {
                                     poll["voted"][button_index].push(interaction.member.user.id);
                                 }
-                                let visuals = new MessageEmbed();
+                                let visuals = new EmbedBuilder();
                                 let tmp_text = "";
                                 for (let i = 0; i < poll["voted"].length; i++) {
                                     tmp_text = tmp_text + poll["buttons"][i].label;
@@ -593,7 +645,7 @@ ${this.rps_data.length} rps elo notes
                                 }
                                 visuals.setTitle(poll["question"]);
                                 visuals.setDescription(tmp_text);
-                                visuals.footer = { text: "make your own with /poll!" };
+                                visuals.setFooter({text: "make your own with /poll!"});
                                 let test_msg = interaction.message as Message;
                                 test_msg.edit({embeds: [visuals]});
                                 console.log("Edited /poll message with new values following interaction.");
@@ -752,32 +804,6 @@ function num_to_word_rps(number: number): string {
             return "scissors";
         default:
             return "UNKNOWN INDEX";
-    }
-}
-
-function num_to_button_color(number: number): MessageButtonStyleResolvable {
-    switch (number) {
-        case 0:
-            return "SECONDARY";
-        case 1:
-            return "DANGER";
-        case 2:
-            return "PRIMARY";
-        default:
-            return "SUCCESS";
-    }
-}
-
-function num_to_button_word(number: number): string {
-    switch (number) {
-        case 0:
-            return " ";
-        case 1:
-            return "X";
-        case 2:
-            return "O";
-        default:
-            return "ERR";
     }
 }
 
