@@ -164,29 +164,29 @@ export function translate_string(key) {
         case "eightball.response":
             return random_string([
                 // yes (6)
-                ["sure", "GREEN"],
-                ["absoulutely", "GREEN"],
-                ["yes", "GREEN"],
-                ["yeah...", "GREEN"],
-                ["of course!", "GREEN"],
-                ["indeed.", "GREEN"],
+                ["sure", "#32a852"],
+                ["absoulutely", "#32a852"],
+                ["yes", "#32a852"],
+                ["yeah...", "#32a852"],
+                ["of course!", "#32a852"],
+                ["indeed.", "#32a852"],
                 // unclear (3)
-                ["okeydokey", "BLUE"],
-                ["the answer is ambigous.", "BLUE"],
-                ["i am __eight (8) ball__", "BLUE"],
+                ["okeydokey", "#3236a8"],
+                ["the answer is ambigous.", "#3236a8"],
+                ["i am __eight (8) ball__", "#3236a8"],
                 // maybe (4)
-                ["idk", "YELLOW"],
-                ["maybe", "YELLOW"],
-                ["possibly.", "YELLOW"],
-                ["why ask *me*? I don't know.", "YELLOW"],
+                ["idk", "#f7ef05"],
+                ["maybe", "#f7ef05"],
+                ["possibly.", "#f7ef05"],
+                ["why ask *me*? I don't know.", "#f7ef05"],
                 // no (7)
-                ["nah", "RED"],
-                ["**FUCK NO!**", "RED"],
-                ["stupid question, obviously not", "RED"],
-                ["no", "RED"],
-                ["nope", "RED"],
-                ["no way", "RED"],
-                ["negative.", "RED"]
+                ["nah", "#a84032"],
+                ["**FUCK NO!**", "#a84032"],
+                ["stupid question, obviously not", "#a84032"],
+                ["no", "#a84032"],
+                ["nope", "#a84032"],
+                ["no way", "#a84032"],
+                ["negative.", "#a84032"]
             ]);
         case "balls.url":
             return random_string([
