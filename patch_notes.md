@@ -1,3 +1,7 @@
+**Goblin Child v4.12.1**
+*Changes and Tweaks*
+- /eightball no longer crashes the bot
+
 **Goblin Child v4.12.0**
 *Features and New Content*
 - /roll - Roll some dice!

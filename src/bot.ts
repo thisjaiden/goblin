@@ -556,7 +556,7 @@ export class Bot {
                                     new EmbedBuilder()
                                         .setTitle(`${interaction.user.username}${translate_string("eightball.title")}${translate_string("format.quote.left")}${interaction.options.data[0].value}${translate_string("format.quote.right")}`)
                                         .setDescription(`${translate_string("eightball.text")}"${response[0]}"`)
-                                        .setColor(response[1] as ColorResolvable)
+                                        .setColor(response[1])
                                 ]
                             }
                         );

@@ -217,7 +217,7 @@ export function translate_string(key) {
         case "format.quote.right":
             return "\"";
         case "bot.version":
-            return "4.12.0";
+            return "4.12.1";
         default:
             return key;
     }
