@@ -2,7 +2,7 @@ Goblin Child
 ===
 
 ![](https://img.shields.io/badge/20-servers-blueviolet) "your resident shitposting bot"
-[Invite](https://discord.com/oauth2/authorize?client_id=763525517931839520&permissions=8&scope=bot%20applications.commands) | [Patch notes](patch_notes.md)
+[Invite](https://discord.com/oauth2/authorize?client_id=763525517931839520&permissions=8&scope=bot%21applications.commands) | [Patch notes](patch_notes.md)
 
 Building
 ---

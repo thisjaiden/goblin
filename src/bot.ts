@@ -137,6 +137,9 @@ export class Bot {
             if (interaction.isCommand()) {
                 console.log(`Interaction begin: /${interaction.commandName}`);
                 switch (interaction.commandName) {
+                    case "hj":
+                        interaction.reply("https://www.youtube.com/watch?v=3bYXy1jT3m8");
+                        break;
                     case "admin":
                         if (interaction.inGuild() == false) {
                             interaction.reply(translate_string("admin.dm"));
@@ -324,13 +327,19 @@ export class Bot {
                         }
                         break;
                     case "poll":
+                        // Prevents polls in DMs with Goblin Child
                         if (interaction.inGuild() == false) {
                             interaction.reply(translate_string("poll.dms"));
                             return;
                         }
+
+                        // Get interaction arguments
                         let poll_options = interaction.options;
+                        // String of poll question
                         let poll_question;
+                        // Strings of possible poll answers
                         let poll_responses = [];
+                        // Seperate arguments into `poll_question` and `poll_responses`
                         poll_options.data.forEach((option) => {
                             if (option.name == "question") {
                                 poll_question = option.value;
@@ -339,6 +348,7 @@ export class Bot {
                                 poll_responses.push(option.value);
                             }
                         });
+
                         let buttons = new ActionRowBuilder<ButtonBuilder>();
                         let visuals = new EmbedBuilder();
                         let tmp_text = "";
@@ -602,8 +612,53 @@ export class Bot {
                     case "poll":
                         let found_poll = false;
                         this.poll_data.forEach((poll) => {
-                            if (poll["message_id"] == interaction.message.id) {
+                            if (poll["message_id"] === interaction.message.id) {
                                 found_poll = true;
+
+                                // Found our target poll, do processing
+                                const CLICKED_BUTTON = interaction.customId;
+                                console.log(`Clicked button: ${CLICKED_BUTTON}`);
+                                console.log(`All buttons: ${poll["buttons"]}`);
+                                const BUTTONS: Array<Object> = poll["buttons"];
+                                const BUTTON_INDEX = BUTTONS.findIndex((btn) => { return btn["customId"] === CLICKED_BUTTON });
+                                const USER_ID = interaction.member.user.id;
+                                // Remove old votes (if present) for this user
+                                for (let i = 0; i < poll["voted"].length; i++) {
+                                    let vote_index = poll["voted"][i].findIndex((vote) => { return vote === USER_ID });
+                                    if (vote_index !== -1) {
+                                        poll["voted"][i].splice(vote_index, 1);
+                                    }
+                                }
+                                // Add a new vote for this user
+                                console.log(`Attempting to add to button ${BUTTON_INDEX}.`);
+                                console.log(`Is it present in object ${poll["voted"]}?`);
+                                poll["voted"][BUTTON_INDEX].push(USER_ID);
+
+                                // Create the outgoing visuals
+                                let visuals = new EmbedBuilder();
+                                let embed_text = "";
+
+                                for (let i = 0; i < poll["buttons"].length; i++) {
+                                    embed_text += poll["buttons"][i]["label"];
+                                    embed_text += ": ";
+                                    embed_text += poll["voted"][i].length;
+                                    embed_text += " ";
+                                    embed_text += '▇'.repeat(poll["voted"][i].length);
+                                    embed_text += "\n";
+                                }
+
+                                visuals.setTitle(poll["question"]);
+                                visuals.setDescription(embed_text);
+                                visuals.setFooter({text: "make your own with /poll!"});
+                                let test_msg = interaction.message as Message;
+                                test_msg.edit({embeds: [visuals]});
+                                console.log("Edited /poll message with new values following interaction.");
+                                
+                                interaction.reply({ephemeral: true, content: "Voted!"});
+
+                                // All done!
+                                return;
+                                /*
                                 let button_index = 0;
                                 let finished = false;
                                 poll["buttons"].forEach((button) => {
@@ -653,8 +708,10 @@ export class Bot {
                                     interaction.reply({ephemeral: true, content: "Voted!"});
                                 }
                                 return;
+                                */
                             }
                         });
+                        // ----------
                         if (!found_poll) {
                             interaction.reply("This poll is from an earlier version of Goblin and can no longer be voted on.");
                         }

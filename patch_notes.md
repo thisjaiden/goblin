@@ -1,3 +1,11 @@
+**Goblin Child v4.13.0**
+*Features and New Content*
+- 7 new /flavors!
+- added cock and balls (/hj)
+
+*Changes and Tweaks*
+- /poll is back/fixed!
+
 **Goblin Child v4.12.1**
 *Changes and Tweaks*
 - /eightball no longer crashes the bot

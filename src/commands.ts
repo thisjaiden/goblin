@@ -188,6 +188,10 @@ export function commands(): ApplicationCommandDataResolvable[] {
                     required: false
                 }
             ]
+        },
+        {
+            name: "hj",
+            description: "jan measles"
         }
     ];
 }

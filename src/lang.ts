@@ -99,6 +99,10 @@ export function translate_string(key) {
                 ["Raspberry Flavored", "#470920"],
                 ["Pepper Flavored", "#4a4a4a"],
                 ["Bubblegum Flavored", "#ed7beb"],
+                ["Cheese Flavored", "#f7d425"],
+                ["peanut Butter and jelly flavor", "#805412"],
+                ["peanut Butter and jelly flavor", "#761280"],
+                ["Pistachio Flavored", "#18590c"],
                 // Unusual flavors
                 ["Yellow Flavor", "#ffff00"],
                 ["\"Fruit\" Flavored :stuck_out_tongue_winking_eye:", "#750707"],
@@ -132,6 +136,9 @@ export function translate_string(key) {
                 ["Chicago Flavored", "#7b94ed"],
                 ["Catgirl Flavored", "#f5a9b8"],
                 ["Dyke Flavored ❤️", "#8403ab"],
+                ["Tetris Flavored", "#8c08cf"],
+                ["toki pona Flavored", "#ffff61"],
+                ["Sad Flavored �", "#619bff"],
                 // Unrelated to flavors
                 ["ginemenasaurus, what do you say, gigantasaurus, jamenas... uh bwa menamoris... some menafmorphis, gigandanordisis. Mhm. Jarmornous.", "#ff8000"],
                 ["in massive amounts of back pain", "#c79052"],
@@ -156,6 +163,7 @@ export function translate_string(key) {
                 ["getting a STEM degree", "#1d3638"],
                 ["tonsi", "#fc3595"],
                 ["", "#000000"],
+                ["eating an entire clove of garlic", "#ffffff"],
             ]);
         case "eightball.title":
             return " asked ";
@@ -217,7 +225,7 @@ export function translate_string(key) {
         case "format.quote.right":
             return "\"";
         case "bot.version":
-            return "4.12.1";
+            return "4.13.0";
         default:
             return key;
     }
