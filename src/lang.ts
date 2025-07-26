@@ -77,7 +77,12 @@ export function translate_string(key) {
         case "flavor.flavor":
             return random_string([
                 // Real flavors
+                ["Whipped Cream Flavored", "#ffffff"],
                 ["Grape Flavored", "#ab339f"],
+                ["Kiwi Flavored", "#49ae49"],
+                ["Clementine Flavored", "#f2992c"],
+                ["Orange Flavored", "#f2992c"],
+                ["Cookie Dough Flavored", "#9f6b1d"],
                 ["Strawberry Flavored", "#db2323"],
                 ["Blueberry Flavored", "#243fd6"],
                 ["Lemon Flavored", "#edfa7d"],
@@ -139,6 +144,10 @@ export function translate_string(key) {
                 ["Tetris Flavored", "#8c08cf"],
                 ["toki pona Flavored", "#ffff61"],
                 ["Sad Flavored �", "#619bff"],
+                ["Antifreeze Flavored", "#405cdb"],
+                ["Train Flavored", "#18567d"],
+                ["Womenite Flavored", "#ff9797"],
+                ["Businessman Flavored", "#382efb"],
                 // Unrelated to flavors
                 ["ginemenasaurus, what do you say, gigantasaurus, jamenas... uh bwa menamoris... some menafmorphis, gigandanordisis. Mhm. Jarmornous.", "#ff8000"],
                 ["in massive amounts of back pain", "#c79052"],
@@ -164,6 +173,10 @@ export function translate_string(key) {
                 ["tonsi", "#fc3595"],
                 ["", "#000000"],
                 ["eating an entire clove of garlic", "#ffffff"],
+                ["nice :)", "#3fc03f"],
+                ["mean :(", "#c03f3f"],
+                ["screaming :scream:", "#fae606"],
+                ["spicy!", "#ff0000"]
             ]);
         case "eightball.title":
             return " asked ";

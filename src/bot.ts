@@ -6,7 +6,7 @@ const stripIndents = commontags.stripIndents;
 
 import {
     ActionRowBuilder, ActivityType, ButtonBuilder, ButtonStyle, Client, ColorResolvable,
-    EmbedBuilder, Guild, Message, NewsChannel, PermissionFlagsBits, TextChannel 
+    EmbedBuilder, EmbedFooterOptions, Guild, Message, NewsChannel, PermissionFlagsBits, TextChannel
 } from 'discord.js';
 
 import { translate_string } from "./lang";
@@ -477,11 +477,31 @@ export class Bot {
                         break;
                     case "flavor":
                         let repo = translate_string("flavor.flavor");
+                        let attribute = "";
+                        let attribute_footer: EmbedFooterOptions | null = null;
+                        let attribute_seed = randZeroToMax(1000);
+                        if (attribute_seed == 0) {
+                            attribute = " potentially ";
+                            attribute_footer = {text: "Rare flavor!"};
+                        }
+                        if (attribute_seed == 1) {
+                            attribute = " devastated about being ";
+                            attribute_footer = {text: "Rare flavor!"};
+                        }
+                        if (attribute_seed == 2) {
+                            attribute = " not ";
+                            attribute_footer = {text: "Rare flavor!"};
+                        }
+                        if (attribute_seed == 3) {
+                            attribute = " artifically ";
+                            attribute_footer = {text: "Rare flavor!"};
+                        }
                         interaction.reply({embeds: [
                             new EmbedBuilder()
                                 .setTitle(translate_string("flavor.title"))
-                                .setDescription(`"${interaction.user}${translate_string("flavor.text")}__${repo[0]}__"`)
+                                .setDescription(`"${interaction.user}${translate_string("flavor.text")}${attribute}__${repo[0]}__"`)
                                 .setColor(repo[1] as ColorResolvable)
+                                .setFooter(attribute_footer)
                         ]});
                         break;
                     case "rps":
@@ -608,113 +628,6 @@ export class Bot {
                                 }
                             }
                         });
-                        break;
-                    case "poll":
-                        let found_poll = false;
-                        this.poll_data.forEach((poll) => {
-                            if (poll["message_id"] === interaction.message.id) {
-                                found_poll = true;
-
-                                // Found our target poll, do processing
-                                const CLICKED_BUTTON = interaction.customId;
-                                console.log(`Clicked button: ${CLICKED_BUTTON}`);
-                                console.log(`All buttons: ${poll["buttons"]}`);
-                                const BUTTONS: Array<Object> = poll["buttons"];
-                                const BUTTON_INDEX = BUTTONS.findIndex((btn) => { return btn["customId"] === CLICKED_BUTTON });
-                                const USER_ID = interaction.member.user.id;
-                                // Remove old votes (if present) for this user
-                                for (let i = 0; i < poll["voted"].length; i++) {
-                                    let vote_index = poll["voted"][i].findIndex((vote) => { return vote === USER_ID });
-                                    if (vote_index !== -1) {
-                                        poll["voted"][i].splice(vote_index, 1);
-                                    }
-                                }
-                                // Add a new vote for this user
-                                console.log(`Attempting to add to button ${BUTTON_INDEX}.`);
-                                console.log(`Is it present in object ${poll["voted"]}?`);
-                                poll["voted"][BUTTON_INDEX].push(USER_ID);
-
-                                // Create the outgoing visuals
-                                let visuals = new EmbedBuilder();
-                                let embed_text = "";
-
-                                for (let i = 0; i < poll["buttons"].length; i++) {
-                                    embed_text += poll["buttons"][i]["label"];
-                                    embed_text += ": ";
-                                    embed_text += poll["voted"][i].length;
-                                    embed_text += " ";
-                                    embed_text += '▇'.repeat(poll["voted"][i].length);
-                                    embed_text += "\n";
-                                }
-
-                                visuals.setTitle(poll["question"]);
-                                visuals.setDescription(embed_text);
-                                visuals.setFooter({text: "make your own with /poll!"});
-                                let test_msg = interaction.message as Message;
-                                test_msg.edit({embeds: [visuals]});
-                                console.log("Edited /poll message with new values following interaction.");
-                                
-                                interaction.reply({ephemeral: true, content: "Voted!"});
-
-                                // All done!
-                                return;
-                                /*
-                                let button_index = 0;
-                                let finished = false;
-                                poll["buttons"].forEach((button) => {
-                                    //console.log(`Checking if ${button.customId} == ${interaction.customId}`);
-                                    if (button.customId == interaction.customId) {
-                                        finished = true;
-                                        if (finished) {
-                                            return;
-                                        }
-                                    }
-                                    button_index++;
-                                });
-                                let updated = false;
-                                rootlevel:
-                                for (let i = 0; i < poll["voted"].length; i++) {
-                                    for (let j = 0; j < poll["voted"][i].length; j++) {
-                                        if (interaction.member.user.id == poll["voted"][i][j]) {
-                                            poll["voted"][i].splice(j, 1);
-                                            poll["voted"][button_index].push(interaction.member.user.id);
-                                            updated = true;
-                                            interaction.reply({ephemeral: true, content: "Vote updated."});
-                                            console.log("User updated poll vote.");
-                                            break rootlevel;
-                                        }
-                                    }
-                                }
-                                if (updated == false) {
-                                    poll["voted"][button_index].push(interaction.member.user.id);
-                                }
-                                let visuals = new EmbedBuilder();
-                                let tmp_text = "";
-                                for (let i = 0; i < poll["voted"].length; i++) {
-                                    tmp_text = tmp_text + poll["buttons"][i].label;
-                                    tmp_text = tmp_text + ": ";
-                                    tmp_text = tmp_text + poll["voted"][i].length;
-                                    tmp_text = tmp_text + " ";
-                                    tmp_text = tmp_text + '▇'.repeat(poll["voted"][i].length);
-                                    tmp_text = tmp_text + "\n";
-                                }
-                                visuals.setTitle(poll["question"]);
-                                visuals.setDescription(tmp_text);
-                                visuals.setFooter({text: "make your own with /poll!"});
-                                let test_msg = interaction.message as Message;
-                                test_msg.edit({embeds: [visuals]});
-                                console.log("Edited /poll message with new values following interaction.");
-                                if (!updated) {
-                                    interaction.reply({ephemeral: true, content: "Voted!"});
-                                }
-                                return;
-                                */
-                            }
-                        });
-                        // ----------
-                        if (!found_poll) {
-                            interaction.reply("This poll is from an earlier version of Goblin and can no longer be voted on.");
-                        }
                         break;
                     case "rps":
                         let new_games_list = [];
@@ -869,6 +782,8 @@ function get_or_init_file(filename: string): any {
         return JSON.parse(fs.readFileSync(`${filename}.json`, 'utf8'));
     }
     catch (_e) {
+        // This almost certainly is an error in finding `filename.json` *or* that it does not
+        // contain valid JSON. Remaking the file with an empty list is the best and easiest option.
         fs.writeFileSync(`${filename}.json`, "[]");
         return get_or_init_file(filename);
     }

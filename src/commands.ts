@@ -1,49 +1,8 @@
-import { ApplicationCommandDataResolvable, ApplicationCommandOptionType } from "discord.js";
+import { ApplicationCommandDataResolvable } from "discord.js";
+import { ApplicationCommandOptionType as Type } from "discord.js";
 
 export function commands(): ApplicationCommandDataResolvable[] {
     return [
-        {
-            name: "poll",
-            description: "Create a poll and get results",
-            options: [
-                {
-                    type: 3,
-                    name: "question",
-                    description: "The question to ask in this poll",
-                    required: true
-                },
-                {
-                    type: 3,
-                    name: "answer",
-                    description: "The first answer to this poll",
-                    required: true
-                },
-                {
-                    type: 3,
-                    name: "answer2",
-                    description: "The second answer to this poll",
-                    required: true
-                },
-                {
-                    type: 3,
-                    name: "answer3",
-                    description: "The third answer to this poll (optional)",
-                    required: false
-                },
-                {
-                    type: 3,
-                    name: "answer4",
-                    description: "The fourth answer to this poll (optional)",
-                    required: false
-                },
-                {
-                    type: 3,
-                    name: "answer5",
-                    description: "The fifth answer to this poll (optional)",
-                    required: false
-                }
-            ]
-        },
         {
             name: "balls",
             description: "Get a picture of balls"
@@ -53,13 +12,13 @@ export function commands(): ApplicationCommandDataResolvable[] {
             description: "Set a reminder for the future",
             options: [
                 {
-                    type: 4,
+                    type: Type.Integer,
                     name: "time",
                     description: "How long until your reminder?",
                     "required": true
                 },
                 {
-                    "type": 3,
+                    "type": Type.String,
                     "name": "unit",
                     "description": "What unit of time?",
                     "required": true,
@@ -172,7 +131,7 @@ export function commands(): ApplicationCommandDataResolvable[] {
             description: "Roll some dice.",
             options: [
                 {
-                    type: ApplicationCommandOptionType.Integer,
+                    type: Type.Integer,
                     name: "sides",
                     description: "Number of sides on this die.",
                     min_value: 3,
@@ -180,7 +139,7 @@ export function commands(): ApplicationCommandDataResolvable[] {
                     required: true
                 },
                 {
-                    type: ApplicationCommandOptionType.Integer,
+                    type: Type.Integer,
                     name: "amount",
                     description: "Number of dice to roll.",
                     min_value: 1,

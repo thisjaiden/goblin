@@ -1,3 +1,11 @@
+**Goblin Child v4.14.0**
+*Features and New Content*
+- 13 new /flavors!
+- Added rare variants to /flavor
+
+*Removed*
+- /poll is not needed with Discord's new built-in polls
+
 **Goblin Child v4.13.0**
 *Features and New Content*
 - 7 new /flavors!
