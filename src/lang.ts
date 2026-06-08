@@ -16,9 +16,9 @@ export function translate_string(key) {
                 /flavor - Ever wondered what flavor you are? Find out now.
                 /game - Play a fun game!
                 /invite - Get the invite link for Goblin. <3
-                /poll - Ask everyone a question.
                 /remindme - Set a reminder for yourself.
                 /rps - Challenge someone to rock paper scissors.
+                /rating - View your rock paper scissors rating!
             `;
         case "help.snitch.enabled":
             return "ENABLED";
@@ -74,6 +74,42 @@ export function translate_string(key) {
             return "**ANNOUNCEMENT**";
         case "flavor.text":
             return " is ";
+        case "flavor.atomic":
+            return random_string([
+                ["Hydrogen", "#ffffff"],
+                ["Helium", "#f37f75"],
+                ["Lithium", "#69acf3"],
+                ["Beryllium", "#8cfca4"],
+                ["Boron", "#29e251"],
+                ["Carbon", "#2f2f2f"],
+                ["Nitrogen", "#8bf4ee"],
+                ["Oxygen", "#c04444"],
+                ["Fluorine", "#f9ff88"],
+                ["Neon", "#ff8a36"],
+                ["Sodium", "#524d8a"],
+                ["Magnesium", "#8761a7"],
+                ["Aluminium", "#bdfffe"],
+                ["Silicon", "#8d9198"],
+                ["Phosphorus", "#faf43e"],
+                ["Sulphur", "#c2bd2c"],
+                ["Chlorine", "#cdff88"],
+                ["Argon", "#dd48f4"],
+                ["Potassium", "#936c96"],
+                ["Calcium", "#efefef"],
+                ["Scandium", "#958194"],
+                ["Titanium", "#f19cfc"],
+                ["Vanadium", "#999999"],
+                // out of order from here on out
+                ["Mercury", "#999999"],
+                ["Iodine", "#5e236b"],
+                ["Gold", "#f5d225"],
+                ["Uranium", "#0d6804"],
+                ["Francium", "#986127"],
+                ["Cobalt", "#013972"],
+                ["Tantalum", "#7cfdff"],
+                ["Ruthenium", "#94a2a3"],
+                ["Dysprosium", "#c7c7c7"]
+            ]);
         case "flavor.flavor":
             return random_string([
                 // Real flavors
@@ -108,7 +144,17 @@ export function translate_string(key) {
                 ["peanut Butter and jelly flavor", "#805412"],
                 ["peanut Butter and jelly flavor", "#761280"],
                 ["Pistachio Flavored", "#18590c"],
+                ["Cracker Flavored", "#fad169"],
+                ["Mala Flavored", "#7e270a"],
                 // Unusual flavors
+                ["Cardboard Flavored", "#9e6f31"],
+                ["Flavor Flavored", "#000000"],
+                ["Estrogen Flavored", "#fc7df3"],
+                ["Testosterone Flavored", "#0ee3ff"],
+                ["Knot Flavored", "#513b09"],
+                ["Alien (👽) Flavored", "#28a328"],
+                ["Acetone Flavored", "#b2b2b2"],
+                ["Silksong Flavored", "#9f0000"],
                 ["Yellow Flavor", "#ffff00"],
                 ["\"Fruit\" Flavored :stuck_out_tongue_winking_eye:", "#750707"],
                 ["Green Flavored", "#24d63f"],
@@ -148,13 +194,16 @@ export function translate_string(key) {
                 ["Train Flavored", "#18567d"],
                 ["Womenite Flavored", "#ff9797"],
                 ["Businessman Flavored", "#382efb"],
+                ["LuV Flavored", "#f1b4f5"],
                 // Unrelated to flavors
+                ["public transportation! 🚌", "#626fff"],
+                ["American?", "#4c2800"],
+                ["asleep. 💤", "#77bce5"],
                 ["ginemenasaurus, what do you say, gigantasaurus, jamenas... uh bwa menamoris... some menafmorphis, gigandanordisis. Mhm. Jarmornous.", "#ff8000"],
                 ["in massive amounts of back pain", "#c79052"],
                 ["Orange Orange Orange Orange Orange", "#f2992c"],
                 ["dead", "#473838"],
                 ["wanted on multiple counts of manslaughter", "#75161d"],
-                ["**Chunky Monkey**", "#693d15"],
                 ["Piss", "#dde080"],
                 ["not avalable. Please leave a message, after the tone. **BEEEEEEP**", "#52876c"],
                 ["not avalable. (spelled incorrectly!) Please leave a message, after the tone. **BEEEEEEP**", "#52876c"],
@@ -176,7 +225,9 @@ export function translate_string(key) {
                 ["nice :)", "#3fc03f"],
                 ["mean :(", "#c03f3f"],
                 ["screaming :scream:", "#fae606"],
-                ["spicy!", "#ff0000"]
+                ["spicy!", "#ff0000"],
+                ["wondering what year it is...", "#894d9f"],
+                ["explaining academica latin", "#a87842"]
             ]);
         case "eightball.title":
             return " asked ";
@@ -238,7 +289,7 @@ export function translate_string(key) {
         case "format.quote.right":
             return "\"";
         case "bot.version":
-            return "4.13.0";
+            return "4.16.0";
         default:
             return key;
     }
@@ -253,6 +304,6 @@ export function random_string(list) {
  * @param max - The maximum number to generate (exclusive)
  * @returns The number generated
  */
- function randZeroToMax(max: number): number {
+function randZeroToMax(max: number): number {
     return Math.floor(Math.random() * Math.floor(max));
 }

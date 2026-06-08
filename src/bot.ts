@@ -496,6 +496,11 @@ export class Bot {
                             attribute = " artifically ";
                             attribute_footer = {text: "Rare flavor!"};
                         }
+                        if (attribute_seed > 3 && attribute_seed <= 8) {
+                            attribute_footer = {text: "Rare flavor! (Atomic!)"};
+                            repo = translate_string("flavor.atomic");
+                            break;
+                        }
                         interaction.reply({embeds: [
                             new EmbedBuilder()
                                 .setTitle(translate_string("flavor.title"))
@@ -603,6 +608,70 @@ export class Bot {
                                 ]
                             }
                         );
+                        break;
+                    case "rating":
+                        // This is inefficent and bad. Don't care!
+                        let ratings = [];
+                        this.rps_data.forEach((game) => {
+                            let challenger_index = -1;
+                            let challenged_index = -1;
+                            //console.log(game);
+                            for (let i = 0; i < ratings.length; i++) {
+                                if (ratings[i][0] == game["challenger"]) {
+                                    challenger_index = i;
+                                }
+                                if (ratings[i][0] == game["challenged"]) {
+                                    challenged_index = i;
+                                }
+                            }
+                            if (challenger_index == -1) {
+                                //console.log("No user " + game["challenger"] + ", creating them!");
+                                ratings.push([game["challenger"], 400]);
+                                challenger_index = ratings.length - 1;
+                            }
+                            if (challenged_index == -1) {
+                                //console.log("No user " + game["challenged"] + ", creating them!");
+                                ratings.push([game["challenged"], 400]);
+                                challenged_index = ratings.length - 1;
+                            }
+                            //console.log("Indexes: " + challenger_index + "," + challenged_index);
+                            if (game["winner"] == "challenged") {
+                                ratings[challenged_index][1] += (Math.max((ratings[challenger_index][1] - ratings[challenged_index][1]) / 2, 50))
+                                ratings[challenger_index][1] -= (Math.max((ratings[challenged_index][1] - ratings[challenger_index][1]) / 2, 50))
+                            }
+                            if (game["winner"] == "challenger") {
+                                ratings[challenged_index][1] -= (Math.max((ratings[challenger_index][1] - ratings[challenged_index][1]) / 2, 50))
+                                ratings[challenger_index][1] += (Math.max((ratings[challenged_index][1] - ratings[challenger_index][1]) / 2, 50))
+                            }
+                            return;
+                        });
+                        //console.log(ratings);
+                        let user_rating = -1;
+                        let highest_rating = 400;
+                        let lowest_rating = 400;
+                        for (let i = 0; i < ratings.length; i++) {
+                            console.log(interaction.user.id);
+                            if (ratings[i][0] == interaction.user.id) {
+                                user_rating = ratings[i][1];
+                            }
+                            if (ratings[i][1] > highest_rating) {
+                                highest_rating = ratings[i][1];
+                            }
+                            if (ratings[i][1] < lowest_rating) {
+                                lowest_rating = ratings[i][1];
+                            }
+                        }
+                        if (user_rating == -1) {
+                            interaction.reply({content: "You have not been rated yet. Play rock paper siscors against other people to get a rating!"});
+                        }
+                        else {
+                            interaction.reply({embeds: [
+                                new EmbedBuilder()
+                                    .setTitle(interaction.user.username + "'s RPS Elo")
+                                    .setDescription("Your rating is " + user_rating + "! The highest current rating of anyone is " + highest_rating + " and the lowest is " + lowest_rating + ".")
+                                    .setFooter({text:"Base ELO is 400. Gain ELO by playing against other players and winning!"})
+                            ]})
+                        }
                         break;
                     default:
                         console.error("Encountered an interaction for a command that wasn't avalable!");
@@ -788,6 +857,3 @@ function get_or_init_file(filename: string): any {
         return get_or_init_file(filename);
     }
 }
-
-// Checks that every element in an array is equal.
-const allEqual = arr => arr.every(val => val === arr[0]);

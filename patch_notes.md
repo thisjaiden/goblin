@@ -1,3 +1,21 @@
+**Goblin Child v4.16.0**
+*Features and New Content*
+- /rating - View your rock paper scissors ELO! Only loosely based on real ELO math.
+- 6 new /flavors!
+
+*Changes and Tweaks*
+- Fixed some old language in /help
+
+**Goblin Child v4.15.0**
+*Features and New Content*
+- 42 new /flavors!
+- - (32 are rarer atomic flavors!)
+
+**Goblin Child v4.14.1**
+*Changes and Tweaks*
+- One /flavor removed (potentially racist, ew)
+- Rare variants for /flavor should be fixed
+
 **Goblin Child v4.14.0**
 *Features and New Content*
 - 13 new /flavors!

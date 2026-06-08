@@ -98,6 +98,10 @@ export function commands(): ApplicationCommandDataResolvable[] {
             ]
         },
         {
+            name: "rating",
+            description: "Get your rating in Rock Paper Scissors Elo. (Only loosely based on actual ELO)"
+        },
+        {
             name: "anon",
             description: "Post an anonymous message.",
             options: [
